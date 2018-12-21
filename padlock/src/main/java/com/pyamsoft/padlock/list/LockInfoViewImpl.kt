@@ -1,9 +1,11 @@
 package com.pyamsoft.padlock.list
 
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.lifecycle.Lifecycle.Event.ON_DESTROY
 import androidx.lifecycle.LifecycleObserver
@@ -18,11 +20,14 @@ import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.model.list.ActivityEntry
+import com.pyamsoft.pydroid.loader.ImageLoader
+import com.pyamsoft.pydroid.loader.ImageTarget
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
+import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import com.pyamsoft.pydroid.util.tintWith
 import com.pyamsoft.pydroid.util.toDp
@@ -41,7 +46,8 @@ internal class LockInfoViewImpl @Inject internal constructor(
   private val inflater: LayoutInflater,
   private val container: ViewGroup?,
   private val savedInstanceState: Bundle?,
-  private val appIconLoader: AppIconLoader
+  private val appIconLoader: AppIconLoader,
+  private val imageLoader: ImageLoader
 ) : LockInfoView, LifecycleObserver {
 
   private lateinit var binding: DialogLockInfoBinding
@@ -83,9 +89,38 @@ internal class LockInfoViewImpl @Inject internal constructor(
     setupRecyclerView()
     setupPackageInfo()
     setupToolbar()
+    loadToolbarIcon()
     prepareFilterDelegate()
     restoreListPosition()
     loadAppIcon()
+  }
+
+  private fun loadToolbarIcon() {
+    imageLoader.load(R.drawable.ic_close_24dp)
+        .into(object : ImageTarget<Drawable> {
+          override fun clear() {
+            binding.lockInfoToolbar.navigationIcon = null
+          }
+
+          override fun setError(error: Drawable?) {
+            binding.lockInfoToolbar.navigationIcon = error
+          }
+
+          override fun setImage(image: Drawable) {
+            val color = ContextCompat.getColor(binding.lockInfoToolbar.context, R.color.white)
+            binding.lockInfoToolbar.navigationIcon = image.tintWith(color)
+          }
+
+          override fun setPlaceholder(placeholder: Drawable?) {
+            binding.lockInfoToolbar.navigationIcon = placeholder
+          }
+
+          override fun view(): View {
+            return binding.lockInfoToolbar
+          }
+
+        })
+        .bind(owner)
   }
 
   private fun loadAppIcon() {
@@ -133,7 +168,6 @@ internal class LockInfoViewImpl @Inject internal constructor(
       }
     }
 
-    val context = root().context
     binding.lockInfoRecycler.apply {
       layoutManager = LinearLayoutManager(context).apply {
         isItemPrefetchEnabled = true
@@ -194,6 +228,8 @@ internal class LockInfoViewImpl @Inject internal constructor(
 
 
       ViewCompat.setElevation(this, 4f.toDp(context).toFloat())
+
+      setUpEnabled(true)
     }
   }
 

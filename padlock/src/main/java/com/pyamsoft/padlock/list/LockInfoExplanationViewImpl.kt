@@ -16,22 +16,32 @@
 
 package com.pyamsoft.padlock.list
 
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.annotation.CheckResult
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle.Event.ON_DESTROY
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.OnLifecycleEvent
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogInfoLocktypeExplainBinding
+import com.pyamsoft.pydroid.loader.ImageLoader
+import com.pyamsoft.pydroid.loader.ImageTarget
+import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
+import com.pyamsoft.pydroid.util.tintWith
 import javax.inject.Inject
 
 internal class LockInfoExplanationViewImpl @Inject internal constructor(
   private val owner: LifecycleOwner,
   private val inflater: LayoutInflater,
-  private val container: ViewGroup?
+  private val container: ViewGroup?,
+  private val imageLoader: ImageLoader,
+  private val theming: Theming
 ) : LockInfoExplanationView, LifecycleObserver {
 
   private lateinit var binding: DialogInfoLocktypeExplainBinding
@@ -51,12 +61,52 @@ internal class LockInfoExplanationViewImpl @Inject internal constructor(
     binding = DialogInfoLocktypeExplainBinding.inflate(inflater, container, false)
 
     binding.lockInfoExplainToolbar.setUpEnabled(true)
+    loadToolbarIcon()
   }
 
   override fun onToolbarNavigationClicked(onClick: () -> Unit) {
     binding.lockInfoExplainToolbar.setNavigationOnClickListener(DebouncedOnClickListener.create {
       onClick()
     })
+  }
+
+  @CheckResult
+  private fun tintIcon(icon: Drawable): Drawable {
+    val color: Int
+    if (theming.isDarkTheme()) {
+      color = R.color.white
+    } else {
+      color = R.color.black
+    }
+    val tint = ContextCompat.getColor(binding.lockInfoExplainToolbar.context, color)
+    return icon.tintWith(tint)
+  }
+
+  private fun loadToolbarIcon() {
+    imageLoader.load(R.drawable.ic_close_24dp)
+        .into(object : ImageTarget<Drawable> {
+          override fun clear() {
+            binding.lockInfoExplainToolbar.navigationIcon = null
+          }
+
+          override fun setError(error: Drawable?) {
+            binding.lockInfoExplainToolbar.navigationIcon = error
+          }
+
+          override fun setImage(image: Drawable) {
+            binding.lockInfoExplainToolbar.navigationIcon = tintIcon(image)
+          }
+
+          override fun setPlaceholder(placeholder: Drawable?) {
+            binding.lockInfoExplainToolbar.navigationIcon = placeholder
+          }
+
+          override fun view(): View {
+            return binding.lockInfoExplainToolbar
+          }
+
+        })
+        .bind(owner)
   }
 
   override fun root(): View {
