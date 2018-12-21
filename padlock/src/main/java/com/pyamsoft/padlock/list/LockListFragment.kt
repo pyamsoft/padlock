@@ -146,7 +146,6 @@ class LockListFragment : ToolbarFragment() {
       Timber.d("Launched from notification, force list refresh")
       populateList(true)
     }
-
   }
 
   private fun onFabStateChanged(
@@ -178,6 +177,7 @@ class LockListFragment : ToolbarFragment() {
   override fun onStart() {
     super.onStart()
     populateList(false)
+    checkFabState(false)
   }
 
   override fun onResume() {

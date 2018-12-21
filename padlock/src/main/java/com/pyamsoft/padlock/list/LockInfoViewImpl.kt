@@ -175,7 +175,7 @@ internal class LockInfoViewImpl @Inject internal constructor(
       }
 
       setHasFixedSize(true)
-      addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+//      addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
       adapter = FastAdapter.with<
           LockInfoBaseItem<*, *, *>,
           ModelAdapter<ActivityEntry, LockInfoBaseItem<*, *, *>>
