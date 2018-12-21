@@ -173,6 +173,7 @@ internal class LockInfoViewImpl @Inject internal constructor(
         isItemPrefetchEnabled = true
         initialPrefetchItemCount = 3
       }
+
       setHasFixedSize(true)
       addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
       adapter = FastAdapter.with<
