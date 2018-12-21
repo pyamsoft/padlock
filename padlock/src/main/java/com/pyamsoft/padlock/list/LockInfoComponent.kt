@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.list
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.list.LockInfoComponent.LockInfoModule
 import com.pyamsoft.padlock.model.list.ActivityEntry
@@ -36,6 +37,8 @@ interface LockInfoComponent {
 
   @Subcomponent.Builder
   interface Builder {
+
+    @BindsInstance fun activity(activity: FragmentActivity): Builder
 
     @BindsInstance fun owner(owner: LifecycleOwner): Builder
 

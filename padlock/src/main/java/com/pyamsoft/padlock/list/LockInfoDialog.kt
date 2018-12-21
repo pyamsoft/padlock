@@ -63,6 +63,7 @@ class LockInfoDialog : ToolbarDialog() {
 
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusLockInfoComponent()
+        .activity(requireActivity())
         .owner(viewLifecycleOwner)
         .appName(appName)
         .packageName(appPackageName)

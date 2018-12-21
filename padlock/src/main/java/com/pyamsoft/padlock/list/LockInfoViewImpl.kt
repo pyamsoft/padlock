@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle.Event.ON_DESTROY
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -41,6 +42,7 @@ internal class LockInfoViewImpl @Inject internal constructor(
   @Named("list_state_tag") private val listStateTag: String,
   @Named("app_icon") private val icon: Int,
   @Named("app_system") private val isSystem: Boolean,
+  private val activity: FragmentActivity,
   private val theming: Theming,
   private val owner: LifecycleOwner,
   private val inflater: LayoutInflater,
@@ -169,13 +171,13 @@ internal class LockInfoViewImpl @Inject internal constructor(
     }
 
     binding.lockInfoRecycler.apply {
-      layoutManager = LinearLayoutManager(context).apply {
+      layoutManager = LinearLayoutManager(activity).apply {
         isItemPrefetchEnabled = true
         initialPrefetchItemCount = 3
       }
 
       setHasFixedSize(true)
-//      addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+      addItemDecoration(DividerItemDecoration(activity, DividerItemDecoration.VERTICAL))
       adapter = FastAdapter.with<
           LockInfoBaseItem<*, *, *>,
           ModelAdapter<ActivityEntry, LockInfoBaseItem<*, *, *>>
