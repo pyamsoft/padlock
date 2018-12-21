@@ -25,6 +25,7 @@ import android.view.WindowManager
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.list.info.LockInfoViewModel
 import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.model.list.ActivityEntry
@@ -34,6 +35,7 @@ import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
+import com.pyamsoft.pydroid.ui.util.show
 import javax.inject.Inject
 
 class LockInfoDialog : ToolbarDialog() {
@@ -85,6 +87,16 @@ class LockInfoDialog : ToolbarDialog() {
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
+
+    lockView.onSwipeRefresh { populateList(true) }
+
+    lockView.onToolbarNavigationClicked { dismiss() }
+
+    lockView.onToolbarMenuItemClicked {
+      if (it == R.id.menu_explain_lock_type) {
+        LockInfoExplanationDialog().show(requireActivity(), "lock_info_explain")
+      }
+    }
 
     databaseChangeDisposable = viewModel.onDatabaseChangeEvent(
         onChange = { lockView.onDatabaseChangeReceived(it.index, it.entry) },

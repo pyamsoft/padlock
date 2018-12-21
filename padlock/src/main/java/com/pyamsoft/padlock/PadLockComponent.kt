@@ -22,6 +22,7 @@ import com.pyamsoft.padlock.base.BaseModule
 import com.pyamsoft.padlock.base.BaseProvider
 import com.pyamsoft.padlock.base.database.DatabaseProvider
 import com.pyamsoft.padlock.list.LockInfoComponent
+import com.pyamsoft.padlock.list.LockInfoExplainComponent
 import com.pyamsoft.padlock.list.LockInfoItemComponent
 import com.pyamsoft.padlock.list.LockListComponent
 import com.pyamsoft.padlock.list.LockListItemComponent
@@ -104,6 +105,9 @@ interface PadLockComponent {
 
   @CheckResult
   fun plusLockInfoItemComponent(): LockInfoItemComponent.Builder
+
+  @CheckResult
+  fun plusLockInfoExplainComponent(): LockInfoExplainComponent.Builder
 
   @CheckResult
   fun plusLockScreenComponent(): LockScreenComponent.Builder

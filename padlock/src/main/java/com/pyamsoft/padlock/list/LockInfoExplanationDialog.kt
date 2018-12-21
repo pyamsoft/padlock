@@ -22,22 +22,30 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import com.pyamsoft.padlock.databinding.DialogInfoLocktypeExplainBinding
+import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
-import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
-import com.pyamsoft.pydroid.ui.util.setUpEnabled
+import javax.inject.Inject
 
 class LockInfoExplanationDialog : ToolbarDialog() {
 
-  private lateinit var binding: DialogInfoLocktypeExplainBinding
+  @field:Inject internal lateinit var explainView: LockInfoExplanationView
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-    binding = DialogInfoLocktypeExplainBinding.inflate(inflater, container, false)
-    return binding.root
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+        .plusLockInfoExplainComponent()
+        .owner(viewLifecycleOwner)
+        .inflater(inflater)
+        .container(container)
+        .build()
+        .inject(this)
+
+    explainView.create()
+    return explainView.root()
   }
 
   override fun onViewCreated(
@@ -45,17 +53,10 @@ class LockInfoExplanationDialog : ToolbarDialog() {
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
-    binding.apply {
-      lockInfoExplainToolbar.setUpEnabled(true)
-      lockInfoExplainToolbar.setNavigationOnClickListener(DebouncedOnClickListener.create {
-        dismiss()
-      })
-    }
-  }
 
-  override fun onDestroyView() {
-    super.onDestroyView()
-    binding.unbind()
+    explainView.onToolbarNavigationClicked {
+      dismiss()
+    }
   }
 
   override fun onResume() {
