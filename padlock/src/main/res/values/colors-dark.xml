@@ -17,5 +17,6 @@
 <resources>
 
   <color name="dark_background">#2D2D2D</color>
+  <color name="dark_lock_group_background">#2B2B2B</color>
 
 </resources>

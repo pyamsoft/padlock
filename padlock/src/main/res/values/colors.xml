@@ -21,4 +21,6 @@
   <color name="blue700">#3C54FE</color>
   <color name="transparent">#00000000</color>
 
+  <color name="lock_group_background">#F0F0F0</color>
+
 </resources>
