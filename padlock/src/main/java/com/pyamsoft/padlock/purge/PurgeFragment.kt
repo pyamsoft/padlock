@@ -48,7 +48,6 @@ class PurgeFragment : ToolbarFragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-    val self = this
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusPurgeComponent()
         .toolbarActivity(requireToolbarActivity())
@@ -57,13 +56,7 @@ class PurgeFragment : ToolbarFragment() {
         .container(container)
         .savedInstanceState(savedInstanceState)
         .diffProvider(object : ListDiffProvider<String> {
-          override fun data(): List<String> {
-            if (self::purgeView.isInitialized) {
-              return purgeView.getListModels()
-            } else {
-              return emptyList()
-            }
-          }
+          override fun data(): List<String> = purgeView.getListModels()
         })
         .build()
         .inject(this)
