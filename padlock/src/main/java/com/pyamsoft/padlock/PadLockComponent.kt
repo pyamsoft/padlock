@@ -23,6 +23,7 @@ import com.pyamsoft.padlock.base.BaseProvider
 import com.pyamsoft.padlock.base.database.DatabaseProvider
 import com.pyamsoft.padlock.list.LockInfoComponent
 import com.pyamsoft.padlock.list.LockInfoItem
+import com.pyamsoft.padlock.list.LockInfoItemComponent
 import com.pyamsoft.padlock.list.LockListComponent
 import com.pyamsoft.padlock.list.LockListItem
 import com.pyamsoft.padlock.list.LockListSingletonModule
@@ -93,8 +94,6 @@ interface PadLockComponent {
 
   fun inject(dialog: ConfirmationDialog)
 
-  fun inject(viewHolder: LockInfoItem.ViewHolder)
-
   fun inject(viewHolder: LockListItem.ViewHolder)
 
   @CheckResult
@@ -102,6 +101,9 @@ interface PadLockComponent {
 
   @CheckResult
   fun plusLockInfoComponent(): LockInfoComponent.Builder
+
+  @CheckResult
+  fun plusLockInfoItemComponent(): LockInfoItemComponent.Builder
 
   @CheckResult
   fun plusLockScreenComponent(): LockScreenComponent.Builder

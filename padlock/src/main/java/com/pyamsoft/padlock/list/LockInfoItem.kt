@@ -17,12 +17,10 @@
 package com.pyamsoft.padlock.list
 
 import android.view.View
-import android.widget.RadioButton
 import androidx.recyclerview.widget.RecyclerView
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.databinding.AdapterItemLockinfoBinding
 import com.pyamsoft.padlock.list.info.LockInfoEvent
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.list.ActivityEntry
@@ -63,11 +61,14 @@ class LockInfoItem internal constructor(
 
   class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    private val binding = AdapterItemLockinfoBinding.bind(itemView)
     @field:Inject internal lateinit var publisher: Publisher<LockInfoEvent>
+    @field:Inject internal lateinit var view: LockInfoItemView
 
     init {
       Injector.obtain<PadLockComponent>(itemView.context.applicationContext)
+          .plusLockInfoItemComponent()
+          .itemView(itemView)
+          .build()
           .inject(this)
     }
 
@@ -83,53 +84,15 @@ class LockInfoItem internal constructor(
       model: ActivityEntry.Item,
       system: Boolean
     ) {
-      binding.apply {
-        // Remove any old binds
-        val lockedButton: RadioButton = when (model.lockState) {
-          LockState.DEFAULT -> lockInfoRadioDefault
-          LockState.WHITELISTED -> lockInfoRadioWhite
-          LockState.LOCKED -> lockInfoRadioBlack
-          else -> throw IllegalStateException("Illegal enum state")
-        }
+      view.bind(model, system)
 
-        // Must null out the old listeners to avoid loops
-        lockInfoRadioGroup.setOnCheckedChangeListener(null)
-        lockInfoRadioBlack.setOnCheckedChangeListener(null)
-        lockInfoRadioWhite.setOnCheckedChangeListener(null)
-        lockInfoRadioDefault.setOnCheckedChangeListener(null)
-        lockedButton.isChecked = true
-
-        lockInfoActivity.text = model.activity
-
-        lockInfoRadioGroup.setOnCheckedChangeListener { radioGroup, _ ->
-          val id = radioGroup.checkedRadioButtonId
-          Timber.d("Checked radio id: %d", id)
-          if (id == 0) {
-            Timber.e("No radiobutton is checked, set to default")
-            lockInfoRadioDefault.isChecked = true
-          }
-        }
-
-        lockInfoRadioDefault.setOnCheckedChangeListener { _, isChecked ->
-          if (isChecked) {
-            processModifyDatabaseEntry(model, system, LockState.DEFAULT)
-          }
-        }
-        lockInfoRadioWhite.setOnCheckedChangeListener { _, isChecked ->
-          if (isChecked) {
-            processModifyDatabaseEntry(model, system, LockState.WHITELISTED)
-          }
-        }
-        lockInfoRadioBlack.setOnCheckedChangeListener { _, isChecked ->
-          if (isChecked) {
-            processModifyDatabaseEntry(model, system, LockState.LOCKED)
-          }
-        }
+      view.onSwitchChanged {
+        processModifyDatabaseEntry(model, system, it)
       }
     }
 
     fun unbind() {
-      // Unbind any lifecycle related async processes here if needed.
+      view.unbind()
     }
   }
 }

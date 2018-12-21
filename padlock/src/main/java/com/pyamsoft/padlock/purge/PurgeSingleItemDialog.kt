@@ -30,23 +30,16 @@ import javax.inject.Inject
 
 class PurgeSingleItemDialog : ToolbarDialog() {
 
-  @field:Inject
-  internal lateinit var purgePublisher: Publisher<PurgeEvent>
-  private lateinit var packageName: String
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    packageName = requireArguments().getString(PACKAGE, "")
-  }
+  @field:Inject internal lateinit var purgePublisher: Publisher<PurgeEvent>
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    val packageName = requireArguments().getString(PACKAGE, "")
+
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .inject(this)
 
     return AlertDialog.Builder(requireActivity())
-        .setMessage(
-            "Really delete old entry for $packageName?"
-        )
+        .setMessage("Really delete old entry for $packageName?")
         .setPositiveButton("Delete") { _, _ ->
           purgePublisher.publish(PurgeEvent(packageName))
           dismiss()

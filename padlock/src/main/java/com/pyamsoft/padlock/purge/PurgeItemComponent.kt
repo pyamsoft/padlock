@@ -25,7 +25,6 @@ interface PurgeItemComponent {
   abstract class PurgeModule {
 
     @Binds
-    @CheckResult
     internal abstract fun bindItemView(impl: PurgeItemViewImpl): PurgeItemView
 
   }
