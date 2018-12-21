@@ -31,6 +31,7 @@ import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.widget.HideOnScrollListener
 import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import com.pyamsoft.pydroid.util.tintWith
+import timber.log.Timber
 import java.util.Collections
 import javax.inject.Inject
 
@@ -130,7 +131,6 @@ internal class LockListViewImpl @Inject internal constructor(
   override fun create() {
     binding = FragmentLockListBinding.inflate(inflater, container, false)
 
-    setupRefreshLatch()
     setupRecyclerView()
     setupSwipeRefresh()
     setupFAB()
@@ -140,7 +140,7 @@ internal class LockListViewImpl @Inject internal constructor(
     lastPosition = ListStateUtil.restoreState(listStateTag, savedInstanceState)
   }
 
-  private fun setupRefreshLatch() {
+  override fun onRefreshed(onRefreshed: () -> Unit) {
     refreshLatch = RefreshLatch.create(owner) { loading: Boolean ->
       filterListDelegate.setEnabled(!loading)
       binding.apply {
@@ -158,6 +158,7 @@ internal class LockListViewImpl @Inject internal constructor(
         if (modelAdapter.adapterItemCount > 0) {
           showRecycler()
           lastPosition = ListStateUtil.restorePosition(lastPosition, binding.applistRecyclerview)
+          onRefreshed()
         } else {
           hideRecycler()
         }
@@ -252,18 +253,21 @@ internal class LockListViewImpl @Inject internal constructor(
   }
 
   override fun onFabIconLocked() {
+    Timber.d("FAB locked")
     imageLoader.load(R.drawable.ic_lock_outline_24dp)
         .into(binding.applistFab)
         .bind(owner)
   }
 
   override fun onFabIconPaused() {
+    Timber.d("FAB paused")
     imageLoader.load(R.drawable.ic_pause_24dp)
         .into(binding.applistFab)
         .bind(owner)
   }
 
   override fun onFabIconPermissionDenied() {
+    Timber.d("FAB permission")
     imageLoader.load(R.drawable.ic_warning_24dp)
         .mutate { it.tintWith(root().context, R.color.white) }
         .into(binding.applistFab)
@@ -271,6 +275,7 @@ internal class LockListViewImpl @Inject internal constructor(
   }
 
   override fun onFabIconUnlocked() {
+    Timber.d("FAB unlocked")
     imageLoader.load(R.drawable.ic_lock_open_24dp)
         .into(binding.applistFab)
         .bind(owner)

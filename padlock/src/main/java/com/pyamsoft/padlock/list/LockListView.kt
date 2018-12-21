@@ -8,6 +8,8 @@ import com.pyamsoft.pydroid.ui.app.BaseScreen
 
 interface LockListView : BaseScreen {
 
+  fun onRefreshed(onRefreshed: () -> Unit)
+
   fun onListItemClicked(onClick: (model: AppEntry) -> Unit)
 
   fun onToolbarMenuItemClicked(onClick: (item: MenuItem) -> Unit)

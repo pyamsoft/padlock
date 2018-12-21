@@ -101,6 +101,8 @@ class LockListFragment : ToolbarFragment() {
 
     lockView.onListItemClicked { displayLockInfoFragment(it) }
 
+    lockView.onRefreshed { checkFabState(false) }
+
     clearPinDisposable = viewModel.onClearPinEvent {
       if (it.success) {
         lockView.onMasterPinClearSuccess()
