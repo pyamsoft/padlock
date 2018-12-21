@@ -1,0 +1,277 @@
+package com.pyamsoft.padlock.list
+
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import androidx.core.view.ViewCompat
+import androidx.lifecycle.Lifecycle.Event.ON_DESTROY
+import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.OnLifecycleEvent
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.mikepenz.fastadapter.FastAdapter
+import com.mikepenz.fastadapter.adapters.ModelAdapter
+import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
+import com.pyamsoft.padlock.helper.ListStateUtil
+import com.pyamsoft.padlock.loader.AppIconLoader
+import com.pyamsoft.padlock.model.list.ActivityEntry
+import com.pyamsoft.pydroid.ui.theme.Theming
+import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
+import com.pyamsoft.pydroid.ui.util.Snackbreak
+import com.pyamsoft.pydroid.ui.util.refreshing
+import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
+import com.pyamsoft.pydroid.ui.widget.RefreshLatch
+import com.pyamsoft.pydroid.util.tintWith
+import com.pyamsoft.pydroid.util.toDp
+import java.util.Collections
+import javax.inject.Inject
+import javax.inject.Named
+
+internal class LockInfoViewImpl @Inject internal constructor(
+  @Named("app_name") private val applicationName: String,
+  @Named("package_name") private val packageName: String,
+  @Named("list_state_tag") private val listStateTag: String,
+  @Named("app_icon") private val icon: Int,
+  @Named("app_system") private val isSystem: Boolean,
+  private val theming: Theming,
+  private val owner: LifecycleOwner,
+  private val inflater: LayoutInflater,
+  private val container: ViewGroup?,
+  private val savedInstanceState: Bundle?,
+  private val appIconLoader: AppIconLoader
+) : LockInfoView, LifecycleObserver {
+
+  private lateinit var binding: DialogLockInfoBinding
+  private lateinit var refreshLatch: RefreshLatch
+  private lateinit var modelAdapter: ModelAdapter<ActivityEntry, LockInfoBaseItem<*, *, *>>
+  private lateinit var filterListDelegate: FilterListDelegate
+
+  private var lastPosition: Int = 0
+
+  init {
+    owner.lifecycle.addObserver(this)
+  }
+
+  @Suppress("unused")
+  @OnLifecycleEvent(ON_DESTROY)
+  internal fun destroy() {
+    owner.lifecycle.removeObserver(this)
+
+    filterListDelegate.onDestroyView()
+    binding.apply {
+      lockInfoRecycler.setOnDebouncedClickListener(null)
+      lockInfoRecycler.layoutManager = null
+      lockInfoRecycler.adapter = null
+      unbind()
+    }
+
+    modelAdapter.clear()
+  }
+
+  override fun root(): View {
+    return binding.root
+  }
+
+  override fun create() {
+    binding = DialogLockInfoBinding.inflate(inflater, container, false)
+
+    setupRefreshLatch()
+    setupSwipeRefresh()
+    setupRecyclerView()
+    setupPackageInfo()
+    setupToolbar()
+    prepareFilterDelegate()
+    restoreListPosition()
+    loadAppIcon()
+  }
+
+  private fun loadAppIcon() {
+    appIconLoader.loadAppIcon(packageName, icon)
+        .into(binding.lockInfoIcon)
+        .bind(owner)
+  }
+
+  override fun commitListState(outState: Bundle?) {
+    if (outState == null) {
+      // If we are not commiting to bundle, commit to local var
+      lastPosition = ListStateUtil.getCurrentPosition(binding.lockInfoRecycler)
+    }
+
+    ListStateUtil.saveState(listStateTag, outState, binding.lockInfoRecycler)
+  }
+
+  override fun getListData(): List<ActivityEntry> {
+    return Collections.unmodifiableList(modelAdapter.models)
+  }
+
+  private fun setupSwipeRefresh() {
+    binding.lockInfoSwipeRefresh.apply {
+      setColorSchemeResources(R.color.blue500, R.color.blue700)
+    }
+  }
+
+  override fun onSwipeRefresh(onSwipe: () -> Unit) {
+    binding.lockInfoSwipeRefresh.setOnRefreshListener {
+      refreshLatch.forceRefresh()
+      onSwipe()
+    }
+  }
+
+  private fun restoreListPosition() {
+    lastPosition = ListStateUtil.restoreState(listStateTag, savedInstanceState)
+  }
+
+  private fun setupRecyclerView() {
+    // Setup adapter
+    modelAdapter = ModelAdapter {
+      return@ModelAdapter when (it) {
+        is ActivityEntry.Item -> LockInfoItem(it, isSystem)
+        is ActivityEntry.Group -> LockInfoGroup(packageName, it)
+      }
+    }
+
+    val context = root().context
+    binding.lockInfoRecycler.apply {
+      layoutManager = LinearLayoutManager(context).apply {
+        isItemPrefetchEnabled = true
+        initialPrefetchItemCount = 3
+      }
+      setHasFixedSize(true)
+      addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
+      adapter = FastAdapter.with<
+          LockInfoBaseItem<*, *, *>,
+          ModelAdapter<ActivityEntry, LockInfoBaseItem<*, *, *>>
+          >(modelAdapter)
+    }
+
+    // Set initial view state
+    showRecycler()
+  }
+
+  private fun setupRefreshLatch() {
+    refreshLatch = RefreshLatch.create(owner) { loading: Boolean ->
+      binding.lockInfoSwipeRefresh.refreshing(loading)
+      filterListDelegate.setEnabled(!loading)
+
+      // Load is done
+      if (!loading) {
+        if (modelAdapter.adapterItemCount > 0) {
+          showRecycler()
+
+          // Restore last position
+          lastPosition = ListStateUtil.restorePosition(lastPosition, binding.lockInfoRecycler)
+        } else {
+          hideRecycler()
+        }
+      }
+    }
+  }
+
+  private fun setupToolbar() {
+    val theme: Int
+    if (theming.isDarkTheme()) {
+      theme = R.style.ThemeOverlay_AppCompat
+    } else {
+      theme = R.style.ThemeOverlay_AppCompat_Light
+    }
+    binding.lockInfoToolbar.apply {
+      popupTheme = theme
+      title = applicationName
+      inflateMenu(R.menu.search_menu)
+      inflateMenu(R.menu.lockinfo_menu)
+
+      // Tint search icon white to match Toolbar
+      val searchItem = menu.findItem(R.id.menu_search)
+      val searchIcon = searchItem.icon
+      searchIcon.mutate()
+          .also { icon ->
+            val tintedIcon = icon.tintWith(context, R.color.white)
+            searchItem.icon = tintedIcon
+          }
+
+
+      ViewCompat.setElevation(this, 4f.toDp(context).toFloat())
+    }
+  }
+
+  private fun prepareFilterDelegate() {
+    filterListDelegate = FilterListDelegate()
+    filterListDelegate.onViewCreated(modelAdapter)
+    filterListDelegate.onPrepareOptionsMenu(binding.lockInfoToolbar.menu, modelAdapter)
+  }
+
+  override fun onToolbarNavigationClicked(onClick: () -> Unit) {
+    binding.lockInfoToolbar.setNavigationOnClickListener(
+        DebouncedOnClickListener.create { onClick() }
+    )
+  }
+
+  override fun onToolbarMenuItemClicked(onClick: (id: Int) -> Unit) {
+    binding.lockInfoToolbar.setOnMenuItemClickListener {
+      onClick(it.itemId)
+      return@setOnMenuItemClickListener true
+    }
+  }
+
+  private fun setupPackageInfo() {
+    binding.apply {
+      lockInfoPackageName.text = packageName
+      lockInfoSystem.text = if (isSystem) "YES" else "NO"
+    }
+  }
+
+  private fun showRecycler() {
+    binding.apply {
+      lockInfoEmpty.visibility = View.GONE
+      lockInfoRecycler.visibility = View.VISIBLE
+    }
+  }
+
+  private fun hideRecycler() {
+    binding.apply {
+      lockInfoRecycler.visibility = View.GONE
+      lockInfoEmpty.visibility = View.VISIBLE
+    }
+  }
+
+  override fun onListPopulateBegin() {
+    refreshLatch.isRefreshing = true
+  }
+
+  override fun onListPopulated() {
+    refreshLatch.isRefreshing = false
+  }
+
+  override fun onListLoaded(list: List<ActivityEntry>) {
+    modelAdapter.set(list)
+  }
+
+  override fun onListPopulateError(onAction: () -> Unit) {
+    Snackbreak.long(root(), "Failed to load list for $applicationName")
+        .setAction("Retry") { onAction() }
+        .show()
+  }
+
+  override fun onModifyEntryError(onAction: () -> Unit) {
+    Snackbreak.long(root(), "Failed to modify list for $applicationName")
+        .setAction("Retry") { onAction() }
+        .show()
+  }
+
+  override fun onDatabaseChangeError(onAction: () -> Unit) {
+    Snackbreak.long(root(), "Failed realtime monitoring for $applicationName")
+        .setAction("Retry") { onAction() }
+        .show()
+  }
+
+  override fun onDatabaseChangeReceived(
+    index: Int,
+    entry: ActivityEntry
+  ) {
+    modelAdapter.set(index, entry)
+  }
+
+}

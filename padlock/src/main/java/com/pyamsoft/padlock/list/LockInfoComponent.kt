@@ -16,14 +16,20 @@
 
 package com.pyamsoft.padlock.list
 
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.ViewGroup
 import androidx.lifecycle.LifecycleOwner
+import com.pyamsoft.padlock.list.LockInfoComponent.LockInfoModule
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
+import dagger.Binds
 import dagger.BindsInstance
+import dagger.Module
 import dagger.Subcomponent
 import javax.inject.Named
 
-@Subcomponent
+@Subcomponent(modules = [LockInfoModule::class])
 interface LockInfoComponent {
 
   fun inject(dialog: LockInfoDialog)
@@ -37,6 +43,27 @@ interface LockInfoComponent {
 
     @BindsInstance fun packageName(@Named("package_name") packageName: String): Builder
 
+    @BindsInstance fun appName(@Named("app_name") appName: String): Builder
+
+    @BindsInstance fun listStateTag(@Named("list_state_tag") listStateTag: String): Builder
+
+    @BindsInstance fun appIcon(@Named("app_icon") appIcon: Int): Builder
+
+    @BindsInstance fun appSystem(@Named("app_system") system: Boolean): Builder
+
+    @BindsInstance fun inflater(inflater: LayoutInflater): Builder
+
+    @BindsInstance fun container(container: ViewGroup?): Builder
+
+    @BindsInstance fun savedInstanceState(savedInstanceState: Bundle?): Builder
+
     fun build(): LockInfoComponent
+  }
+
+  @Module
+  abstract class LockInfoModule {
+
+    @Binds
+    internal abstract fun bindView(impl: LockInfoViewImpl): LockInfoView
   }
 }

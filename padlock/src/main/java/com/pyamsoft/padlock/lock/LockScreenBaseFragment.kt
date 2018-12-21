@@ -21,11 +21,8 @@ import android.view.View
 import androidx.annotation.CallSuper
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.Injector
-import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_ACTIVITY_NAME
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_IS_SYSTEM
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_LOCK_CODE
-import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_PACKAGE_NAME
-import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_REAL_NAME
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
