@@ -96,13 +96,13 @@ class LockViewModel @Inject internal constructor(
       enforcer.assertNotOnMainThread()
       return@defer interactor.lockEntryOnFail(packageName, activityName)
     }
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .doOnSuccess {
           if (System.currentTimeMillis() < it) {
             onSubmitResultAttemptLock()
           }
         }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
         .map { Unit }
         .toSingle(Unit)
   }
