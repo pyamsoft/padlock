@@ -17,9 +17,9 @@
 
 package com.pyamsoft.padlock.main
 
-import com.pyamsoft.pydroid.ui.app.BaseScreen
+import com.pyamsoft.padlock.uicommon.ShimBaseScreen
 
-interface MainView : BaseScreen {
+interface MainView : ShimBaseScreen {
 
   fun onToolbarNavigationClicked(onClick: () -> Unit)
 

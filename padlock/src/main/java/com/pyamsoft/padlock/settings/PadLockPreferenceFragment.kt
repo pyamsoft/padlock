@@ -30,9 +30,9 @@ import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
-import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
 import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.app.fragment.requireView
+import com.pyamsoft.pydroid.ui.settings.AppSettingsPreferenceFragment
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
@@ -40,14 +40,12 @@ import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
 
-class PadLockPreferenceFragment : SettingsPreferenceFragment() {
+class PadLockPreferenceFragment : AppSettingsPreferenceFragment() {
 
   @field:Inject internal lateinit var viewModel: SettingsViewModel
   @field:Inject internal lateinit var settingsView: SettingsView
 
   override val preferenceXmlResId: Int = R.xml.preferences
-
-  override val rootViewContainer: Int = R.id.fragment_container
 
   private var installReceiverDisposable by singleDisposable()
   private var lockTypeDisposable by singleDisposable()
@@ -140,7 +138,8 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
   }
 
   private fun onLockTypeChangePrevented() {
-    Snackbreak.long(requireView(), "You must clear the current code before changing type")
+    Snackbreak.bindTo(viewLifecycleOwner)
+        .long(requireView(), "You must clear the current code before changing type")
         .setAction("Okay", DebouncedOnClickListener.create {
           PinDialog.newInstance(checkOnly = false, finishOnDismiss = false)
               .show(requireActivity(), PinDialog.TAG)
@@ -149,22 +148,26 @@ class PadLockPreferenceFragment : SettingsPreferenceFragment() {
   }
 
   private fun onLockTypeChangeError(throwable: Throwable) {
-    Snackbreak.short(requireView(), throwable.localizedMessage)
+    Snackbreak.bindTo(viewLifecycleOwner)
+        .short(requireView(), throwable.localizedMessage)
         .show()
   }
 
   private fun onClearDatabase() {
-    Snackbreak.short(requireView(), "Locked application database cleared")
+    Snackbreak.bindTo(viewLifecycleOwner)
+        .short(requireView(), "Locked application database cleared")
         .show()
   }
 
   private fun onMasterPinClearFailure() {
-    Snackbreak.short(requireView(), "Failed to clear master pin")
+    Snackbreak.bindTo(viewLifecycleOwner)
+        .short(requireView(), "Failed to clear master pin")
         .show()
   }
 
   private fun onMasterPinClearSuccess() {
-    Snackbreak.short(requireView(), "You may now change lock type")
+    Snackbreak.bindTo(viewLifecycleOwner)
+        .short(requireView(), "You may now change lock type")
         .show()
   }
 

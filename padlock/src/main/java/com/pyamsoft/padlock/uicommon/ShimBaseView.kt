@@ -15,12 +15,9 @@
  *
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.uicommon
 
-import com.pyamsoft.padlock.uicommon.ShimBaseScreen
+interface ShimBaseView {
 
-interface LockInfoExplanationView : ShimBaseScreen {
-
-  fun onToolbarNavigationClicked(onClick: () -> Unit)
+  fun create()
 }
-

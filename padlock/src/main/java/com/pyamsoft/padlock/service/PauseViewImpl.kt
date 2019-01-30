@@ -49,7 +49,8 @@ internal class PauseViewImpl @Inject internal constructor(
   }
 
   override fun onCheckPinFailed() {
-    Snackbreak.short(binding.pauseCheckRoot, "Invalid PIN")
+    Snackbreak.bindTo(activity)
+        .short(binding.pauseCheckRoot, "Invalid PIN")
         .show()
   }
 

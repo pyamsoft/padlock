@@ -46,7 +46,6 @@ import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
-import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import com.pyamsoft.pydroid.util.tintWith
 import com.pyamsoft.pydroid.util.toDp
 import java.util.Collections
@@ -70,7 +69,6 @@ internal class LockInfoViewImpl @Inject internal constructor(
 ) : LockInfoView, LifecycleObserver {
 
   private lateinit var binding: DialogLockInfoBinding
-  private lateinit var refreshLatch: RefreshLatch
   private lateinit var modelAdapter: ModelAdapter<ActivityEntry, LockInfoBaseItem<*, *, *>>
   private lateinit var filterListDelegate: FilterListDelegate
 
@@ -103,7 +101,6 @@ internal class LockInfoViewImpl @Inject internal constructor(
   override fun create() {
     binding = DialogLockInfoBinding.inflate(inflater, container, false)
 
-    setupRefreshLatch()
     setupSwipeRefresh()
     setupRecyclerView()
     setupPackageInfo()
@@ -169,7 +166,7 @@ internal class LockInfoViewImpl @Inject internal constructor(
 
   override fun onSwipeRefresh(onSwipe: () -> Unit) {
     binding.lockInfoSwipeRefresh.setOnRefreshListener {
-      refreshLatch.forceRefresh()
+      startRefreshing()
       onSwipe()
     }
   }
@@ -205,22 +202,22 @@ internal class LockInfoViewImpl @Inject internal constructor(
     showRecycler()
   }
 
-  private fun setupRefreshLatch() {
-    refreshLatch = RefreshLatch.create(owner) { loading: Boolean ->
-      binding.lockInfoSwipeRefresh.refreshing(loading)
-      filterListDelegate.setEnabled(!loading)
+  private fun startRefreshing() {
+    filterListDelegate.setEnabled(false)
+    binding.lockInfoSwipeRefresh.refreshing(true)
+  }
 
-      // Load is done
-      if (!loading) {
-        if (modelAdapter.adapterItemCount > 0) {
-          showRecycler()
+  private fun doneRefreshing() {
+    filterListDelegate.setEnabled(true)
+    binding.lockInfoSwipeRefresh.refreshing(false)
 
-          // Restore last position
-          lastPosition = ListStateUtil.restorePosition(lastPosition, binding.lockInfoRecycler)
-        } else {
-          hideRecycler()
-        }
-      }
+    if (modelAdapter.adapterItemCount > 0) {
+      showRecycler()
+
+      // Restore last position
+      lastPosition = ListStateUtil.restorePosition(lastPosition, binding.lockInfoRecycler)
+    } else {
+      hideRecycler()
     }
   }
 
@@ -294,11 +291,11 @@ internal class LockInfoViewImpl @Inject internal constructor(
   }
 
   override fun onListPopulateBegin() {
-    refreshLatch.isRefreshing = true
+    startRefreshing()
   }
 
   override fun onListPopulated() {
-    refreshLatch.isRefreshing = false
+    doneRefreshing()
   }
 
   override fun onListLoaded(list: List<ActivityEntry>) {
@@ -306,19 +303,19 @@ internal class LockInfoViewImpl @Inject internal constructor(
   }
 
   override fun onListPopulateError(onAction: () -> Unit) {
-    Snackbreak.long(root(), "Failed to load list for $applicationName")
+    Snackbreak.bindTo(owner).long(root(), "Failed to load list for $applicationName")
         .setAction("Retry") { onAction() }
         .show()
   }
 
   override fun onModifyEntryError(onAction: () -> Unit) {
-    Snackbreak.long(root(), "Failed to modify list for $applicationName")
+    Snackbreak.bindTo(owner).long(root(), "Failed to modify list for $applicationName")
         .setAction("Retry") { onAction() }
         .show()
   }
 
   override fun onDatabaseChangeError(onAction: () -> Unit) {
-    Snackbreak.long(root(), "Failed realtime monitoring for $applicationName")
+    Snackbreak.bindTo(owner).long(root(), "Failed realtime monitoring for $applicationName")
         .setAction("Retry") { onAction() }
         .show()
   }

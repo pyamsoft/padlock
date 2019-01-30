@@ -102,15 +102,15 @@ internal class SettingsInteractorImpl @Inject internal constructor(
           })
           .andThen(Completable.fromAction {
             enforcer.assertNotOnMainThread()
-            lockListRepo.clearAll()
+            lockListRepo.cancel()
           })
           .andThen(Completable.fromAction {
             enforcer.assertNotOnMainThread()
-            purgeListRepo.clearAll()
+            purgeListRepo.cancel()
           })
           .andThen(Completable.fromAction {
             enforcer.assertNotOnMainThread()
-            lockInfoRepo.clearAll()
+            lockInfoRepo.cancel()
           })
           .toSingleDefault(DATABASE)
     }

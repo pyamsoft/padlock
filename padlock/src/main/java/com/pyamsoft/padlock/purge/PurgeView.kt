@@ -19,9 +19,9 @@ package com.pyamsoft.padlock.purge
 
 import android.os.Bundle
 import androidx.annotation.CheckResult
-import com.pyamsoft.pydroid.ui.app.BaseScreen
+import com.pyamsoft.padlock.uicommon.ShimBaseScreen
 
-interface PurgeView : BaseScreen {
+interface PurgeView : ShimBaseScreen {
 
   @CheckResult
   fun getListModels(): List<String>

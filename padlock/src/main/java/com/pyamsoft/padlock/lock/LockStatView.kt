@@ -17,9 +17,9 @@
 
 package com.pyamsoft.padlock.lock
 
-import com.pyamsoft.pydroid.ui.app.BaseScreen
+import com.pyamsoft.padlock.uicommon.ShimBaseScreen
 
-interface LockStatView : BaseScreen {
+interface LockStatView : ShimBaseScreen {
 
   fun setDisplayName(name: String)
 }

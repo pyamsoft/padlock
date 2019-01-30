@@ -15,12 +15,13 @@
  *
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.uicommon
 
-import com.pyamsoft.padlock.uicommon.ShimBaseScreen
+import android.view.View
+import androidx.annotation.CheckResult
 
-interface LockInfoExplanationView : ShimBaseScreen {
+interface ShimBaseScreen : ShimBaseView {
 
-  fun onToolbarNavigationClicked(onClick: () -> Unit)
+  @CheckResult
+  fun root(): View
 }
-

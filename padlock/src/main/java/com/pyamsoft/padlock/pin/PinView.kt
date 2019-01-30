@@ -17,9 +17,9 @@
 
 package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.pydroid.ui.app.BaseScreen
+import com.pyamsoft.padlock.uicommon.ShimBaseScreen
 
-interface PinView : BaseScreen {
+interface PinView : ShimBaseScreen {
 
   fun onToolbarNavigationClicked(onClick: () -> Unit)
 

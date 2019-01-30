@@ -37,7 +37,6 @@ import com.pyamsoft.pydroid.ui.app.activity.ToolbarActivity
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.refreshing
-import com.pyamsoft.pydroid.ui.widget.RefreshLatch
 import javax.inject.Inject
 
 internal class PurgeViewImpl @Inject internal constructor(
@@ -52,7 +51,6 @@ internal class PurgeViewImpl @Inject internal constructor(
   private lateinit var adapter: ModelAdapter<String, PurgeItem>
   private lateinit var binding: FragmentPurgeBinding
   private lateinit var decoration: DividerItemDecoration
-  private lateinit var refreshLatch: RefreshLatch
 
   private var lastPosition: Int = 0
 
@@ -76,7 +74,6 @@ internal class PurgeViewImpl @Inject internal constructor(
 
   override fun create() {
     binding = FragmentPurgeBinding.inflate(inflater, container, false)
-    createRefreshLatch()
     setupRecyclerView()
     setupSwipeRefresh()
     setupToolbarMenu()
@@ -93,7 +90,7 @@ internal class PurgeViewImpl @Inject internal constructor(
 
   override fun onSwipeToRefresh(onSwipe: () -> Unit) {
     binding.purgeSwipeRefresh.setOnRefreshListener {
-      refreshLatch.forceRefresh()
+      startRefreshing()
       onSwipe()
     }
   }
@@ -115,7 +112,7 @@ internal class PurgeViewImpl @Inject internal constructor(
   }
 
   override fun onStaleFetchBegin(forced: Boolean) {
-    refreshLatch.isRefreshing = true
+    startRefreshing()
   }
 
   override fun onStaleFetchSuccess(stalePackages: List<String>) {
@@ -126,13 +123,14 @@ internal class PurgeViewImpl @Inject internal constructor(
     error: Throwable,
     onRetry: () -> Unit
   ) {
-    Snackbreak.long(binding.root, "Failed to load outdated application list")
+    Snackbreak.bindTo(owner)
+        .long(binding.root, "Failed to load outdated application list")
         .setAction("Retry") { onRetry() }
         .show()
   }
 
   override fun onStaleFetchComplete() {
-    refreshLatch.isRefreshing = false
+    doneRefreshing()
   }
 
   override fun saveListPosition(outState: Bundle?) {
@@ -150,16 +148,14 @@ internal class PurgeViewImpl @Inject internal constructor(
     binding.purgeSwipeRefresh.setColorSchemeResources(R.color.blue500, R.color.blue700)
   }
 
-  private fun createRefreshLatch() {
-    refreshLatch = RefreshLatch.create(owner) {
-      binding.purgeSwipeRefresh.refreshing(it)
+  private fun startRefreshing() {
+    binding.purgeSwipeRefresh.refreshing(true)
+  }
 
-      // Load complete
-      if (!it) {
-        lastPosition = ListStateUtil.restorePosition(lastPosition, binding.purgeList)
-        decideListState()
-      }
-    }
+  private fun doneRefreshing() {
+    binding.purgeSwipeRefresh.refreshing(false)
+    lastPosition = ListStateUtil.restorePosition(lastPosition, binding.purgeList)
+    decideListState()
   }
 
   private fun setupRecyclerView() {

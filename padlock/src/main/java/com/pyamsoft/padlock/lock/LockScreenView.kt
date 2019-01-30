@@ -19,9 +19,9 @@ package com.pyamsoft.padlock.lock
 
 import android.os.Bundle
 import android.view.MenuItem
-import com.pyamsoft.pydroid.ui.app.BaseScreen
+import com.pyamsoft.padlock.uicommon.ShimBaseScreen
 
-interface LockScreenView : BaseScreen {
+interface LockScreenView : ShimBaseScreen {
 
   fun onToolbarNavigationClicked(onClick: () -> Unit)
 

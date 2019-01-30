@@ -112,7 +112,8 @@ class PinTextFragment : PinBaseFragment() {
   }
 
   override fun onInvalidPin() {
-    Snackbreak.short(requireView(), "Error incorrect PIN")
+    Snackbreak.bindTo(viewLifecycleOwner)
+        .short(requireView(), "Error incorrect PIN")
         .show()
   }
 

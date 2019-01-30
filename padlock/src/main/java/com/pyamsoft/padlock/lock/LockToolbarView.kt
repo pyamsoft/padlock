@@ -18,9 +18,9 @@
 package com.pyamsoft.padlock.lock
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.pydroid.ui.app.BaseScreen
+import com.pyamsoft.padlock.uicommon.ShimBaseScreen
 
-interface LockToolbarView : BaseScreen {
+interface LockToolbarView : ShimBaseScreen {
 
   @CheckResult
   fun isExcludeChecked(): Boolean

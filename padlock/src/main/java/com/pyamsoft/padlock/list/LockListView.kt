@@ -21,9 +21,9 @@ import android.os.Bundle
 import android.view.MenuItem
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.model.list.AppEntry
-import com.pyamsoft.pydroid.ui.app.BaseScreen
+import com.pyamsoft.padlock.uicommon.ShimBaseScreen
 
-interface LockListView : BaseScreen {
+interface LockListView : ShimBaseScreen {
 
   fun onRefreshed(onRefreshed: () -> Unit)
 

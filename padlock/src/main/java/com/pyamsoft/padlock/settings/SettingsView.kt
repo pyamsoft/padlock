@@ -17,9 +17,9 @@
 
 package com.pyamsoft.padlock.settings
 
-import com.pyamsoft.pydroid.ui.app.BaseView
+import com.pyamsoft.padlock.uicommon.ShimBaseView
 
-interface SettingsView : BaseView {
+interface SettingsView : ShimBaseView {
 
   fun onLockTypeChangeAttempt(onChange: (newValue: String) -> Unit)
 

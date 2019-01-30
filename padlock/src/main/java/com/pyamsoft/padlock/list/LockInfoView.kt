@@ -20,9 +20,9 @@ package com.pyamsoft.padlock.list
 import android.os.Bundle
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.model.list.ActivityEntry
-import com.pyamsoft.pydroid.ui.app.BaseScreen
+import com.pyamsoft.padlock.uicommon.ShimBaseScreen
 
-interface LockInfoView : BaseScreen {
+interface LockInfoView : ShimBaseScreen {
 
   fun onToolbarNavigationClicked(onClick: () -> Unit)
 

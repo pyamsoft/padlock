@@ -44,6 +44,8 @@ class PauseConfirmActivity : ActivityBase() {
   private var checkPinSuccessDisposable by singleDisposable()
   private var recreateDisposable by singleDisposable()
 
+  override val fragmentContainerId: Int = 0
+
   override fun onCreate(savedInstanceState: Bundle?) {
     overridePendingTransition(0, 0)
 

@@ -34,7 +34,7 @@ internal class PurgeInteractorImpl @Inject internal constructor(
 ) : PurgeInteractor, Cache {
 
   override fun clearCache() {
-    repo.clearAll()
+    repo.cancel()
   }
 
   override fun fetchStalePackageNames(bypass: Boolean): Single<List<String>> {

@@ -105,7 +105,8 @@ internal class LockScreenPatternViewImpl @Inject internal constructor(
   }
 
   override fun showSnackbar(text: String) {
-    Snackbreak.short(root(), text)
+    Snackbreak.bindTo(owner)
+        .short(root(), text)
         .show()
   }
 

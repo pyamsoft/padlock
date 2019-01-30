@@ -17,12 +17,13 @@
 
 package com.pyamsoft.padlock.settings
 
-import com.pyamsoft.pydroid.ui.app.fragment.AppSettingsFragment
-import com.pyamsoft.pydroid.ui.app.fragment.SettingsPreferenceFragment
+import com.pyamsoft.pydroid.ui.settings.AppSettingsFragment
+import com.pyamsoft.pydroid.ui.settings.AppSettingsPreferenceFragment
 
 class SettingsFragment : AppSettingsFragment() {
 
-  override fun provideSettingsFragment(): SettingsPreferenceFragment = PadLockPreferenceFragment()
+  override fun provideSettingsFragment(): AppSettingsPreferenceFragment =
+    PadLockPreferenceFragment()
 
   override fun provideSettingsTag(): String = PadLockPreferenceFragment.TAG
 

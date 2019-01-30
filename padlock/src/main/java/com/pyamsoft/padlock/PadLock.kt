@@ -113,7 +113,7 @@ class PadLock : Application(), PYDroid.Instance {
           .enforcer(it.modules().enforcer())
           .imageLoader(it.modules().loaderModule().provideImageLoader())
           .theming(it.modules().theming())
-          .moshi(it.modules().versionCheckModule().getMoshi())
+          .moshi(it.modules().versionCheckModule().moshi)
           .build()
     }
   }

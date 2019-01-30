@@ -82,6 +82,6 @@ internal class LockListInteractorImpl @Inject internal constructor(
   }
 
   override fun clearCache() {
-    repo.clearAll()
+    repo.cancel()
   }
 }

@@ -65,7 +65,8 @@ internal class PinTextViewImpl @Inject internal constructor(
   }
 
   override fun onInvalidPin() {
-    Snackbreak.short(binding.root, "Error incorrect PIN")
+    Snackbreak.bindTo(owner)
+        .short(binding.root, "Error incorrect PIN")
         .show()
   }
 

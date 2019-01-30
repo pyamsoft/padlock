@@ -17,9 +17,9 @@
 
 package com.pyamsoft.padlock.main
 
-import com.pyamsoft.pydroid.ui.app.BaseScreen
+import com.pyamsoft.padlock.uicommon.ShimBaseScreen
 
-interface MainFragmentView : BaseScreen {
+interface MainFragmentView : ShimBaseScreen {
 
   fun onBottomNavigationClicked(onClick: (id: Int) -> Boolean)
 

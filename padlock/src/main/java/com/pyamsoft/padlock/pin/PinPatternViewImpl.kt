@@ -132,18 +132,21 @@ internal class PinPatternViewImpl @Inject internal constructor(
 
   override fun infoPatternNeedsRepeat() {
     clearDisplay()
-    Snackbreak.short(binding.root, "Please confirm pattern")
+    Snackbreak.bindTo(owner)
+        .short(binding.root, "Please confirm pattern")
         .show()
   }
 
   override fun infoPatternNotLongEnough() {
-    Snackbreak.short(binding.root, "Pattern is not long enough")
+    Snackbreak.bindTo(owner)
+        .short(binding.root, "Pattern is not long enough")
         .show()
     setPatternWrong()
   }
 
   override fun onInvalidPin() {
-    Snackbreak.short(binding.root, "Error incorrect PIN")
+    Snackbreak.bindTo(owner)
+        .short(binding.root, "Error incorrect PIN")
         .show()
   }
 

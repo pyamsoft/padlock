@@ -59,8 +59,7 @@ class LockScreenActivity : ActivityBase() {
   private var ignoreTimeDisposable by singleDisposable()
   private var closeOldDisposable by singleDisposable()
 
-  init {
-  }
+  override val fragmentContainerId: Int = R.id.lock_screen_container
 
   override fun getSystemService(name: String): Any {
     if (Injector.name == name) {
@@ -109,7 +108,7 @@ class LockScreenActivity : ActivityBase() {
     closeOldDisposable = viewModel.closeOld { onCloseOldReceived() }
 
     ignoreTimeDisposable =
-        viewModel.createWithDefaultIgnoreTime { lockScreen.initIgnoreTimeSelection(it) }
+      viewModel.createWithDefaultIgnoreTime { lockScreen.initIgnoreTimeSelection(it) }
 
     displayNameDisposable = viewModel.loadDisplayNameFromPackage { lockScreen.setToolbarTitle(it) }
 
@@ -163,7 +162,7 @@ class LockScreenActivity : ActivityBase() {
     val fragment = fragmentManager.findFragmentByTag(LockScreenTextFragment.TAG)
     if (fragment == null) {
       fragmentManager.beginTransaction()
-          .add(R.id.lock_screen_container, pushFragment, tag)
+          .add(fragmentContainerId, pushFragment, tag)
           .commit(this)
     }
   }

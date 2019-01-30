@@ -18,9 +18,9 @@
 package com.pyamsoft.padlock.lock
 
 import android.os.Bundle
-import com.pyamsoft.pydroid.ui.app.BaseScreen
+import com.pyamsoft.padlock.uicommon.ShimBaseScreen
 
-interface LockScreenFragmentView : BaseScreen {
+interface LockScreenFragmentView : ShimBaseScreen {
 
   fun clearDisplay()
 

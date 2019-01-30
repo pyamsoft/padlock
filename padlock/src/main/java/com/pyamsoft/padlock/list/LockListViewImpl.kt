@@ -45,8 +45,7 @@ import com.pyamsoft.pydroid.ui.util.popHide
 import com.pyamsoft.pydroid.ui.util.popShow
 import com.pyamsoft.pydroid.ui.util.refreshing
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
-import com.pyamsoft.pydroid.ui.widget.HideOnScrollListener
-import com.pyamsoft.pydroid.ui.widget.RefreshLatch
+import com.pyamsoft.pydroid.ui.widget.scroll.HideOnScrollListener
 import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
 import java.util.Collections
@@ -68,10 +67,11 @@ internal class LockListViewImpl @Inject internal constructor(
   private lateinit var filterListDelegate: FilterListDelegate
   private lateinit var modelAdapter: ModelAdapter<AppEntry, LockListItem>
   private lateinit var hideScrollListener: RecyclerView.OnScrollListener
-  private lateinit var refreshLatch: RefreshLatch
 
   private var lastPosition: Int = 0
   private var displaySystemItem: MenuItem? = null
+
+  private var refreshCallback: () -> Unit = {}
 
   init {
     owner.lifecycle.addObserver(this)
@@ -109,11 +109,11 @@ internal class LockListViewImpl @Inject internal constructor(
   }
 
   override fun onListPopulateBegin() {
-    refreshLatch.isRefreshing = true
+    startRefreshing()
   }
 
   override fun onListPopulated() {
-    refreshLatch.isRefreshing = false
+    doneRefreshing()
   }
 
   override fun onListLoaded(list: List<AppEntry>) {
@@ -121,19 +121,22 @@ internal class LockListViewImpl @Inject internal constructor(
   }
 
   override fun onListPopulateError(onAction: () -> Unit) {
-    Snackbreak.long(root(), "Failed to load application list")
+    Snackbreak.bindTo(owner)
+        .long(root(), "Failed to load application list")
         .setAction("Retry") { onAction() }
         .show()
   }
 
   override fun onModifyEntryError(onAction: () -> Unit) {
-    Snackbreak.long(root(), "Failed to modify application list")
+    Snackbreak.bindTo(owner)
+        .long(root(), "Failed to modify application list")
         .setAction("Retry") { onAction() }
         .show()
   }
 
   override fun onDatabaseChangeError(onAction: () -> Unit) {
-    Snackbreak.long(root(), "Failed realtime monitoring for application list")
+    Snackbreak.bindTo(owner)
+        .long(root(), "Failed realtime monitoring for application list")
         .setAction("Retry") { onAction() }
         .show()
   }
@@ -158,28 +161,25 @@ internal class LockListViewImpl @Inject internal constructor(
   }
 
   override fun onRefreshed(onRefreshed: () -> Unit) {
-    refreshLatch = RefreshLatch.create(owner) { loading: Boolean ->
-      filterListDelegate.setEnabled(!loading)
-      binding.apply {
-        applistSwipeRefresh.refreshing(loading)
+    this.refreshCallback = onRefreshed
+  }
 
-        if (loading) {
-          binding.applistFab.popHide()
-        } else {
-          binding.applistFab.popShow()
-        }
-      }
+  private fun startRefreshing() {
+    filterListDelegate.setEnabled(false)
+    binding.applistSwipeRefresh.refreshing(true)
+    binding.applistFab.popHide()
+  }
 
-      // Load is done
-      if (!loading) {
-        if (modelAdapter.adapterItemCount > 0) {
-          showRecycler()
-          lastPosition = ListStateUtil.restorePosition(lastPosition, binding.applistRecyclerview)
-          onRefreshed()
-        } else {
-          hideRecycler()
-        }
-      }
+  private fun doneRefreshing() {
+    filterListDelegate.setEnabled(true)
+    binding.applistSwipeRefresh.refreshing(false)
+    binding.applistFab.popShow()
+    if (modelAdapter.adapterItemCount > 0) {
+      showRecycler()
+      lastPosition = ListStateUtil.restorePosition(lastPosition, binding.applistRecyclerview)
+      refreshCallback()
+    } else {
+      hideRecycler()
     }
   }
 
@@ -208,7 +208,7 @@ internal class LockListViewImpl @Inject internal constructor(
 
   override fun onSwipeRefresh(onSwipe: () -> Unit) {
     binding.applistSwipeRefresh.setOnRefreshListener {
-      refreshLatch.forceRefresh()
+      startRefreshing()
       onSwipe()
     }
   }
@@ -321,22 +321,26 @@ internal class LockListViewImpl @Inject internal constructor(
   }
 
   override fun onMasterPinClearSuccess() {
-    Snackbreak.short(root(), "PadLock Disabled")
+    Snackbreak.bindTo(owner)
+        .short(root(), "PadLock Disabled")
         .show()
   }
 
   override fun onMasterPinClearFailure() {
-    Snackbreak.short(root(), "Failed to clear master pin")
+    Snackbreak.bindTo(owner)
+        .short(root(), "Failed to clear master pin")
         .show()
   }
 
   override fun onMasterPinCreateFailure() {
-    Snackbreak.short(root(), "Failed to create master pin")
+    Snackbreak.bindTo(owner)
+        .short(root(), "Failed to create master pin")
         .show()
   }
 
   override fun onMasterPinCreateSuccess() {
-    Snackbreak.short(root(), "PadLock Enabled")
+    Snackbreak.bindTo(owner)
+        .short(root(), "PadLock Enabled")
         .show()
   }
 

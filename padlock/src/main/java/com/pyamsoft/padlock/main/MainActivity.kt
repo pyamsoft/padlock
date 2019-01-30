@@ -47,8 +47,10 @@ class MainActivity : RatingActivity() {
   override val applicationIcon: Int
     get() = R.mipmap.ic_launcher
 
-  override val rootView: View
+  override val snackbarRoot: View
     get() = mainView.root()
+
+  override val fragmentContainerId: Int = R.id.fragment_container
 
   override val changeLogLines: ChangeLogBuilder
     get() =
@@ -86,7 +88,7 @@ class MainActivity : RatingActivity() {
     if (fm.findFragmentByTag(MainFragment.TAG) == null && !AboutFragment.isPresent(this)) {
       Timber.d("Load default page")
       fm.beginTransaction()
-          .add(R.id.fragment_container, MainFragment(), MainFragment.TAG)
+          .add(fragmentContainerId, MainFragment(), MainFragment.TAG)
           .commit(this)
     } else {
       Timber.w("Default page or About libraries was already loaded")

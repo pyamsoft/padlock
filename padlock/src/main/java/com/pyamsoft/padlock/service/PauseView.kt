@@ -17,9 +17,9 @@
 
 package com.pyamsoft.padlock.service
 
-import com.pyamsoft.pydroid.ui.app.BaseView
+import com.pyamsoft.padlock.uicommon.ShimBaseView
 
-interface PauseView : BaseView {
+interface PauseView : ShimBaseView {
 
   fun onCheckPinFailed()
 

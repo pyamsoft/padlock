@@ -17,9 +17,9 @@
 
 package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.pydroid.ui.app.BaseScreen
+import com.pyamsoft.padlock.uicommon.ShimBaseScreen
 
-interface PinBaseView : BaseScreen {
+interface PinBaseView : ShimBaseScreen {
 
   fun clearDisplay()
 
