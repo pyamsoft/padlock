@@ -20,7 +20,7 @@
 buildscript {
 
   ext {
-    kotlin_version = '1.3.11'
+    kotlin_version = '1.3.20'
   }
 
   repositories {
@@ -39,17 +39,17 @@ buildscript {
     room = "2.0.0"
 
     pydroid = "18.2.2-SNAPSHOT"
-    leakCanary = "1.6.2"
-    dagger = "2.19"
+    leakCanary = "1.6.3"
+    dagger = "2.21"
     patternLock = "1.0.0"
     fastAdapter = "3.3.1"
   }
 
   dependencies {
-    classpath "com.android.tools.build:gradle:3.2.1"
+    classpath "com.android.tools.build:gradle:3.3.0"
 
     // Dex count
-    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.4'
+    classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.5'
 
     // Gradle version checker
     classpath 'com.github.ben-manes:gradle-versions-plugin:0.20.0'
