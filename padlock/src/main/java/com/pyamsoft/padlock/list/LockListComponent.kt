@@ -25,7 +25,7 @@ import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.list.LockListComponent.LockListModule
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
-import com.pyamsoft.pydroid.ui.app.activity.ToolbarActivity
+import com.pyamsoft.pydroid.ui.app.ToolbarActivity
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module

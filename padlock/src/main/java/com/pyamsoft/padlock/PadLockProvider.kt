@@ -22,13 +22,14 @@ import android.app.Application
 import android.app.Service
 import android.app.job.JobService
 import android.content.Context
-import androidx.annotation.CheckResult
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.PadLockJobService
 import com.pyamsoft.padlock.service.PadLockService
+import com.pyamsoft.padlock.settings.LockTypeSwitchEvent
+import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.bus.RxBus
@@ -41,6 +42,11 @@ import javax.inject.Named
 object PadLockProvider {
 
   private val recreateBus = RxBus.create<Unit>()
+  private val settingsStateBus = RxBus.create<LockTypeSwitchEvent>()
+
+  @JvmStatic
+  @Provides
+  fun provideLockTypeBus(): EventBus<LockTypeSwitchEvent> = settingsStateBus
 
   @JvmStatic
   @Provides

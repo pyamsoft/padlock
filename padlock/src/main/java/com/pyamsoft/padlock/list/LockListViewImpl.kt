@@ -38,7 +38,7 @@ import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.helper.tintIcon
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.pydroid.loader.ImageLoader
-import com.pyamsoft.pydroid.ui.app.activity.ToolbarActivity
+import com.pyamsoft.pydroid.ui.app.ToolbarActivity
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.popHide

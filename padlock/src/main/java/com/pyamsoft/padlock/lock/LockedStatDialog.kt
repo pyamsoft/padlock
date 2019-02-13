@@ -24,14 +24,14 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.CheckResult
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.DialogFragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.lock.screen.LockScreenViewModel
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
-import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import javax.inject.Inject
 
-class LockedStatDialog : ToolbarDialog() {
+class LockedStatDialog : DialogFragment() {
 
   @field:Inject internal lateinit var statView: LockStatView
   @field:Inject internal lateinit var viewModel: LockScreenViewModel

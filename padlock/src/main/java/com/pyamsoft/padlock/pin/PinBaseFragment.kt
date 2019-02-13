@@ -22,16 +22,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.CallSuper
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
-import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
-import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
+import com.pyamsoft.pydroid.ui.app.requireArguments
 import javax.inject.Inject
 
-abstract class PinBaseFragment : ToolbarFragment() {
+abstract class PinBaseFragment : Fragment() {
 
   private var checkOnly: Boolean = false
 

@@ -121,24 +121,6 @@ class SettingsViewModel @Inject internal constructor(
         })
   }
 
-  @CheckResult
-  fun switchLockType(
-    onSwitchBegin: () -> Unit,
-    onSwitchSuccess: (canSwitch: Boolean) -> Unit,
-    onSwitchError: (error: Throwable) -> Unit,
-    onSwitchComplete: () -> Unit
-  ): Disposable {
-    return interactor.hasExistingMasterPassword()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .doOnSubscribe { onSwitchBegin() }
-        .doAfterTerminate { onSwitchComplete() }
-        .subscribe({ onSwitchSuccess(!it) }, {
-          Timber.e(it, "Error switching lock type")
-          onSwitchError(it)
-        })
-  }
-
   fun publishRecreate() {
     Timber.d("Publish recreate event")
     recreatePublisher.publish(Unit)

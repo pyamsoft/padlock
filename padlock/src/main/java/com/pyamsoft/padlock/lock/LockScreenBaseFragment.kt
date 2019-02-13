@@ -21,19 +21,19 @@ import android.os.Bundle
 import android.view.View
 import androidx.annotation.CallSuper
 import androidx.annotation.CheckResult
+import androidx.fragment.app.Fragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_IS_SYSTEM
 import com.pyamsoft.padlock.lock.LockScreenActivity.Companion.ENTRY_LOCK_CODE
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
-import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
-import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
-import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
+import com.pyamsoft.pydroid.ui.app.requireArguments
+import com.pyamsoft.pydroid.ui.app.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import timber.log.Timber
 import javax.inject.Inject
 
-abstract class LockScreenBaseFragment protected constructor() : ToolbarFragment() {
+abstract class LockScreenBaseFragment protected constructor() : Fragment() {
 
   @field:Inject internal lateinit var viewModel: LockViewModel
   @field:Inject internal lateinit var toolbarView: LockToolbarView

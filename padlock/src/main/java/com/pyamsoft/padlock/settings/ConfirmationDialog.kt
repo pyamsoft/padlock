@@ -21,14 +21,14 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.annotation.CheckResult
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.DialogFragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.pydroid.core.bus.Publisher
-import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import javax.inject.Inject
 
-class ConfirmationDialog : ToolbarDialog() {
+class ConfirmationDialog : DialogFragment() {
 
   @field:Inject
   internal lateinit var publisher: Publisher<ConfirmEvent>

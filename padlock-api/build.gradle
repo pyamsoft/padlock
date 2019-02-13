@@ -43,6 +43,10 @@ android {
   libraryVariants.all {
     it.generateBuildConfig.enabled = false
   }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
 }
 
 // Kapt flags
@@ -64,7 +68,6 @@ dependencies {
   // Dagger
   api "com.google.dagger:dagger:$dagger"
   kapt "com.google.dagger:dagger-compiler:$dagger"
-
-  api project(":padlock-model")
+  api project(':padlock-model')
 }
 

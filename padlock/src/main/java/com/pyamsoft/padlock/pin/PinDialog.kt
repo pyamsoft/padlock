@@ -17,6 +17,7 @@
 
 package com.pyamsoft.padlock.pin
 
+import android.app.Dialog
 import android.content.DialogInterface
 import android.os.Bundle
 import android.view.Gravity
@@ -25,6 +26,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.annotation.CheckResult
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
@@ -32,13 +34,13 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.lock.screen.PinScreenInputViewModel
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
-import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
-import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
+import com.pyamsoft.pydroid.ui.app.noTitle
+import com.pyamsoft.pydroid.ui.app.requireArguments
 import com.pyamsoft.pydroid.ui.util.commit
 import timber.log.Timber
 import javax.inject.Inject
 
-class PinDialog : ToolbarDialog() {
+class PinDialog : DialogFragment() {
 
   @field:Inject internal lateinit var pinView: PinView
   @field:Inject internal lateinit var viewModel: PinScreenInputViewModel
@@ -84,6 +86,11 @@ class PinDialog : ToolbarDialog() {
 
     pinView.create()
     return pinView.root()
+  }
+
+  override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    return super.onCreateDialog(savedInstanceState)
+        .noTitle()
   }
 
   override fun onViewCreated(

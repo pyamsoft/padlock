@@ -83,6 +83,10 @@ android {
       versionNameSuffix "-dev"
     }
   }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
 }
 
 // Kapt flags
@@ -104,27 +108,22 @@ dependencies {
   // FastAdapter
   implementation "com.mikepenz:fastadapter:$fastAdapter@aar"
   implementation "com.mikepenz:fastadapter-commons:$fastAdapter@aar"
-
   // Leak Canary
   debugImplementation "com.squareup.leakcanary:leakcanary-support-fragment:$leakCanary"
   debugImplementation "com.squareup.leakcanary:leakcanary-android:$leakCanary"
   releaseImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$leakCanary"
   testImplementation "com.squareup.leakcanary:leakcanary-android-no-op:$leakCanary"
-
   // Dagger
   kapt "com.google.dagger:dagger-compiler:$dagger"
-
   // Pattern Lock
   implementation "com.andrognito.patternlockview:patternlockview:$patternLock"
-
   // PYDroid
   implementation "com.pyamsoft.pydroid:ui:$pydroid"
-
-  implementation project(":padlock-base")
-  implementation project(":padlock-list")
-  implementation project(":padlock-lock")
-  implementation project(":padlock-pin")
-  implementation project(":padlock-purge")
-  implementation project(":padlock-service")
-  implementation project(":padlock-settings")
+  implementation project(':padlock-base')
+  implementation project(':padlock-list')
+  implementation project(':padlock-lock')
+  implementation project(':padlock-pin')
+  implementation project(':padlock-purge')
+  implementation project(':padlock-service')
+  implementation project(':padlock-settings')
 }

@@ -29,13 +29,12 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.list.LockListFragment
 import com.pyamsoft.padlock.purge.PurgeFragment
 import com.pyamsoft.padlock.settings.SettingsFragment
-import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
-import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
+import com.pyamsoft.pydroid.ui.app.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.util.commit
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import javax.inject.Inject
 
-class MainFragment : ToolbarFragment() {
+class MainFragment : Fragment() {
 
   @field:Inject internal lateinit var mainView: MainFragmentView
 

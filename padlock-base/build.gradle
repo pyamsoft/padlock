@@ -46,6 +46,10 @@ android {
   libraryVariants.all {
     it.generateBuildConfig.enabled = false
   }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
 }
 
 // Kapt flags
@@ -68,14 +72,11 @@ dependencies {
   implementation "androidx.room:room-rxjava2:$room"
   implementation "androidx.room:room-runtime:$room"
   kapt "androidx.room:room-compiler:$room"
-
   // Dagger
   kapt "com.google.dagger:dagger-compiler:$dagger"
-
   // PYDroid
   api "com.pyamsoft.pydroid:bootstrap:$pydroid"
   api "com.pyamsoft.pydroid:loader:$pydroid"
-
-  api project(":padlock-api")
+  api project(':padlock-api')
 }
 

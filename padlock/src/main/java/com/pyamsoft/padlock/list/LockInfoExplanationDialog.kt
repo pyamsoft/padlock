@@ -17,20 +17,27 @@
 
 package com.pyamsoft.padlock.list
 
+import android.app.Dialog
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import androidx.fragment.app.DialogFragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
-import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
+import com.pyamsoft.pydroid.ui.app.noTitle
 import javax.inject.Inject
 
-class LockInfoExplanationDialog : ToolbarDialog() {
+class LockInfoExplanationDialog : DialogFragment() {
 
   @field:Inject internal lateinit var explainView: LockInfoExplanationView
+
+  override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+    return super.onCreateDialog(savedInstanceState)
+        .noTitle()
+  }
 
   override fun onCreateView(
     inflater: LayoutInflater,

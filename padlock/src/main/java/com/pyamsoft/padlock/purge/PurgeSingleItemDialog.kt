@@ -21,15 +21,15 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.annotation.CheckResult
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.DialogFragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.model.purge.PurgeEvent
 import com.pyamsoft.pydroid.core.bus.Publisher
-import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
-import com.pyamsoft.pydroid.ui.app.fragment.requireArguments
+import com.pyamsoft.pydroid.ui.app.requireArguments
 import javax.inject.Inject
 
-class PurgeSingleItemDialog : ToolbarDialog() {
+class PurgeSingleItemDialog : DialogFragment() {
 
   @field:Inject internal lateinit var purgePublisher: Publisher<PurgeEvent>
 

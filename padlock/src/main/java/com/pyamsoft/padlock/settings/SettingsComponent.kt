@@ -18,6 +18,7 @@
 package com.pyamsoft.padlock.settings
 
 import androidx.annotation.CheckResult
+import androidx.lifecycle.LifecycleOwner
 import androidx.preference.PreferenceScreen
 import com.pyamsoft.padlock.settings.SettingsComponent.SettingsModule
 import dagger.Binds
@@ -33,6 +34,8 @@ interface SettingsComponent {
   @Subcomponent.Builder
   interface Builder {
 
+    @BindsInstance fun owner(owner: LifecycleOwner): Builder
+
     @BindsInstance fun preferenceScreen(preferenceScreen: PreferenceScreen): Builder
 
     fun build(): SettingsComponent
@@ -40,6 +43,9 @@ interface SettingsComponent {
 
   @Module
   abstract class SettingsModule {
+
+    @Binds
+    internal abstract fun bindLockTypePresenter(impl: LockTypePresenterImpl): LockTypePresenter
 
     @Binds
     @CheckResult

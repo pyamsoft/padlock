@@ -20,11 +20,11 @@ package com.pyamsoft.padlock.list
 import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.DialogFragment
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
-import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 
-class UsageAccessRequestDialog : ToolbarDialog() {
+class UsageAccessRequestDialog : DialogFragment() {
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     requireActivity().let {

@@ -26,7 +26,7 @@ import androidx.annotation.CheckResult
 import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
-import com.pyamsoft.pydroid.ui.app.fragment.requireView
+import com.pyamsoft.pydroid.ui.app.requireView
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import timber.log.Timber
 import javax.inject.Inject

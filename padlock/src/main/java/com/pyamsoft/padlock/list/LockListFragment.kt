@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -36,15 +37,14 @@ import com.pyamsoft.padlock.service.ServiceManager
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
-import com.pyamsoft.pydroid.ui.app.fragment.ToolbarFragment
-import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
-import com.pyamsoft.pydroid.ui.app.fragment.toolbarActivity
+import com.pyamsoft.pydroid.ui.app.requireToolbarActivity
+import com.pyamsoft.pydroid.ui.app.toolbarActivity
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockListFragment : ToolbarFragment() {
+class LockListFragment : Fragment() {
 
   @field:Inject internal lateinit var viewModel: LockListViewModel
   @field:Inject internal lateinit var serviceManager: ServiceManager

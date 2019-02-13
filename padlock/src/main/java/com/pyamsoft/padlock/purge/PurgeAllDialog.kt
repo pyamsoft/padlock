@@ -20,14 +20,14 @@ package com.pyamsoft.padlock.purge
 import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
+import androidx.fragment.app.DialogFragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.model.purge.PurgeAllEvent
 import com.pyamsoft.pydroid.core.bus.Publisher
-import com.pyamsoft.pydroid.ui.app.fragment.ToolbarDialog
 import javax.inject.Inject
 
-class PurgeAllDialog : ToolbarDialog() {
+class PurgeAllDialog : DialogFragment() {
 
   @field:Inject
   internal lateinit var purgePublisher: Publisher<PurgeAllEvent>

@@ -30,8 +30,8 @@ import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
-import com.pyamsoft.pydroid.ui.app.fragment.requireToolbarActivity
-import com.pyamsoft.pydroid.ui.app.fragment.requireView
+import com.pyamsoft.pydroid.ui.app.requireToolbarActivity
+import com.pyamsoft.pydroid.ui.app.requireView
 import com.pyamsoft.pydroid.ui.settings.AppSettingsPreferenceFragment
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.Snackbreak
@@ -40,15 +40,15 @@ import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
 
-class PadLockPreferenceFragment : AppSettingsPreferenceFragment() {
+class PadLockPreferenceFragment : AppSettingsPreferenceFragment(), LockTypePresenter.Callback {
 
+  @field:Inject internal lateinit var lockTypePresenter: LockTypePresenter
   @field:Inject internal lateinit var viewModel: SettingsViewModel
   @field:Inject internal lateinit var settingsView: SettingsView
 
   override val preferenceXmlResId: Int = R.xml.preferences
 
   private var installReceiverDisposable by singleDisposable()
-  private var lockTypeDisposable by singleDisposable()
   private var allClearDisposable by singleDisposable()
   private var dbClearDisposable by singleDisposable()
   private var pinClearFailedDisposable by singleDisposable()
@@ -62,6 +62,7 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment() {
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusSettingsComponent()
         .preferenceScreen(preferenceScreen)
+        .owner(viewLifecycleOwner)
         .build()
         .inject(this)
 
@@ -89,31 +90,21 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment() {
       )
     }
 
-    settingsView.onLockTypeChangeAttempt { newValue: String ->
-      lockTypeDisposable = viewModel.switchLockType(
-          onSwitchBegin = {},
-          onSwitchSuccess = { canSwitch: Boolean ->
-            if (canSwitch) {
-              onLockTypeChangeAccepted(newValue)
-            } else {
-              onLockTypeChangePrevented()
-            }
-          },
-          onSwitchError = { onLockTypeChangeError(it) },
-          onSwitchComplete = {}
-      )
+    settingsView.onLockTypeChangeAttempt {
+      lockTypePresenter.switchType(it)
     }
 
     allClearDisposable = viewModel.onAllSettingsCleared { onClearAll() }
     dbClearDisposable = viewModel.onDatabaseCleared { onClearDatabase() }
     pinClearFailedDisposable = viewModel.onPinClearFailed { onMasterPinClearFailure() }
     pinClearSuccessDisposable = viewModel.onPinClearSuccess { onMasterPinClearSuccess() }
+
+    lockTypePresenter.bind(this)
   }
 
   override fun onDestroyView() {
     super.onDestroyView()
     installReceiverDisposable.tryDispose()
-    lockTypeDisposable.tryDispose()
     allClearDisposable.tryDispose()
     dbClearDisposable.tryDispose()
     pinClearFailedDisposable.tryDispose()
@@ -128,16 +119,12 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment() {
   }
 
   override fun onClearAllClicked() {
+    super.onClearAllClicked()
     ConfirmationDialog.newInstance(ConfirmEvent.ALL)
         .show(requireActivity(), "confirm_dialog")
   }
 
-  private fun onLockTypeChangeAccepted(value: String) {
-    Timber.d("Change accepted, set value: %s", value)
-    settingsView.changeLockType(value)
-  }
-
-  private fun onLockTypeChangePrevented() {
+  override fun onLockTypeSwitchBlocked() {
     Snackbreak.bindTo(viewLifecycleOwner)
         .long(requireView(), "You must clear the current code before changing type")
         .setAction("Okay", DebouncedOnClickListener.create {
@@ -147,7 +134,12 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment() {
         .show()
   }
 
-  private fun onLockTypeChangeError(throwable: Throwable) {
+  override fun onLockTypeSwitchSuccess(newType: String) {
+    Timber.d("Change accepted, set value: $newType")
+    settingsView.changeLockType(newType)
+  }
+
+  override fun onLockTypeSwitchError(throwable: Throwable) {
     Snackbreak.bindTo(viewLifecycleOwner)
         .short(requireView(), throwable.localizedMessage)
         .show()
