@@ -42,7 +42,6 @@ import io.reactivex.observables.GroupedObservable
 import timber.log.Timber
 import java.util.ArrayList
 import javax.inject.Inject
-import javax.inject.Singleton
 
 internal class LockInfoInteractorDb @Inject internal constructor(
   private val enforcer: Enforcer,
@@ -252,7 +251,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     enforcer.assertNotOnMainThread()
     return item.sorted { o1, o2 -> o1.activity.compareTo(o2.activity, ignoreCase = true) }
         .map { it as ActivityEntry }
-        .startWith(ActivityEntry.Group(item.key!!))
+        .startWith(ActivityEntry.Group(requireNotNull(item.key)))
   }
 
   override fun fetchActivityEntryList(
@@ -310,7 +309,7 @@ internal class LockInfoInteractorDb @Inject internal constructor(
     return when {
       event.packageName == null -> onAllEntitiesDeleted(list)
       event.activityName == null -> onPackageDeleted(list)
-      else -> onEntryDeleted(/* Never null*/  event.activityName!!, list)
+      else -> onEntryDeleted(/* Never null */ requireNotNull(event.activityName), list)
     }
   }
 
@@ -369,8 +368,8 @@ internal class LockInfoInteractorDb @Inject internal constructor(
       return Observable.empty()
     }
 
-    val packageName = event.packageName!!
-    val activityName = event.activityName!!
+    val packageName = requireNotNull(event.packageName)
+    val activityName = requireNotNull(event.activityName)
 
     var index: Int = -1
 
@@ -414,8 +413,8 @@ internal class LockInfoInteractorDb @Inject internal constructor(
       return Observable.empty()
     }
 
-    val packageName = event.packageName!!
-    val activityName = event.activityName!!
+    val packageName = requireNotNull(event.packageName)
+    val activityName = requireNotNull(event.activityName)
 
     var index: Int = -1
 

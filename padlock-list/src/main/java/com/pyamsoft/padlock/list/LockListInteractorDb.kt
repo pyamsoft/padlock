@@ -43,7 +43,6 @@ import io.reactivex.ObservableEmitter
 import io.reactivex.Single
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Singleton
 
 internal class LockListInteractorDb @Inject internal constructor(
   private val enforcer: Enforcer,
@@ -168,7 +167,9 @@ internal class LockListInteractorDb @Inject internal constructor(
     list: List<AppEntry>
   ): Observable<LockListUpdatePayload> {
     enforcer.assertNotOnMainThread()
-    return onEntityInserted(event.packageName!!, event.activityName!!, event.whitelisted, list)
+    val packageName = requireNotNull(event.packageName)
+    val activityName = requireNotNull(event.activityName)
+    return onEntityInserted(packageName, activityName, event.whitelisted, list)
   }
 
   @CheckResult
@@ -289,7 +290,9 @@ internal class LockListInteractorDb @Inject internal constructor(
     list: List<AppEntry>
   ): Observable<LockListUpdatePayload> {
     enforcer.assertNotOnMainThread()
-    return onEntityUpdated(event.packageName!!, event.activityName!!, event.whitelisted, list)
+    val packageName = requireNotNull(event.packageName)
+    val activityName = requireNotNull(event.activityName)
+    return onEntityUpdated(packageName, activityName, event.whitelisted, list)
   }
 
   @CheckResult
@@ -333,8 +336,15 @@ internal class LockListInteractorDb @Inject internal constructor(
     enforcer.assertNotOnMainThread()
     return when {
       event.packageName == null -> onAllEntitiesDeleted(list)
-      event.activityName == null -> onPackageDeleted(/* Never null */ event.packageName!!, list)
-      else -> onEntryDeleted(/* Never null*/ event.packageName!!, event.activityName!!, list)
+      event.activityName == null -> onPackageDeleted(
+          /* Never null */ requireNotNull(event.packageName),
+          list
+      )
+      else -> onEntryDeleted(
+          /* Never null*/ requireNotNull(event.packageName),
+          /* Never null*/ requireNotNull(event.activityName),
+          list
+      )
     }
   }
 

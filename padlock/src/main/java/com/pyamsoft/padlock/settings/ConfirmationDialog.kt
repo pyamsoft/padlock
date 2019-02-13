@@ -26,19 +26,15 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.pydroid.core.bus.Publisher
+import com.pyamsoft.pydroid.ui.app.requireArguments
 import javax.inject.Inject
 
 class ConfirmationDialog : DialogFragment() {
 
   @field:Inject
   internal lateinit var publisher: Publisher<ConfirmEvent>
-  private lateinit var type: ConfirmEvent
-
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    arguments!!.let {
-      type = ConfirmEvent.valueOf(it.getString(WHICH, ConfirmEvent.DATABASE.name))
-    }
+  private val type by lazy {
+    ConfirmEvent.valueOf(requireArguments().getString(WHICH, ConfirmEvent.DATABASE.name))
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
