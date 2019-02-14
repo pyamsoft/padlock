@@ -25,9 +25,6 @@ import com.pyamsoft.padlock.api.database.EntryDeleteDao
 import com.pyamsoft.padlock.api.preferences.ClearPreferences
 import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
 import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
-import com.pyamsoft.padlock.model.ConfirmEvent
-import com.pyamsoft.padlock.model.ConfirmEvent.ALL
-import com.pyamsoft.padlock.model.ConfirmEvent.DATABASE
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.pydroid.core.cache.Cache
@@ -39,7 +36,6 @@ import io.reactivex.Single
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Singleton
 
 internal class SettingsInteractorImpl @Inject internal constructor(
   private val enforcer: Enforcer,
@@ -75,7 +71,7 @@ internal class SettingsInteractorImpl @Inject internal constructor(
         .ignoreElement()
   }
 
-  override fun clearDatabase(): Single<ConfirmEvent> {
+  override fun clearDatabase(): Single<Unit> {
     return Single.defer {
       Timber.d("clear database")
       enforcer.assertNotOnMainThread()
@@ -112,17 +108,16 @@ internal class SettingsInteractorImpl @Inject internal constructor(
             enforcer.assertNotOnMainThread()
             lockInfoRepo.cancel()
           })
-          .toSingleDefault(DATABASE)
+          .toSingleDefault(Unit)
     }
   }
 
-  override fun clearAll(): Single<ConfirmEvent> {
+  override fun clearAll(): Single<Unit> {
     // We map here to make sure the clear all is complete before stream continues
     return clearDatabase().map {
       enforcer.assertNotOnMainThread()
       Timber.d("Clear all preferences")
       preferences.clearAll()
-      return@map ALL
     }
   }
 

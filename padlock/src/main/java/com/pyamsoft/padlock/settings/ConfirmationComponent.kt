@@ -17,44 +17,35 @@
 
 package com.pyamsoft.padlock.settings
 
-import androidx.annotation.CheckResult
 import androidx.lifecycle.LifecycleOwner
-import androidx.preference.PreferenceScreen
-import com.pyamsoft.padlock.settings.SettingsComponent.SettingsModule
+import com.pyamsoft.padlock.settings.ConfirmationComponent.ConfirmationModule
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module
 import dagger.Subcomponent
 
-@Subcomponent(modules = [SettingsModule::class])
-interface SettingsComponent {
+@Subcomponent(modules = [ConfirmationModule::class])
+interface ConfirmationComponent {
 
-  fun inject(fragment: PadLockPreferenceFragment)
+  fun inject(dialog: ConfirmDeleteDatabaseDialog)
+
+  fun inject(dialog: ConfirmDeleteAllDialog)
 
   @Subcomponent.Builder
   interface Builder {
 
     @BindsInstance fun owner(owner: LifecycleOwner): Builder
 
-    @BindsInstance fun preferenceScreen(preferenceScreen: PreferenceScreen): Builder
-
-    fun build(): SettingsComponent
+    fun build(): ConfirmationComponent
   }
 
   @Module
-  abstract class SettingsModule {
+  abstract class ConfirmationModule {
 
     @Binds
     internal abstract fun bindClearDatabasePresenter(impl: ClearDatabasePresenterImpl): ClearDatabasePresenter
 
     @Binds
     internal abstract fun bindClearAllPresenter(impl: ClearAllPresenterImpl): ClearAllPresenter
-
-    @Binds
-    internal abstract fun bindLockTypePresenter(impl: LockTypePresenterImpl): LockTypePresenter
-
-    @Binds
-    @CheckResult
-    internal abstract fun bindSettingsView(impl: SettingsViewImpl): SettingsView
   }
 }

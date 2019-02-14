@@ -53,7 +53,7 @@ import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.PauseComponent
 import com.pyamsoft.padlock.service.ServiceSingletonModule
 import com.pyamsoft.padlock.service.ServiceSingletonProvider
-import com.pyamsoft.padlock.settings.ConfirmationDialog
+import com.pyamsoft.padlock.settings.ConfirmationComponent
 import com.pyamsoft.padlock.settings.SettingsComponent
 import com.pyamsoft.padlock.settings.SettingsSingletonModule
 import com.pyamsoft.padlock.settings.SettingsSingletonProvider
@@ -93,8 +93,6 @@ interface PadLockComponent {
 
   fun inject(dialog: PurgeSingleItemDialog)
 
-  fun inject(dialog: ConfirmationDialog)
-
   @CheckResult
   fun plusLockListComponent(): LockListComponent.Builder
 
@@ -115,6 +113,9 @@ interface PadLockComponent {
 
   @CheckResult
   fun plusSettingsComponent(): SettingsComponent.Builder
+
+  @CheckResult
+  fun plusConfirmationComponent(): ConfirmationComponent.Builder
 
   @CheckResult
   fun plusPauseComponent(): PauseComponent.Builder

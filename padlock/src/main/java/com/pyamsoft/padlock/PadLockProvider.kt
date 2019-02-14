@@ -28,6 +28,8 @@ import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.service.PadLockJobService
 import com.pyamsoft.padlock.service.PadLockService
+import com.pyamsoft.padlock.settings.ClearAllEvent
+import com.pyamsoft.padlock.settings.ClearDatabaseEvent
 import com.pyamsoft.padlock.settings.LockTypeSwitchEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Listener
@@ -41,8 +43,18 @@ import javax.inject.Named
 @Module
 object PadLockProvider {
 
+  private val clearAllBus = RxBus.create<ClearAllEvent>()
+  private val clearDatabaseBus = RxBus.create<ClearDatabaseEvent>()
   private val recreateBus = RxBus.create<Unit>()
   private val settingsStateBus = RxBus.create<LockTypeSwitchEvent>()
+
+  @JvmStatic
+  @Provides
+  internal fun provideClearAllBus(): EventBus<ClearAllEvent> = clearAllBus
+
+  @JvmStatic
+  @Provides
+  internal fun provideClearDatabaseBus(): EventBus<ClearDatabaseEvent> = clearDatabaseBus
 
   @JvmStatic
   @Provides

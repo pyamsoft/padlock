@@ -15,23 +15,6 @@
  *
  */
 
-package com.pyamsoft.padlock.api
+package com.pyamsoft.padlock.settings
 
-import androidx.annotation.CheckResult
-import io.reactivex.Completable
-import io.reactivex.Single
-
-interface SettingsInteractor {
-
-  @CheckResult
-  fun updateApplicationReceiver(): Completable
-
-  @CheckResult
-  fun clearDatabase(): Single<Unit>
-
-  @CheckResult
-  fun clearAll(): Single<Unit>
-
-  @CheckResult
-  fun hasExistingMasterPassword(): Single<Boolean>
-}
+internal object ClearDatabaseEvent

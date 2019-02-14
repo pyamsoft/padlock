@@ -19,59 +19,36 @@ package com.pyamsoft.padlock.settings
 
 import android.app.Dialog
 import android.os.Bundle
-import androidx.annotation.CheckResult
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
-import com.pyamsoft.padlock.model.ConfirmEvent
-import com.pyamsoft.pydroid.core.bus.Publisher
-import com.pyamsoft.pydroid.ui.app.requireArguments
 import javax.inject.Inject
 
-class ConfirmationDialog : DialogFragment() {
+class ConfirmDeleteAllDialog : DialogFragment() {
 
-  @field:Inject
-  internal lateinit var publisher: Publisher<ConfirmEvent>
-  private val type by lazy {
-    ConfirmEvent.valueOf(requireArguments().getString(WHICH, ConfirmEvent.DATABASE.name))
-  }
+  @field:Inject internal lateinit var presenter: ClearAllPresenter
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+        .plusConfirmationComponent()
+        .owner(viewLifecycleOwner)
+        .build()
         .inject(this)
 
     return AlertDialog.Builder(requireActivity())
         .setMessage(
-            if (type === ConfirmEvent.DATABASE)
-              """Really clear entire database?
-        |
-        |You will have to re-configure all locked applications again""".trimMargin()
-            else
-              """Really clear all application settings?
-        |
-        |You will have to manually restart the Usage Access component of PadLock""".trimMargin()
+            """
+              |Really clear all application settings?
+              |
+              |You will have to manually restart the Usage Access component of PadLock
+              |""".trimMargin()
         )
         .setPositiveButton("Yes") { _, _ ->
-          publisher.publish(type)
+          presenter.clear()
           dismiss()
         }
         .setNegativeButton("No") { _, _ -> dismiss() }
         .create()
-  }
-
-  companion object {
-
-    private const val WHICH = "which_type"
-
-    @CheckResult
-    @JvmStatic
-    fun newInstance(type: ConfirmEvent): ConfirmationDialog {
-      return ConfirmationDialog().apply {
-        arguments = Bundle().apply {
-          putString(WHICH, type.name)
-        }
-      }
-    }
   }
 }

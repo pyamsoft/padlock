@@ -19,15 +19,9 @@ package com.pyamsoft.padlock.settings
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.SettingsInteractor
-import com.pyamsoft.padlock.model.ConfirmEvent
-import com.pyamsoft.padlock.model.ConfirmEvent.ALL
-import com.pyamsoft.padlock.model.ConfirmEvent.DATABASE
 import com.pyamsoft.padlock.model.pin.ClearPinEvent
-import com.pyamsoft.padlock.model.service.ServiceFinishEvent
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.Publisher
-import com.pyamsoft.pydroid.core.threads.Enforcer
-import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
@@ -36,52 +30,10 @@ import javax.inject.Inject
 import javax.inject.Named
 
 class SettingsViewModel @Inject internal constructor(
-  private val enforcer: Enforcer,
   private val interactor: SettingsInteractor,
-  private val bus: Listener<ConfirmEvent>,
-  private val serviceFinishBus: Publisher<ServiceFinishEvent>,
   private val clearPinBus: Listener<ClearPinEvent>,
   @param:Named("recreate_publisher") private val recreatePublisher: Publisher<Unit>
 ) {
-
-  @CheckResult
-  private fun clearDatabase(): Single<ConfirmEvent> {
-    enforcer.assertNotOnMainThread()
-    return interactor.clearDatabase()
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-  }
-
-  @CheckResult
-  private fun clearAll(): Single<ConfirmEvent> {
-    enforcer.assertNotOnMainThread()
-    return interactor.clearAll()
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-  }
-
-  @CheckResult
-  fun onDatabaseCleared(func: () -> Unit): Disposable {
-    return bus.listen()
-        .observeOn(Schedulers.io())
-        .filter { it == DATABASE }
-        .flatMapSingle { clearDatabase() }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { func() }
-  }
-
-  @CheckResult
-  fun onAllSettingsCleared(func: () -> Unit): Disposable {
-    return bus.listen()
-        .observeOn(Schedulers.io())
-        .filter { it == ALL }
-        .flatMapSingle { clearAll() }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .doOnNext { serviceFinishBus.publish(ServiceFinishEvent) }
-        .subscribe { func() }
-  }
 
   @CheckResult
   fun onPinClearSuccess(func: () -> Unit): Disposable {

@@ -18,15 +18,14 @@
 package com.pyamsoft.padlock.settings
 
 import android.app.ActivityManager
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
@@ -40,8 +39,13 @@ import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
 
-class PadLockPreferenceFragment : AppSettingsPreferenceFragment(), LockTypePresenter.Callback {
+class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
+    ClearAllPresenter.Callback,
+    ClearDatabasePresenter.Callback,
+    LockTypePresenter.Callback {
 
+  @field:Inject internal lateinit var clearDatabasePresenter: ClearDatabasePresenter
+  @field:Inject internal lateinit var clearAllPresenter: ClearAllPresenter
   @field:Inject internal lateinit var lockTypePresenter: LockTypePresenter
   @field:Inject internal lateinit var viewModel: SettingsViewModel
   @field:Inject internal lateinit var settingsView: SettingsView
@@ -49,8 +53,6 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(), LockTypePrese
   override val preferenceXmlResId: Int = R.xml.preferences
 
   private var installReceiverDisposable by singleDisposable()
-  private var allClearDisposable by singleDisposable()
-  private var dbClearDisposable by singleDisposable()
   private var pinClearFailedDisposable by singleDisposable()
   private var pinClearSuccessDisposable by singleDisposable()
 
@@ -66,7 +68,6 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(), LockTypePrese
         .build()
         .inject(this)
 
-    settingsView.create()
     return super.onCreateView(inflater, container, savedInstanceState)
   }
 
@@ -75,9 +76,10 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(), LockTypePrese
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
+    settingsView.create()
 
     settingsView.onClearDatabaseClicked {
-      ConfirmationDialog.newInstance(ConfirmEvent.DATABASE)
+      ConfirmDeleteAllDialog()
           .show(requireActivity(), "confirm_dialog")
     }
 
@@ -94,19 +96,17 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(), LockTypePrese
       lockTypePresenter.switchType(it)
     }
 
-    allClearDisposable = viewModel.onAllSettingsCleared { onClearAll() }
-    dbClearDisposable = viewModel.onDatabaseCleared { onClearDatabase() }
     pinClearFailedDisposable = viewModel.onPinClearFailed { onMasterPinClearFailure() }
     pinClearSuccessDisposable = viewModel.onPinClearSuccess { onMasterPinClearSuccess() }
 
+    clearDatabasePresenter.bind(this)
+    clearAllPresenter.bind(this)
     lockTypePresenter.bind(this)
   }
 
   override fun onDestroyView() {
     super.onDestroyView()
     installReceiverDisposable.tryDispose()
-    allClearDisposable.tryDispose()
-    dbClearDisposable.tryDispose()
     pinClearFailedDisposable.tryDispose()
     pinClearSuccessDisposable.tryDispose()
   }
@@ -120,7 +120,7 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(), LockTypePrese
 
   override fun onClearAllClicked() {
     super.onClearAllClicked()
-    ConfirmationDialog.newInstance(ConfirmEvent.ALL)
+    ConfirmDeleteAllDialog()
         .show(requireActivity(), "confirm_dialog")
   }
 
@@ -145,7 +145,13 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(), LockTypePrese
         .show()
   }
 
-  private fun onClearDatabase() {
+  override fun onAllSettingsCleared() {
+    Timber.d("Everything is cleared, kill self")
+    val activityManager = requireNotNull(requireActivity().getSystemService<ActivityManager>())
+    activityManager.clearApplicationUserData()
+  }
+
+  override fun onDatabaseCleared() {
     Snackbreak.bindTo(viewLifecycleOwner)
         .short(requireView(), "Locked application database cleared")
         .show()
@@ -161,12 +167,6 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(), LockTypePrese
     Snackbreak.bindTo(viewLifecycleOwner)
         .short(requireView(), "You may now change lock type")
         .show()
-  }
-
-  private fun onClearAll() {
-    Timber.d("Everything is cleared, kill self")
-    val activityManager = activity?.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-    activityManager.clearApplicationUserData()
   }
 
   override fun onResume() {
