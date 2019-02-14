@@ -19,12 +19,14 @@ package com.pyamsoft.padlock.settings
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.preference.PreferenceScreen
+import com.pyamsoft.padlock.scopes.FragmentScope
 import com.pyamsoft.padlock.settings.SettingsComponent.SettingsModule
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module
 import dagger.Subcomponent
 
+@FragmentScope
 @Subcomponent(modules = [SettingsModule::class])
 interface SettingsComponent {
 
@@ -50,9 +52,9 @@ interface SettingsComponent {
     internal abstract fun bindClearAllPresenter(impl: ClearAllPresenterImpl): ClearAllPresenter
 
     @Binds
-    internal abstract fun bindSwitchLockTypePresenter(impl: SwitchLockTypePresenterImpl): SwitchLockTypePresenter
+    internal abstract fun bindPresenter(impl: SettingsPresenterImpl): SettingsPresenter
 
     @Binds
-    internal abstract fun bindSettingsView(impl: SettingsViewImpl): SettingsView
+    internal abstract fun provideSettingsViewCallback(impl: SettingsPresenterImpl): SettingsView.Callback
   }
 }

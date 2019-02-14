@@ -55,23 +55,6 @@ class SettingsViewModel @Inject internal constructor(
         .subscribe { func() }
   }
 
-  @CheckResult
-  fun updateApplicationReceiver(
-    onUpdateBegin: () -> Unit,
-    onUpdateSuccess: () -> Unit,
-    onUpdateError: (error: Throwable) -> Unit,
-    onUpdateComplete: () -> Unit
-  ): Disposable {
-    return interactor.updateApplicationReceiver()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .doOnSubscribe { onUpdateBegin() }
-        .doAfterTerminate { onUpdateComplete() }
-        .subscribe({ onUpdateSuccess() }, {
-          Timber.e(it, "Error updating application receiver")
-          onUpdateError(it)
-        })
-  }
 
   fun publishRecreate() {
     Timber.d("Publish recreate event")

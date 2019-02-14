@@ -17,12 +17,12 @@
 
 package com.pyamsoft.padlock.settings
 
-sealed class LockTypeSwitchEvent {
+sealed class SwitchLockTypeEvent {
 
-  data class LockTypeSwitchSuccess(val newType: String) : LockTypeSwitchEvent()
+  data class SwitchLockTypeSuccess(val newType: String) : SwitchLockTypeEvent()
 
-  object LockTypeSwitchBlocked : LockTypeSwitchEvent()
+  object SwitchLockTypeBlocked : SwitchLockTypeEvent()
 
-  data class LockTypeSwitchError(val error: Throwable) : LockTypeSwitchEvent()
+  data class SwitchLockTypeError(val error: Throwable) : SwitchLockTypeEvent()
 
 }

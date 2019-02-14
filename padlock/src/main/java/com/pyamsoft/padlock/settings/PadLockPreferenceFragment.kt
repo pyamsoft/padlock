@@ -40,19 +40,19 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
+    SettingsPresenter.Callback,
     ClearAllPresenter.Callback,
-    ClearDatabasePresenter.Callback,
-    SwitchLockTypePresenter.Callback {
+    ClearDatabasePresenter.Callback {
 
   @field:Inject internal lateinit var clearDatabasePresenter: ClearDatabasePresenter
   @field:Inject internal lateinit var clearAllPresenter: ClearAllPresenter
-  @field:Inject internal lateinit var switchLockTypePresenter: SwitchLockTypePresenter
+  @field:Inject internal lateinit var presenter: SettingsPresenter
+
   @field:Inject internal lateinit var viewModel: SettingsViewModel
   @field:Inject internal lateinit var settingsView: SettingsView
 
   override val preferenceXmlResId: Int = R.xml.preferences
 
-  private var installReceiverDisposable by singleDisposable()
   private var pinClearFailedDisposable by singleDisposable()
   private var pinClearSuccessDisposable by singleDisposable()
 
@@ -76,46 +76,39 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
-    settingsView.create()
-
-    settingsView.onClearDatabaseClicked {
-      ConfirmDeleteAllDialog()
-          .show(requireActivity(), "confirm_dialog")
-    }
-
-    settingsView.onInstallListenerClicked {
-      installReceiverDisposable = viewModel.updateApplicationReceiver(
-          onUpdateBegin = {},
-          onUpdateSuccess = { Timber.d("Updated application install receiver") },
-          onUpdateError = { Timber.e(it, "Failed to update application install receiver") },
-          onUpdateComplete = {}
-      )
-    }
-
-    settingsView.onLockTypeChangeAttempt {
-      switchLockTypePresenter.switchType(it)
-    }
+    settingsView.inflate(savedInstanceState)
 
     pinClearFailedDisposable = viewModel.onPinClearFailed { onMasterPinClearFailure() }
     pinClearSuccessDisposable = viewModel.onPinClearSuccess { onMasterPinClearSuccess() }
 
+    presenter.bind(this)
     clearDatabasePresenter.bind(this)
     clearAllPresenter.bind(this)
-    switchLockTypePresenter.bind(this)
+  }
+
+  override fun onClearDatabaseRequest() {
+    ConfirmDeleteAllDialog()
+        .show(requireActivity(), "confirm_dialog")
   }
 
   override fun onDestroyView() {
     super.onDestroyView()
-    installReceiverDisposable.tryDispose()
+    settingsView.teardown()
     pinClearFailedDisposable.tryDispose()
     pinClearSuccessDisposable.tryDispose()
   }
 
-  override fun onDarkThemeClicked(dark: Boolean) {
-    super.onDarkThemeClicked(dark)
+  override fun onSaveInstanceState(outState: Bundle) {
+    super.onSaveInstanceState(outState)
+    settingsView.saveState(outState)
+  }
 
+  override fun onDarkThemeClicked(dark: Boolean) {
     // Publish incase any other activities are listening
     viewModel.publishRecreate()
+
+    // Recreate
+    super.onDarkThemeClicked(dark)
   }
 
   override fun onClearAllClicked() {

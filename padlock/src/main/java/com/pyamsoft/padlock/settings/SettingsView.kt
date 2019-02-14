@@ -17,16 +17,66 @@
 
 package com.pyamsoft.padlock.settings
 
-import com.pyamsoft.padlock.uicommon.ShimBaseView
+import android.os.Bundle
+import androidx.preference.ListPreference
+import androidx.preference.Preference
+import androidx.preference.PreferenceScreen
+import com.pyamsoft.padlock.R
+import com.pyamsoft.pydroid.ui.arch.PrefUiView
+import timber.log.Timber
+import javax.inject.Inject
 
-interface SettingsView : ShimBaseView {
+internal class SettingsView @Inject internal constructor(
+  preferenceScreen: PreferenceScreen,
+  callback: SettingsView.Callback
+) : PrefUiView<SettingsView.Callback>(preferenceScreen, callback) {
 
-  fun onLockTypeChangeAttempt(onChange: (newValue: String) -> Unit)
+  private val lockType by lazyPref<ListPreference>(R.string.lock_screen_type_key)
+  private val installListener by lazyPref<Preference>(R.string.install_listener_key)
+  private val clearDb by lazyPref<Preference>(R.string.clear_db_key)
 
-  fun changeLockType(newValue: String)
+  override fun inflate(savedInstanceState: Bundle?) {
+    super.inflate(savedInstanceState)
 
-  fun onInstallListenerClicked(onClick: () -> Unit)
+    lockType.setOnPreferenceChangeListener { _, value ->
+      if (value is String) {
+        callback.onSwitchLockTypeChanged(value)
+        return@setOnPreferenceChangeListener false
+      } else {
+        return@setOnPreferenceChangeListener false
+      }
+    }
 
-  fun onClearDatabaseClicked(onClick: () -> Unit)
+    installListener.setOnPreferenceClickListener {
+      callback.onInstallListenerClicked()
+      return@setOnPreferenceClickListener true
+    }
 
+    clearDb.setOnPreferenceClickListener {
+      callback.onClearDatabaseClicked()
+      return@setOnPreferenceClickListener true
+    }
+  }
+
+  override fun teardown() {
+    super.teardown()
+    lockType.onPreferenceChangeListener = null
+    installListener.onPreferenceClickListener = null
+    clearDb.onPreferenceClickListener = null
+  }
+
+  fun changeLockType(newValue: String) {
+    Timber.d("Change lock type: $newValue")
+    lockType.value = newValue
+  }
+
+  interface Callback {
+
+    fun onSwitchLockTypeChanged(newType: String)
+
+    fun onInstallListenerClicked()
+
+    fun onClearDatabaseClicked()
+  }
 }
+
