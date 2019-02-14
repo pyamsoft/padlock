@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.settings
 
 import com.pyamsoft.pydroid.ui.arch.Presenter
 
-interface LockTypePresenter : Presenter<LockTypePresenter.Callback> {
+interface SwitchLockTypePresenter : Presenter<SwitchLockTypePresenter.Callback> {
 
   fun switchType(newType: String)
 

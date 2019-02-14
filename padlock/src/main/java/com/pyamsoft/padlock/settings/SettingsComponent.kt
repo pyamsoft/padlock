@@ -17,7 +17,6 @@
 
 package com.pyamsoft.padlock.settings
 
-import androidx.annotation.CheckResult
 import androidx.lifecycle.LifecycleOwner
 import androidx.preference.PreferenceScreen
 import com.pyamsoft.padlock.settings.SettingsComponent.SettingsModule
@@ -51,10 +50,9 @@ interface SettingsComponent {
     internal abstract fun bindClearAllPresenter(impl: ClearAllPresenterImpl): ClearAllPresenter
 
     @Binds
-    internal abstract fun bindLockTypePresenter(impl: LockTypePresenterImpl): LockTypePresenter
+    internal abstract fun bindSwitchLockTypePresenter(impl: SwitchLockTypePresenterImpl): SwitchLockTypePresenter
 
     @Binds
-    @CheckResult
     internal abstract fun bindSettingsView(impl: SettingsViewImpl): SettingsView
   }
 }

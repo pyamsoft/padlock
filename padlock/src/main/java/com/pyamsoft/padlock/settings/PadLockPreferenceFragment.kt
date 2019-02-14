@@ -42,11 +42,11 @@ import javax.inject.Inject
 class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
     ClearAllPresenter.Callback,
     ClearDatabasePresenter.Callback,
-    LockTypePresenter.Callback {
+    SwitchLockTypePresenter.Callback {
 
   @field:Inject internal lateinit var clearDatabasePresenter: ClearDatabasePresenter
   @field:Inject internal lateinit var clearAllPresenter: ClearAllPresenter
-  @field:Inject internal lateinit var lockTypePresenter: LockTypePresenter
+  @field:Inject internal lateinit var switchLockTypePresenter: SwitchLockTypePresenter
   @field:Inject internal lateinit var viewModel: SettingsViewModel
   @field:Inject internal lateinit var settingsView: SettingsView
 
@@ -93,7 +93,7 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
     }
 
     settingsView.onLockTypeChangeAttempt {
-      lockTypePresenter.switchType(it)
+      switchLockTypePresenter.switchType(it)
     }
 
     pinClearFailedDisposable = viewModel.onPinClearFailed { onMasterPinClearFailure() }
@@ -101,7 +101,7 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
 
     clearDatabasePresenter.bind(this)
     clearAllPresenter.bind(this)
-    lockTypePresenter.bind(this)
+    switchLockTypePresenter.bind(this)
   }
 
   override fun onDestroyView() {

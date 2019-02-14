@@ -32,11 +32,11 @@ import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockTypePresenterImpl @Inject internal constructor(
+class SwitchLockTypePresenterImpl @Inject internal constructor(
   private val interactor: SettingsInteractor,
   owner: LifecycleOwner,
   bus: EventBus<LockTypeSwitchEvent>
-) : BasePresenter<LockTypeSwitchEvent, LockTypePresenter.Callback>(owner, bus), LockTypePresenter {
+) : BasePresenter<LockTypeSwitchEvent, SwitchLockTypePresenter.Callback>(owner, bus), SwitchLockTypePresenter {
 
   private var lockTypeDisposable by singleDisposable()
 
