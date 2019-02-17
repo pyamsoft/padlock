@@ -31,6 +31,7 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogInfoLocktypeExplainBinding
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.ImageTarget
+import com.pyamsoft.pydroid.loader.Loaded
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
@@ -47,6 +48,8 @@ internal class LockInfoExplanationViewImpl @Inject internal constructor(
 
   private lateinit var binding: DialogInfoLocktypeExplainBinding
 
+  private var toolbarIconLoaded: Loaded? = null
+
   init {
     owner.lifecycle.addObserver(this)
   }
@@ -55,6 +58,7 @@ internal class LockInfoExplanationViewImpl @Inject internal constructor(
   internal fun destroy() {
     owner.lifecycle.removeObserver(this)
 
+    toolbarIconLoaded?.dispose()
     binding.unbind()
   }
 
@@ -84,7 +88,8 @@ internal class LockInfoExplanationViewImpl @Inject internal constructor(
   }
 
   private fun loadToolbarIcon() {
-    imageLoader.load(R.drawable.ic_close_24dp)
+    toolbarIconLoaded?.dispose()
+    toolbarIconLoaded = imageLoader.load(R.drawable.ic_close_24dp)
         .into(object : ImageTarget<Drawable> {
           override fun clear() {
             binding.lockInfoExplainToolbar.navigationIcon = null
@@ -107,7 +112,6 @@ internal class LockInfoExplanationViewImpl @Inject internal constructor(
           }
 
         })
-        .bind(owner)
   }
 
   override fun root(): View {

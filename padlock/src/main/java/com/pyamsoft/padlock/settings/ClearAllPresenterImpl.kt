@@ -18,9 +18,7 @@
 package com.pyamsoft.padlock.settings
 
 import androidx.annotation.CheckResult
-import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.api.SettingsInteractor
-import com.pyamsoft.padlock.model.ConfirmEvent
 import com.pyamsoft.padlock.settings.ClearAllPresenter.Callback
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.threads.Enforcer
@@ -34,9 +32,8 @@ import javax.inject.Inject
 internal class ClearAllPresenterImpl @Inject internal constructor(
   private val interactor: SettingsInteractor,
   private val enforcer: Enforcer,
-  owner: LifecycleOwner,
   bus: EventBus<ClearAllEvent>
-) : BasePresenter<ClearAllEvent, Callback>(owner, bus),
+) : BasePresenter<ClearAllEvent, Callback>(bus),
     ClearAllPresenter {
 
   @CheckResult

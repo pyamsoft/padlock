@@ -38,6 +38,7 @@ import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.helper.tintIcon
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.pydroid.loader.ImageLoader
+import com.pyamsoft.pydroid.loader.Loaded
 import com.pyamsoft.pydroid.ui.app.ToolbarActivity
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.Snackbreak
@@ -71,6 +72,9 @@ internal class LockListViewImpl @Inject internal constructor(
   private var lastPosition: Int = 0
   private var displaySystemItem: MenuItem? = null
 
+
+  private var appListFabLoaded: Loaded? = null
+
   private var refreshCallback: () -> Unit = {}
 
   init {
@@ -91,6 +95,8 @@ internal class LockListViewImpl @Inject internal constructor(
       applistSwipeRefresh.setOnRefreshListener(null)
       unbind()
     }
+
+    appListFabLoaded?.dispose()
 
     modelAdapter.clear()
   }
@@ -271,31 +277,31 @@ internal class LockListViewImpl @Inject internal constructor(
 
   override fun onFabIconLocked() {
     Timber.d("FAB locked")
-    imageLoader.load(R.drawable.ic_lock_outline_24dp)
+    appListFabLoaded?.dispose()
+    appListFabLoaded = imageLoader.load(R.drawable.ic_lock_outline_24dp)
         .into(binding.applistFab)
-        .bind(owner)
   }
 
   override fun onFabIconPaused() {
     Timber.d("FAB paused")
-    imageLoader.load(R.drawable.ic_pause_24dp)
+    appListFabLoaded?.dispose()
+    appListFabLoaded = imageLoader.load(R.drawable.ic_pause_24dp)
         .into(binding.applistFab)
-        .bind(owner)
   }
 
   override fun onFabIconPermissionDenied() {
     Timber.d("FAB permission")
-    imageLoader.load(R.drawable.ic_warning_24dp)
+    appListFabLoaded?.dispose()
+    appListFabLoaded = imageLoader.load(R.drawable.ic_warning_24dp)
         .mutate { it.tintWith(root().context, R.color.white) }
         .into(binding.applistFab)
-        .bind(owner)
   }
 
   override fun onFabIconUnlocked() {
     Timber.d("FAB unlocked")
-    imageLoader.load(R.drawable.ic_lock_open_24dp)
+    appListFabLoaded?.dispose()
+    appListFabLoaded = imageLoader.load(R.drawable.ic_lock_open_24dp)
         .into(binding.applistFab)
-        .bind(owner)
   }
 
   private fun showRecycler() {

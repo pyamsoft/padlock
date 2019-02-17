@@ -17,11 +17,22 @@
 
 package com.pyamsoft.padlock
 
+import android.app.Activity
 import android.app.Application
+import android.app.Service
+import android.app.job.JobService
+import android.content.Context
 import androidx.annotation.CheckResult
+import androidx.annotation.ColorRes
+import androidx.annotation.DrawableRes
+import com.pyamsoft.padlock.PadLockComponent.PadLockModule
+import com.pyamsoft.padlock.PadLockComponent.PadLockProvider
+import com.pyamsoft.padlock.R.color
+import com.pyamsoft.padlock.R.drawable
 import com.pyamsoft.padlock.base.BaseModule
 import com.pyamsoft.padlock.base.BaseProvider
 import com.pyamsoft.padlock.base.database.DatabaseProvider
+import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.list.LockInfoComponent
 import com.pyamsoft.padlock.list.LockInfoExplainComponent
 import com.pyamsoft.padlock.list.LockInfoItemComponent
@@ -35,8 +46,12 @@ import com.pyamsoft.padlock.list.modify.LockStateModule
 import com.pyamsoft.padlock.lock.LockScreenComponent
 import com.pyamsoft.padlock.lock.LockSingletonModule
 import com.pyamsoft.padlock.lock.LockSingletonProvider
+import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.main.MainComponent
 import com.pyamsoft.padlock.main.MainFragmentComponent
+import com.pyamsoft.padlock.model.pin.ClearPinEvent
+import com.pyamsoft.padlock.pin.ClearPinPresenter
+import com.pyamsoft.padlock.pin.ClearPinPresenterImpl
 import com.pyamsoft.padlock.pin.PinBaseFragment
 import com.pyamsoft.padlock.pin.PinComponent
 import com.pyamsoft.padlock.pin.PinSingletonModule
@@ -53,22 +68,39 @@ import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.PauseComponent
 import com.pyamsoft.padlock.service.ServiceSingletonModule
 import com.pyamsoft.padlock.service.ServiceSingletonProvider
-import com.pyamsoft.padlock.settings.ConfirmationComponent
+import com.pyamsoft.padlock.settings.ClearAllEvent
+import com.pyamsoft.padlock.settings.ClearAllPresenter
+import com.pyamsoft.padlock.settings.ClearAllPresenterImpl
+import com.pyamsoft.padlock.settings.ClearDatabaseEvent
+import com.pyamsoft.padlock.settings.ClearDatabasePresenter
+import com.pyamsoft.padlock.settings.ClearDatabasePresenterImpl
+import com.pyamsoft.padlock.settings.ConfirmDeleteAllDialog
+import com.pyamsoft.padlock.settings.ConfirmDeleteDatabaseDialog
 import com.pyamsoft.padlock.settings.SettingsComponent
 import com.pyamsoft.padlock.settings.SettingsSingletonModule
 import com.pyamsoft.padlock.settings.SettingsSingletonProvider
+import com.pyamsoft.padlock.settings.SwitchLockTypeEvent
+import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.bus.Listener
+import com.pyamsoft.pydroid.core.bus.Publisher
+import com.pyamsoft.pydroid.core.bus.RxBus
+import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.squareup.moshi.Moshi
+import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
+import dagger.Module
+import dagger.Provides
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
 @Component(
     modules = [
-      PadLockProvider::class, BaseModule::class, DatabaseProvider::class,
+      PadLockProvider::class, PadLockModule::class, BaseModule::class, DatabaseProvider::class,
       PinSingletonModule::class, ServiceSingletonModule::class, PurgeSingletonModule::class,
       PurgeSingletonProvider::class, SettingsSingletonModule::class, LockInfoSingletonModule::class,
       LockInfoSingletonProvider::class, LockStateModule::class, LockListSingletonModule::class,
@@ -93,6 +125,10 @@ interface PadLockComponent {
 
   fun inject(dialog: PurgeSingleItemDialog)
 
+  fun inject(dialog: ConfirmDeleteDatabaseDialog)
+
+  fun inject(dialog: ConfirmDeleteAllDialog)
+
   @CheckResult
   fun plusLockListComponent(): LockListComponent.Builder
 
@@ -113,9 +149,6 @@ interface PadLockComponent {
 
   @CheckResult
   fun plusSettingsComponent(): SettingsComponent.Builder
-
-  @CheckResult
-  fun plusConfirmationComponent(): ConfirmationComponent.Builder
 
   @CheckResult
   fun plusPauseComponent(): PauseComponent.Builder
@@ -151,4 +184,89 @@ interface PadLockComponent {
     fun build(): PadLockComponent
 
   }
+
+  @Module
+  object PadLockProvider {
+
+    private val clearAllBus = RxBus.create<ClearAllEvent>()
+    private val clearDatabaseBus = RxBus.create<ClearDatabaseEvent>()
+    private val recreateBus = RxBus.create<Unit>()
+    private val settingsStateBus = RxBus.create<SwitchLockTypeEvent>()
+    private val clearPinBus = RxBus.create<ClearPinEvent>()
+
+    @JvmStatic
+    @Provides
+    internal fun provideClearPinBus(): EventBus<ClearPinEvent> = clearPinBus
+
+    @JvmStatic
+    @Provides
+    internal fun provideClearAllBus(): EventBus<ClearAllEvent> = clearAllBus
+
+    @JvmStatic
+    @Provides
+    internal fun provideClearDatabaseBus(): EventBus<ClearDatabaseEvent> = clearDatabaseBus
+
+    @JvmStatic
+    @Provides
+    fun provideLockTypeBus(): EventBus<SwitchLockTypeEvent> = settingsStateBus
+
+    @JvmStatic
+    @Provides
+    @Named("recreate_publisher")
+    fun provideRecreatePublisher(): Publisher<Unit> = recreateBus
+
+    @JvmStatic
+    @Provides
+    @Named("recreate_listener")
+    fun provideRecreateListener(): Listener<Unit> = recreateBus
+
+    @JvmStatic
+    @Provides
+    fun provideContext(application: Application): Context = application
+
+    @JvmStatic
+    @Provides
+    @Named("cache_list_state")
+    fun provideListStateCache(): Cache =
+      ListStateUtil
+
+    @JvmStatic
+    @Provides
+    fun provideMainActivityClass(): Class<out Activity> = MainActivity::class.java
+
+    @JvmStatic
+    @Provides
+    fun provideServiceClass(): Class<out Service> = PadLockService::class.java
+
+    @JvmStatic
+    @Provides
+    fun provideJobServiceClass(): Class<out JobService> = PadLockJobService::class.java
+
+    @JvmStatic
+    @Provides
+    @Named("notification_icon")
+    @DrawableRes
+    fun provideNotificationIcon(): Int = drawable.ic_padlock_notification
+
+    @JvmStatic
+    @Provides
+    @Named("notification_color")
+    @ColorRes
+    fun provideNotificationColor(): Int = color.blue500
+  }
+
+  @Module
+  abstract class PadLockModule {
+
+    @Binds
+    internal abstract fun bindClearDatabasePresenter(impl: ClearDatabasePresenterImpl): ClearDatabasePresenter
+
+    @Binds
+    internal abstract fun bindClearAllPresenter(impl: ClearAllPresenterImpl): ClearAllPresenter
+
+    @Binds
+    internal abstract fun bindClearPinPresenter(impl: ClearPinPresenterImpl): ClearPinPresenter
+
+  }
 }
+

@@ -28,6 +28,7 @@ import com.pyamsoft.padlock.databinding.ActivityLockBinding
 import com.pyamsoft.padlock.helper.isChecked
 import com.pyamsoft.padlock.helper.setChecked
 import com.pyamsoft.padlock.loader.AppIconLoader
+import com.pyamsoft.pydroid.loader.Loaded
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import timber.log.Timber
@@ -61,6 +62,8 @@ internal class LockScreenViewImpl @Inject internal constructor(
   private var menuExclude: MenuItem? = null
 
   private lateinit var ignoreTimes: MutableList<Long>
+
+  private var appIconLoaded: Loaded?= null
 
   override fun isExcludeChecked(): Boolean {
     return menuExclude.isChecked()
@@ -126,9 +129,9 @@ internal class LockScreenViewImpl @Inject internal constructor(
   }
 
   private fun loadAppIcon() {
-    appIconLoader.loadAppIcon(lockedPackageName, lockedIcon)
+    appIconLoaded?.dispose()
+    appIconLoaded = appIconLoader.loadAppIcon(lockedPackageName, lockedIcon)
         .into(binding.lockImage)
-        .bind(activity)
   }
 
   private fun setupToolbar() {

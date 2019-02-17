@@ -32,6 +32,7 @@ import androidx.lifecycle.OnLifecycleEvent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.FragmentLockScreenTextBinding
 import com.pyamsoft.pydroid.loader.ImageLoader
+import com.pyamsoft.pydroid.loader.Loaded
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.util.tintWith
@@ -49,6 +50,8 @@ internal class LockScreenTextViewImpl @Inject internal constructor(
   private lateinit var binding: FragmentLockScreenTextBinding
   private var editText: EditText? = null
 
+  private var goArrowLoaded: Loaded? = null
+
   init {
     owner.lifecycle.addObserver(this)
   }
@@ -57,6 +60,7 @@ internal class LockScreenTextViewImpl @Inject internal constructor(
   @OnLifecycleEvent(ON_DESTROY)
   internal fun destroy() {
     owner.lifecycle.removeObserver(this)
+    goArrowLoaded?.dispose()
     binding.unbind()
   }
 
@@ -113,13 +117,13 @@ internal class LockScreenTextViewImpl @Inject internal constructor(
     // Force keyboard focus
     editText?.requestFocus()
 
-    imageLoader.load(R.drawable.ic_check_24dp)
+    goArrowLoaded?.dispose()
+    goArrowLoaded = imageLoader.load(R.drawable.ic_check_24dp)
         .mutate {
           it.tintWith(root().context, R.color.white)
           return@mutate it
         }
         .into(binding.lockImageGo)
-        .bind(owner)
   }
 
   private fun setupTextInput() {

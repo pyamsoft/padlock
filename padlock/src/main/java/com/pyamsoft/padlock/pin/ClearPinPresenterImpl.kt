@@ -15,49 +15,49 @@
  *
  */
 
-package com.pyamsoft.padlock.settings
+package com.pyamsoft.padlock.pin
 
-import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.SettingsInteractor
+import com.pyamsoft.padlock.model.pin.ClearPinEvent
+import com.pyamsoft.padlock.pin.ClearPinPresenter.Callback
 import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.ui.arch.BasePresenter
 import com.pyamsoft.pydroid.ui.arch.destroy
-import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-internal class ClearDatabasePresenterImpl @Inject internal constructor(
-  private val interactor: SettingsInteractor,
-  private val enforcer: Enforcer,
-  bus: EventBus<ClearDatabaseEvent>
-) : BasePresenter<ClearDatabaseEvent, ClearDatabasePresenter.Callback>(bus),
-    ClearDatabasePresenter {
-
-  @CheckResult
-  private fun clearDatabase(): Single<Unit> {
-    enforcer.assertNotOnMainThread()
-    return interactor.clearDatabase()
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-  }
+internal class ClearPinPresenterImpl @Inject internal constructor(
+  bus: EventBus<ClearPinEvent>
+) : BasePresenter<ClearPinEvent, Callback>(bus),
+    ClearPinPresenter {
 
   override fun onBind() {
     listen()
         .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-        .flatMapSingle { clearDatabase() }
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { callback.onDatabaseCleared() }
+        .subscribe {
+          if (it.success) {
+            callback.onPinClearSuccess()
+          } else {
+            callback.onPinClearFailed()
+          }
+        }
         .destroy(owner)
   }
 
   override fun onUnbind() {
   }
 
-  override fun clear() {
-    publish(ClearDatabaseEvent)
+  override fun success() {
+    clear(true)
+  }
+
+  override fun failure() {
+    clear(false)
+  }
+
+  private fun clear(success: Boolean) {
+    publish(ClearPinEvent(success))
   }
 
 }

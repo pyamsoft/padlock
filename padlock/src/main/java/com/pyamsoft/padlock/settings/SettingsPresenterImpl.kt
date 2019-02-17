@@ -17,7 +17,6 @@
 
 package com.pyamsoft.padlock.settings
 
-import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.padlock.scopes.FragmentScope
 import com.pyamsoft.padlock.settings.SettingsPresenter.Callback
@@ -38,9 +37,8 @@ import javax.inject.Inject
 @FragmentScope
 internal class SettingsPresenterImpl @Inject internal constructor(
   private val interactor: SettingsInteractor,
-  private val switchLockTypeBus: EventBus<SwitchLockTypeEvent>,
-  owner: LifecycleOwner
-) : BasePresenter<Unit, Callback>(owner, RxBus.empty()),
+  private val switchLockTypeBus: EventBus<SwitchLockTypeEvent>
+) : BasePresenter<Unit, Callback>(RxBus.empty()),
     SettingsView.Callback,
     SettingsPresenter {
 

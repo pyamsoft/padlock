@@ -40,6 +40,7 @@ import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.ImageTarget
+import com.pyamsoft.pydroid.loader.Loaded
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.Snackbreak
@@ -72,6 +73,9 @@ internal class LockInfoViewImpl @Inject internal constructor(
   private lateinit var modelAdapter: ModelAdapter<ActivityEntry, LockInfoBaseItem<*, *, *>>
   private lateinit var filterListDelegate: FilterListDelegate
 
+  private var appIconLoaded: Loaded? = null
+  private var toolbarIconLoaded: Loaded? = null
+
   private var lastPosition: Int = 0
 
   init {
@@ -90,6 +94,9 @@ internal class LockInfoViewImpl @Inject internal constructor(
       lockInfoRecycler.adapter = null
       unbind()
     }
+
+    appIconLoaded?.dispose()
+    toolbarIconLoaded?.dispose()
 
     modelAdapter.clear()
   }
@@ -112,7 +119,8 @@ internal class LockInfoViewImpl @Inject internal constructor(
   }
 
   private fun loadToolbarIcon() {
-    imageLoader.load(R.drawable.ic_close_24dp)
+    toolbarIconLoaded?.dispose()
+    toolbarIconLoaded = imageLoader.load(R.drawable.ic_close_24dp)
         .into(object : ImageTarget<Drawable> {
           override fun clear() {
             binding.lockInfoToolbar.navigationIcon = null
@@ -136,13 +144,12 @@ internal class LockInfoViewImpl @Inject internal constructor(
           }
 
         })
-        .bind(owner)
   }
 
   private fun loadAppIcon() {
-    appIconLoader.loadAppIcon(packageName, icon)
+    appIconLoaded?.dispose()
+    appIconLoaded = appIconLoader.loadAppIcon(packageName, icon)
         .into(binding.lockInfoIcon)
-        .bind(owner)
   }
 
   override fun commitListState(outState: Bundle?) {
@@ -303,19 +310,22 @@ internal class LockInfoViewImpl @Inject internal constructor(
   }
 
   override fun onListPopulateError(onAction: () -> Unit) {
-    Snackbreak.bindTo(owner).long(root(), "Failed to load list for $applicationName")
+    Snackbreak.bindTo(owner)
+        .long(root(), "Failed to load list for $applicationName")
         .setAction("Retry") { onAction() }
         .show()
   }
 
   override fun onModifyEntryError(onAction: () -> Unit) {
-    Snackbreak.bindTo(owner).long(root(), "Failed to modify list for $applicationName")
+    Snackbreak.bindTo(owner)
+        .long(root(), "Failed to modify list for $applicationName")
         .setAction("Retry") { onAction() }
         .show()
   }
 
   override fun onDatabaseChangeError(onAction: () -> Unit) {
-    Snackbreak.bindTo(owner).long(root(), "Failed realtime monitoring for $applicationName")
+    Snackbreak.bindTo(owner)
+        .long(root(), "Failed realtime monitoring for $applicationName")
         .setAction("Retry") { onAction() }
         .show()
   }

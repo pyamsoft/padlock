@@ -20,22 +20,25 @@ package com.pyamsoft.padlock.list
 import android.view.View
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.AdapterItemLocklistBinding
 import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.pydroid.loader.ImageLoader
+import com.pyamsoft.pydroid.loader.Loaded
 import javax.inject.Inject
 
 internal class LockListItemViewImpl @Inject internal constructor(
   itemView: View,
   private val imageLoader: ImageLoader,
-  private val appIconLoader: AppIconLoader,
-  private val owner: LifecycleOwner
+  private val appIconLoader: AppIconLoader
 ) : LockListItemView {
 
   private val binding = AdapterItemLocklistBinding.bind(itemView)
+
+  private var whitelistLoaded: Loaded? = null
+  private var blacklistLoaded: Loaded? = null
+  private var iconLoaded: Loaded? = null
 
   override fun bind(model: AppEntry) {
     binding.apply {
@@ -48,21 +51,21 @@ internal class LockListItemViewImpl @Inject internal constructor(
       lockListToggle.isChecked = model.locked
 
       if (lockListWhite.isVisible) {
-        imageLoader.load(R.drawable.ic_whitelisted)
+        whitelistLoaded?.dispose()
+        whitelistLoaded = imageLoader.load(R.drawable.ic_whitelisted)
             .into(lockListWhite)
-            .bind(owner)
       }
 
       if (lockListLocked.isVisible) {
-        imageLoader.load(R.drawable.ic_hardlocked)
+        blacklistLoaded?.dispose()
+        blacklistLoaded = imageLoader.load(R.drawable.ic_hardlocked)
             .into(lockListLocked)
-            .bind(owner)
       }
 
       if (lockListIcon.isVisible) {
-        appIconLoader.loadAppIcon(model.packageName, model.icon)
+        iconLoaded?.dispose()
+        iconLoaded = appIconLoader.loadAppIcon(model.packageName, model.icon)
             .into(lockListIcon)
-            .bind(owner)
       }
     }
   }
@@ -77,6 +80,11 @@ internal class LockListItemViewImpl @Inject internal constructor(
   override fun unbind() {
     binding.apply {
       lockListToggle.setOnCheckedChangeListener(null)
+
+      whitelistLoaded?.dispose()
+      blacklistLoaded?.dispose()
+      iconLoaded?.dispose()
+
       unbind()
     }
   }

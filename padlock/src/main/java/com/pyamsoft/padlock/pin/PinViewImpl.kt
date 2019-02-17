@@ -33,6 +33,7 @@ import com.pyamsoft.padlock.databinding.DialogPinEntryBinding
 import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.ImageTarget
+import com.pyamsoft.pydroid.loader.Loaded
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
@@ -50,6 +51,9 @@ internal class PinViewImpl @Inject internal constructor(
 
   private lateinit var binding: DialogPinEntryBinding
 
+  private var toolbarIconLoaded: Loaded? = null
+  private var iconLoaded: Loaded? = null
+
   init {
     owner.lifecycle.addObserver(this)
   }
@@ -58,6 +62,8 @@ internal class PinViewImpl @Inject internal constructor(
   @OnLifecycleEvent(ON_DESTROY)
   internal fun destroy() {
     owner.lifecycle.removeObserver(this)
+    toolbarIconLoaded?.dispose()
+    iconLoaded?.dispose()
     binding.unbind()
   }
 
@@ -76,9 +82,10 @@ internal class PinViewImpl @Inject internal constructor(
 
   private fun loadAppIcon() {
     val packageName = root().context.packageName
-    appIconLoader.loadAppIcon(packageName, R.mipmap.ic_launcher)
+
+    iconLoaded?.dispose()
+    iconLoaded = appIconLoader.loadAppIcon(packageName, R.mipmap.ic_launcher)
         .into(binding.pinImage)
-        .bind(owner)
   }
 
   @CheckResult
@@ -110,7 +117,8 @@ internal class PinViewImpl @Inject internal constructor(
   }
 
   private fun loadToolbarIcon() {
-    imageLoader.load(R.drawable.ic_close_24dp)
+    toolbarIconLoaded?.dispose()
+    toolbarIconLoaded = imageLoader.load(R.drawable.ic_close_24dp)
         .into(object : ImageTarget<Drawable> {
           override fun clear() {
             binding.pinEntryToolbar.navigationIcon = null
@@ -133,7 +141,6 @@ internal class PinViewImpl @Inject internal constructor(
           }
 
         })
-        .bind(owner)
   }
 
   private fun inflateToolbarMenu() {

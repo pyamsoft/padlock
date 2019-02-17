@@ -31,9 +31,6 @@ class ConfirmDeleteDatabaseDialog : DialogFragment() {
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusConfirmationComponent()
-        .owner(viewLifecycleOwner)
-        .build()
         .inject(this)
 
     return AlertDialog.Builder(requireActivity())

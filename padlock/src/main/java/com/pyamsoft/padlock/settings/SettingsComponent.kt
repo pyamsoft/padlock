@@ -17,7 +17,6 @@
 
 package com.pyamsoft.padlock.settings
 
-import androidx.lifecycle.LifecycleOwner
 import androidx.preference.PreferenceScreen
 import com.pyamsoft.padlock.scopes.FragmentScope
 import com.pyamsoft.padlock.settings.SettingsComponent.SettingsModule
@@ -35,8 +34,6 @@ interface SettingsComponent {
   @Subcomponent.Builder
   interface Builder {
 
-    @BindsInstance fun owner(owner: LifecycleOwner): Builder
-
     @BindsInstance fun preferenceScreen(preferenceScreen: PreferenceScreen): Builder
 
     fun build(): SettingsComponent
@@ -44,12 +41,6 @@ interface SettingsComponent {
 
   @Module
   abstract class SettingsModule {
-
-    @Binds
-    internal abstract fun bindClearDatabasePresenter(impl: ClearDatabasePresenterImpl): ClearDatabasePresenter
-
-    @Binds
-    internal abstract fun bindClearAllPresenter(impl: ClearAllPresenterImpl): ClearAllPresenter
 
     @Binds
     internal abstract fun bindPresenter(impl: SettingsPresenterImpl): SettingsPresenter

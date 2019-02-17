@@ -26,9 +26,8 @@ import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.pin.ClearPinPresenter
 import com.pyamsoft.padlock.pin.PinDialog
-import com.pyamsoft.pydroid.core.singleDisposable
-import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.app.requireView
 import com.pyamsoft.pydroid.ui.settings.AppSettingsPreferenceFragment
@@ -42,19 +41,17 @@ import javax.inject.Inject
 class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
     SettingsPresenter.Callback,
     ClearAllPresenter.Callback,
-    ClearDatabasePresenter.Callback {
+    ClearDatabasePresenter.Callback,
+    ClearPinPresenter.Callback {
 
   @field:Inject internal lateinit var clearDatabasePresenter: ClearDatabasePresenter
   @field:Inject internal lateinit var clearAllPresenter: ClearAllPresenter
+  @field:Inject internal lateinit var clearPinPresenter: ClearPinPresenter
   @field:Inject internal lateinit var presenter: SettingsPresenter
 
-  @field:Inject internal lateinit var viewModel: SettingsViewModel
   @field:Inject internal lateinit var settingsView: SettingsView
 
   override val preferenceXmlResId: Int = R.xml.preferences
-
-  private var pinClearFailedDisposable by singleDisposable()
-  private var pinClearSuccessDisposable by singleDisposable()
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -64,7 +61,6 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusSettingsComponent()
         .preferenceScreen(preferenceScreen)
-        .owner(viewLifecycleOwner)
         .build()
         .inject(this)
 
@@ -78,12 +74,10 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
     super.onViewCreated(view, savedInstanceState)
     settingsView.inflate(savedInstanceState)
 
-    pinClearFailedDisposable = viewModel.onPinClearFailed { onMasterPinClearFailure() }
-    pinClearSuccessDisposable = viewModel.onPinClearSuccess { onMasterPinClearSuccess() }
-
-    presenter.bind(this)
-    clearDatabasePresenter.bind(this)
-    clearAllPresenter.bind(this)
+    presenter.bind(viewLifecycleOwner, this)
+    clearPinPresenter.bind(viewLifecycleOwner, this)
+    clearDatabasePresenter.bind(viewLifecycleOwner, this)
+    clearAllPresenter.bind(viewLifecycleOwner, this)
   }
 
   override fun onClearDatabaseRequest() {
@@ -94,21 +88,11 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
   override fun onDestroyView() {
     super.onDestroyView()
     settingsView.teardown()
-    pinClearFailedDisposable.tryDispose()
-    pinClearSuccessDisposable.tryDispose()
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
     settingsView.saveState(outState)
-  }
-
-  override fun onDarkThemeClicked(dark: Boolean) {
-    // Publish incase any other activities are listening
-    viewModel.publishRecreate()
-
-    // Recreate
-    super.onDarkThemeClicked(dark)
   }
 
   override fun onClearAllClicked() {
@@ -150,15 +134,15 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
         .show()
   }
 
-  private fun onMasterPinClearFailure() {
+  override fun onPinClearSuccess() {
     Snackbreak.bindTo(viewLifecycleOwner)
-        .short(requireView(), "Failed to clear master pin")
+        .short(requireView(), "You may now change lock type")
         .show()
   }
 
-  private fun onMasterPinClearSuccess() {
+  override fun onPinClearFailed() {
     Snackbreak.bindTo(viewLifecycleOwner)
-        .short(requireView(), "You may now change lock type")
+        .short(requireView(), "Failed to clear master pin")
         .show()
   }
 
