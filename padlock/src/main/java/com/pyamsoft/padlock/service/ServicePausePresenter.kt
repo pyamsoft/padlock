@@ -15,53 +15,45 @@
  *
  */
 
-package com.pyamsoft.padlock.settings
+package com.pyamsoft.padlock.service
 
-import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.SettingsInteractor
-import com.pyamsoft.padlock.settings.ClearAllPresenter.Callback
-import com.pyamsoft.padlock.settings.ClearAllPresenterImpl.ClearAllEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.ui.arch.BasePresenter
+import com.pyamsoft.pydroid.ui.arch.Presenter
 import com.pyamsoft.pydroid.ui.arch.destroy
-import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-internal class ClearAllPresenterImpl @Inject internal constructor(
-  private val interactor: SettingsInteractor,
-  private val enforcer: Enforcer,
-  bus: EventBus<ClearAllEvent>
-) : BasePresenter<ClearAllEvent, Callback>(bus),
-    ClearAllPresenter {
+internal interface ServicePausePresenter : Presenter<ServicePausePresenter.Callback> {
 
-  @CheckResult
-  private fun clearAll(): Single<Unit> {
-    enforcer.assertNotOnMainThread()
-    return interactor.clearDatabase()
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
+  fun pause(autoResume: Boolean)
+
+  interface Callback {
+
+    fun onServicePaused(autoResume: Boolean)
   }
+
+}
+
+internal class ServicePausePresenterImpl @Inject internal constructor(
+  bus: EventBus<ServicePauseEvent>
+) : BasePresenter<ServicePauseEvent, ServicePausePresenter.Callback>(bus),
+    ServicePausePresenter {
 
   override fun onBind() {
     listen()
         .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-        .flatMapSingle { clearAll() }
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { callback.onAllSettingsCleared() }
+        .subscribe { callback.onServicePaused(it.autoResume) }
         .destroy(owner)
   }
 
   override fun onUnbind() {
   }
 
-  override fun clear() {
-    publish(ClearAllEvent)
+  override fun pause(autoResume: Boolean) {
+    publish(ServicePauseEvent(autoResume))
   }
-
-  internal object ClearAllEvent
 
 }

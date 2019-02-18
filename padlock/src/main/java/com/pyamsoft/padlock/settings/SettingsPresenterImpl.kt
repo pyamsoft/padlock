@@ -20,11 +20,11 @@ package com.pyamsoft.padlock.settings
 import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.padlock.scopes.FragmentScope
 import com.pyamsoft.padlock.settings.SettingsPresenter.Callback
-import com.pyamsoft.padlock.settings.SwitchLockTypeEvent.SwitchLockTypeBlocked
-import com.pyamsoft.padlock.settings.SwitchLockTypeEvent.SwitchLockTypeError
-import com.pyamsoft.padlock.settings.SwitchLockTypeEvent.SwitchLockTypeSuccess
+import com.pyamsoft.padlock.settings.SettingsPresenterImpl.SwitchLockTypeEvent
+import com.pyamsoft.padlock.settings.SettingsPresenterImpl.SwitchLockTypeEvent.SwitchLockTypeBlocked
+import com.pyamsoft.padlock.settings.SettingsPresenterImpl.SwitchLockTypeEvent.SwitchLockTypeError
+import com.pyamsoft.padlock.settings.SettingsPresenterImpl.SwitchLockTypeEvent.SwitchLockTypeSuccess
 import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.bus.RxBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.arch.BasePresenter
@@ -37,8 +37,8 @@ import javax.inject.Inject
 @FragmentScope
 internal class SettingsPresenterImpl @Inject internal constructor(
   private val interactor: SettingsInteractor,
-  private val switchLockTypeBus: EventBus<SwitchLockTypeEvent>
-) : BasePresenter<Unit, Callback>(RxBus.empty()),
+  bus: EventBus<SwitchLockTypeEvent>
+) : BasePresenter<SwitchLockTypeEvent, Callback>(bus),
     SettingsView.Callback,
     SettingsPresenter {
 
@@ -60,13 +60,13 @@ internal class SettingsPresenterImpl @Inject internal constructor(
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe({ switchingBlocked ->
           if (switchingBlocked) {
-            switchLockTypeBus.publish(SwitchLockTypeBlocked)
+            publish(SwitchLockTypeBlocked)
           } else {
-            switchLockTypeBus.publish(SwitchLockTypeSuccess(newType))
+            publish(SwitchLockTypeSuccess(newType))
           }
         }, {
           Timber.e(it, "Error switching lock type")
-          switchLockTypeBus.publish(SwitchLockTypeError(it))
+          publish(SwitchLockTypeError(it))
         })
   }
 
@@ -84,7 +84,7 @@ internal class SettingsPresenterImpl @Inject internal constructor(
   }
 
   private fun listenSwitchLockType() {
-    switchLockTypeBus.listen()
+    listen()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe {
@@ -95,6 +95,16 @@ internal class SettingsPresenterImpl @Inject internal constructor(
           }
         }
         .destroy(owner)
+  }
+
+  internal sealed class SwitchLockTypeEvent {
+
+    data class SwitchLockTypeSuccess(val newType: String) : SwitchLockTypeEvent()
+
+    object SwitchLockTypeBlocked : SwitchLockTypeEvent()
+
+    data class SwitchLockTypeError(val error: Throwable) : SwitchLockTypeEvent()
+
   }
 
 }

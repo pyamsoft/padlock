@@ -19,6 +19,7 @@ package com.pyamsoft.padlock.settings
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.SettingsInteractor
+import com.pyamsoft.padlock.settings.ClearDatabasePresenterImpl.ClearDatabaseEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.ui.arch.BasePresenter
@@ -60,4 +61,7 @@ internal class ClearDatabasePresenterImpl @Inject internal constructor(
     publish(ClearDatabaseEvent)
   }
 
+  internal object ClearDatabaseEvent
+
 }
+

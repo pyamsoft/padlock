@@ -71,17 +71,17 @@ import com.pyamsoft.padlock.service.RecheckPresenter
 import com.pyamsoft.padlock.service.RecheckPresenterImpl
 import com.pyamsoft.padlock.service.ServiceSingletonModule
 import com.pyamsoft.padlock.service.ServiceSingletonProvider
-import com.pyamsoft.padlock.settings.ClearAllEvent
 import com.pyamsoft.padlock.settings.ClearAllPresenter
 import com.pyamsoft.padlock.settings.ClearAllPresenterImpl
-import com.pyamsoft.padlock.settings.ClearDatabaseEvent
+import com.pyamsoft.padlock.settings.ClearAllPresenterImpl.ClearAllEvent
 import com.pyamsoft.padlock.settings.ClearDatabasePresenter
 import com.pyamsoft.padlock.settings.ClearDatabasePresenterImpl
+import com.pyamsoft.padlock.settings.ClearDatabasePresenterImpl.ClearDatabaseEvent
 import com.pyamsoft.padlock.settings.ConfirmDeleteAllDialog
 import com.pyamsoft.padlock.settings.ConfirmDeleteDatabaseDialog
 import com.pyamsoft.padlock.settings.SettingsComponent
+import com.pyamsoft.padlock.settings.SettingsPresenterImpl.SwitchLockTypeEvent
 import com.pyamsoft.padlock.settings.SettingsSingletonModule
-import com.pyamsoft.padlock.settings.SwitchLockTypeEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.RxBus
 import com.pyamsoft.pydroid.core.cache.Cache
@@ -211,7 +211,7 @@ interface PadLockComponent {
 
     @JvmStatic
     @Provides
-    fun provideLockTypeBus(): EventBus<SwitchLockTypeEvent> = settingsStateBus
+    internal fun provideLockTypeBus(): EventBus<SwitchLockTypeEvent> = settingsStateBus
 
     @JvmStatic
     @Provides

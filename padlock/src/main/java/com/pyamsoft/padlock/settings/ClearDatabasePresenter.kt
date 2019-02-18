@@ -17,9 +17,10 @@
 
 package com.pyamsoft.padlock.settings
 
+import com.pyamsoft.padlock.settings.ClearDatabasePresenter.Callback
 import com.pyamsoft.pydroid.ui.arch.Presenter
 
-internal interface ClearDatabasePresenter : Presenter<ClearDatabasePresenter.Callback> {
+internal interface ClearDatabasePresenter : Presenter<Callback> {
 
   fun clear()
 

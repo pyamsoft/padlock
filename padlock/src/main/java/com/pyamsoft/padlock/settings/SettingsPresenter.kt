@@ -17,9 +17,10 @@
 
 package com.pyamsoft.padlock.settings
 
+import com.pyamsoft.padlock.settings.SettingsPresenter.Callback
 import com.pyamsoft.pydroid.ui.arch.Presenter
 
-internal interface SettingsPresenter : Presenter<SettingsPresenter.Callback> {
+internal interface SettingsPresenter : Presenter<Callback> {
 
   interface Callback {
 
