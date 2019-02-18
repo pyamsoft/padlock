@@ -44,21 +44,11 @@ class LockServiceViewModel @Inject internal constructor(
   private val foregroundEventBus: Listener<ForegroundEvent>,
   private val serviceFinishBus: EventBus<ServiceFinishEvent>,
   private val recheckEventBus: Listener<RecheckEvent>,
-  private val servicePauseBus: Listener<ServicePauseEvent>,
   private val interactor: LockServiceInteractor
 ) {
 
   init {
     interactor.init()
-  }
-
-  @CheckResult
-  fun onServicePauseEvent(func: (Boolean) -> Unit): Disposable {
-    return servicePauseBus.listen()
-        .map { it.autoResume }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(func)
   }
 
   @CheckResult

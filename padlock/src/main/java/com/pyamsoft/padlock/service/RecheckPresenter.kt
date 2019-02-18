@@ -17,9 +17,10 @@
 
 package com.pyamsoft.padlock.service
 
+import com.pyamsoft.padlock.service.RecheckPresenter.Callback
 import com.pyamsoft.pydroid.ui.arch.Presenter
 
-internal interface RecheckPresenter : Presenter<RecheckPresenter.Callback> {
+internal interface RecheckPresenter : Presenter<Callback> {
 
   fun recheck(
     packageName: String,

@@ -50,7 +50,6 @@ import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.main.MainComponent
 import com.pyamsoft.padlock.main.MainFragmentComponent
 import com.pyamsoft.padlock.model.pin.ClearPinEvent
-import com.pyamsoft.padlock.model.service.RecheckEvent
 import com.pyamsoft.padlock.pin.ClearPinPresenter
 import com.pyamsoft.padlock.pin.ClearPinPresenterImpl
 import com.pyamsoft.padlock.pin.PinBaseFragment
@@ -69,8 +68,11 @@ import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.PauseComponent
 import com.pyamsoft.padlock.service.RecheckPresenter
 import com.pyamsoft.padlock.service.RecheckPresenterImpl
+import com.pyamsoft.padlock.service.RecheckPresenterImpl.RecheckEvent
+import com.pyamsoft.padlock.service.ServicePausePresenter
+import com.pyamsoft.padlock.service.ServicePausePresenterImpl
+import com.pyamsoft.padlock.service.ServicePausePresenterImpl.ServicePauseEvent
 import com.pyamsoft.padlock.service.ServiceSingletonModule
-import com.pyamsoft.padlock.service.ServiceSingletonProvider
 import com.pyamsoft.padlock.settings.ClearAllPresenter
 import com.pyamsoft.padlock.settings.ClearAllPresenterImpl
 import com.pyamsoft.padlock.settings.ClearAllPresenterImpl.ClearAllEvent
@@ -105,7 +107,7 @@ import javax.inject.Singleton
       PurgeSingletonModule::class, PurgeSingletonProvider::class, SettingsSingletonModule::class,
       LockInfoSingletonModule::class, LockInfoSingletonProvider::class, LockStateModule::class,
       LockListSingletonModule::class, LockListSingletonProvider::class, LockSingletonModule::class,
-      LockSingletonProvider::class, PinSingletonProvider::class, ServiceSingletonProvider::class
+      LockSingletonProvider::class, PinSingletonProvider::class
     ]
 )
 interface PadLockComponent {
@@ -192,6 +194,11 @@ interface PadLockComponent {
     private val clearDatabaseBus = RxBus.create<ClearDatabaseEvent>()
     private val settingsStateBus = RxBus.create<SwitchLockTypeEvent>()
     private val clearPinBus = RxBus.create<ClearPinEvent>()
+    private val servicePauseBus = RxBus.create<ServicePauseEvent>()
+
+    @JvmStatic
+    @Provides
+    internal fun provideServicePauseBus(): EventBus<ServicePauseEvent> = servicePauseBus
 
     @JvmStatic
     @Provides
@@ -262,6 +269,9 @@ interface PadLockComponent {
 
     @Binds
     internal abstract fun bindRecheckPresenter(impl: RecheckPresenterImpl): RecheckPresenter
+
+    @Binds
+    internal abstract fun bindServicePausePresenter(impl: ServicePausePresenterImpl): ServicePausePresenter
 
   }
 }

@@ -27,6 +27,9 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
@@ -47,29 +50,43 @@ import com.pyamsoft.padlock.service.ServiceManager.Commands.USER_TEMP_PAUSE
 import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
+import com.pyamsoft.pydroid.util.fakeBind
+import com.pyamsoft.pydroid.util.fakeUnbind
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
-class PadLockService : Service() {
+class PadLockService : Service(),
+    LifecycleOwner,
+    ServicePausePresenter.Callback {
 
   private val notificationManager by lazy(NONE) {
     requireNotNull(application.getSystemService<NotificationManager>())
   }
+  private val registry = LifecycleRegistry(this)
 
   private lateinit var notificationBuilder: NotificationCompat.Builder
 
-  @field:Inject internal lateinit var viewModel: LockServiceViewModel
   @field:Inject internal lateinit var serviceManager: ServiceManager
   @field:Inject internal lateinit var jobSchedulerCompat: JobSchedulerCompat
 
+  @field:Inject internal lateinit var viewModel: LockServiceViewModel
+  @field:Inject internal lateinit var pausePresenter: ServicePausePresenter
+
   private var finishDisposable by singleDisposable()
-  private var pauseDisposable by singleDisposable()
   private var permissionDisposable by singleDisposable()
   private var screenStateDisposable by singleDisposable()
   private var foregroundDisposable by singleDisposable()
   private var recheckDisposable by singleDisposable()
+
+  override fun getLifecycle(): Lifecycle {
+    return registry
+  }
+
+  override fun onServicePaused(autoResume: Boolean) {
+    pauseService(autoResume)
+  }
 
   override fun onBind(ignore: Intent?): IBinder? {
     throw AssertionError("Service is not bound")
@@ -95,8 +112,11 @@ class PadLockService : Service() {
     )
 
     finishDisposable = viewModel.onServiceFinishEvent { serviceStop() }
-    pauseDisposable = viewModel.onServicePauseEvent { pauseService(it) }
     permissionDisposable = viewModel.onPermissionLostEvent { servicePermissionLost() }
+
+    pausePresenter.bind(this, this)
+
+    registry.fakeBind()
   }
 
   private fun beginWatchingForLockedApplications() {
@@ -120,13 +140,14 @@ class PadLockService : Service() {
     stopForeground(true)
 
     finishDisposable.tryDispose()
-    pauseDisposable.tryDispose()
     permissionDisposable.tryDispose()
     foregroundDisposable.tryDispose()
     recheckDisposable.tryDispose()
     screenStateDisposable.tryDispose()
 
     notificationManager.cancel(NOTIFICATION_ID)
+
+    registry.fakeUnbind()
 
     PadLock.getRefWatcher(this)
         .watch(this)

@@ -17,8 +17,8 @@
 
 package com.pyamsoft.padlock.service
 
-import com.pyamsoft.padlock.service.RecheckPresenter.Callback
-import com.pyamsoft.padlock.service.RecheckPresenterImpl.RecheckEvent
+import com.pyamsoft.padlock.service.ServicePausePresenter.Callback
+import com.pyamsoft.padlock.service.ServicePausePresenterImpl.ServicePauseEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.ui.arch.BasePresenter
 import com.pyamsoft.pydroid.ui.arch.destroy
@@ -26,32 +26,26 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-internal class RecheckPresenterImpl @Inject internal constructor(
-  bus: EventBus<RecheckEvent>
-) : BasePresenter<RecheckEvent, Callback>(bus),
-    RecheckPresenter {
+internal class ServicePausePresenterImpl @Inject internal constructor(
+  bus: EventBus<ServicePauseEvent>
+) : BasePresenter<ServicePauseEvent, Callback>(bus),
+    ServicePausePresenter {
 
   override fun onBind() {
     listen()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { callback.onRecheckRequired(it.packageName, it.className) }
+        .subscribe { callback.onServicePaused(it.autoResume) }
         .destroy(owner)
   }
 
   override fun onUnbind() {
   }
 
-  override fun recheck(
-    packageName: String,
-    className: String
-  ) {
-    publish(RecheckEvent(packageName, className))
+  override fun pause(autoResume: Boolean) {
+    publish(ServicePauseEvent(autoResume))
   }
 
-  internal data class RecheckEvent(
-    val packageName: String,
-    val className: String
-  )
+  internal data class ServicePauseEvent(val autoResume: Boolean)
 
 }
