@@ -50,9 +50,12 @@ import com.pyamsoft.padlock.lock.LockSingletonProvider
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.main.MainComponent
 import com.pyamsoft.padlock.main.MainFragmentComponent
-import com.pyamsoft.padlock.model.pin.ClearPinEvent
+import com.pyamsoft.padlock.pin.CheckPinPresenter
+import com.pyamsoft.padlock.pin.CheckPinPresenterImpl
+import com.pyamsoft.padlock.pin.CheckPinPresenterImpl.CheckPinEvent
 import com.pyamsoft.padlock.pin.ClearPinPresenter
 import com.pyamsoft.padlock.pin.ClearPinPresenterImpl
+import com.pyamsoft.padlock.pin.ClearPinPresenterImpl.ClearPinEvent
 import com.pyamsoft.padlock.pin.PinBaseFragment
 import com.pyamsoft.padlock.pin.PinComponent
 import com.pyamsoft.padlock.pin.PinSingletonModule
@@ -68,9 +71,7 @@ import com.pyamsoft.padlock.service.ForegroundEventPresenter
 import com.pyamsoft.padlock.service.ForegroundEventPresenterImpl
 import com.pyamsoft.padlock.service.LockServicePresenter
 import com.pyamsoft.padlock.service.LockServicePresenterImpl
-import com.pyamsoft.padlock.service.PadLockJobService
 import com.pyamsoft.padlock.service.PadLockService
-import com.pyamsoft.padlock.service.PauseComponent
 import com.pyamsoft.padlock.service.PermissionPresenter
 import com.pyamsoft.padlock.service.PermissionPresenterImpl
 import com.pyamsoft.padlock.service.RecheckPresenter
@@ -89,6 +90,8 @@ import com.pyamsoft.padlock.service.ServicePausePresenterImpl
 import com.pyamsoft.padlock.service.ServiceSingletonModule
 import com.pyamsoft.padlock.service.ServiceStartPresenter
 import com.pyamsoft.padlock.service.ServiceStartPresenterImpl
+import com.pyamsoft.padlock.service.job.PadLockJobService
+import com.pyamsoft.padlock.service.pause.PauseComponent
 import com.pyamsoft.padlock.settings.ClearAllPresenter
 import com.pyamsoft.padlock.settings.ClearAllPresenterImpl
 import com.pyamsoft.padlock.settings.ClearAllPresenterImpl.ClearAllEvent
@@ -205,14 +208,18 @@ interface PadLockComponent {
   @Module
   object PadLockProvider {
 
-    private val recheckBus = RxBus.create<RecheckEvent>()
     private val clearAllBus = RxBus.create<ClearAllEvent>()
     private val clearDatabaseBus = RxBus.create<ClearDatabaseEvent>()
     private val settingsStateBus = RxBus.create<SwitchLockTypeEvent>()
-    private val clearPinBus = RxBus.create<ClearPinEvent>()
+
+    private val recheckBus = RxBus.create<RecheckEvent>()
+
     private val servicePauseBus = RxBus.create<ServicePauseEvent>()
     private val serviceFinishBus = RxBus.create<ServiceFinishEvent>()
     private val foregroundEventBus = RxBus.create<ForegroundEvent>()
+
+    private val clearPinBus = RxBus.create<ClearPinEvent>()
+    private val checkPinBus = RxBus.create<CheckPinEvent>()
 
     @JvmStatic
     @Provides
@@ -233,6 +240,10 @@ interface PadLockComponent {
     @JvmStatic
     @Provides
     internal fun provideClearPinBus(): EventBus<ClearPinEvent> = clearPinBus
+
+    @JvmStatic
+    @Provides
+    internal fun provideCheckPinBus(): EventBus<CheckPinEvent> = checkPinBus
 
     @JvmStatic
     @Provides
@@ -292,6 +303,9 @@ interface PadLockComponent {
 
     @Binds
     internal abstract fun bindClearPinPresenter(impl: ClearPinPresenterImpl): ClearPinPresenter
+
+    @Binds
+    internal abstract fun bindCheckPinPresenter(impl: CheckPinPresenterImpl): CheckPinPresenter
 
     @Binds
     internal abstract fun bindRecheckPresenter(impl: RecheckPresenterImpl): RecheckPresenter

@@ -15,7 +15,7 @@
  *
  */
 
-package com.pyamsoft.padlock.service
+package com.pyamsoft.padlock.api.service
 
 import android.app.PendingIntent
 import androidx.annotation.CheckResult

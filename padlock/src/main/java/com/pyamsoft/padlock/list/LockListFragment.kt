@@ -33,7 +33,7 @@ import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PERMI
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.pin.PinDialog
-import com.pyamsoft.padlock.service.ServiceManager
+import com.pyamsoft.padlock.api.service.ServiceManager
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose

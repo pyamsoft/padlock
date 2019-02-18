@@ -15,7 +15,7 @@
  *
  */
 
-package com.pyamsoft.padlock.service
+package com.pyamsoft.padlock.service.job
 
 import android.app.job.JobParameters
 import android.app.job.JobService
@@ -27,6 +27,8 @@ import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat.JobType.RECHECK
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat.JobType.SERVICE_TEMP_PAUSE
 import com.pyamsoft.padlock.model.service.Recheck
+import com.pyamsoft.padlock.service.RecheckPresenter
+import com.pyamsoft.padlock.api.service.ServiceManager
 import timber.log.Timber
 import javax.inject.Inject
 

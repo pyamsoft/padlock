@@ -33,7 +33,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
-import com.pyamsoft.padlock.service.ServiceManager
+import com.pyamsoft.padlock.api.service.ServiceManager
 import com.pyamsoft.pydroid.core.cache.Cache
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -41,7 +41,6 @@ import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Singleton
 
 internal class ApplicationInstallReceiverImpl @Inject internal constructor(
   private val context: Context,

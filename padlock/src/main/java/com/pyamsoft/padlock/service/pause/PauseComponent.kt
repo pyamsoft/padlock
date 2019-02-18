@@ -15,12 +15,27 @@
  *
  */
 
-package com.pyamsoft.padlock.service
+package com.pyamsoft.padlock.service.pause
 
-import com.pyamsoft.padlock.uicommon.ShimBaseView
+import android.view.ViewGroup
+import androidx.lifecycle.LifecycleOwner
+import dagger.BindsInstance
+import dagger.Subcomponent
 
-interface PauseView : ShimBaseView {
+@Subcomponent
+interface PauseComponent {
 
-  fun onCheckPinFailed()
+  fun inject(activity: PauseConfirmActivity)
+
+  @Subcomponent.Builder
+  interface Builder {
+
+    @BindsInstance fun owner(owner: LifecycleOwner): Builder
+
+    @BindsInstance fun parent(parent: ViewGroup): Builder
+
+    fun build(): PauseComponent
+
+  }
 
 }

@@ -15,33 +15,21 @@
  *
  */
 
-package com.pyamsoft.padlock.service
+package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.padlock.service.PauseComponent.PauseModule
-import dagger.Binds
-import dagger.BindsInstance
-import dagger.Module
-import dagger.Subcomponent
+import com.pyamsoft.pydroid.ui.arch.Presenter
 
-@Subcomponent(modules = [PauseModule::class])
-interface PauseComponent {
+interface CheckPinPresenter : Presenter<CheckPinPresenter.Callback> {
 
-  fun inject(activity: PauseConfirmActivity)
+  fun check(pin: String)
 
-  @Subcomponent.Builder
-  interface Builder {
 
-    @BindsInstance fun activity(activity: PauseConfirmActivity): Builder
+  interface Callback {
 
-    fun build(): PauseComponent
+    fun onCheckPinSuccess()
+
+    fun onCheckPinFailure()
 
   }
-
-  @Module
-  abstract class PauseModule {
-
-    @Binds
-    internal abstract fun bindPauseView(impl: PauseViewImpl): PauseView
-  }
-
 }
+

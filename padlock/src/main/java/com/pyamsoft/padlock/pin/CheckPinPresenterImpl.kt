@@ -17,29 +17,43 @@
 
 package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.padlock.pin.ClearPinPresenter.Callback
-import com.pyamsoft.padlock.pin.ClearPinPresenterImpl.ClearPinEvent
+import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.api.PinInteractor
+import com.pyamsoft.padlock.pin.CheckPinPresenterImpl.CheckPinEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.ui.arch.BasePresenter
 import com.pyamsoft.pydroid.ui.arch.destroy
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-internal class ClearPinPresenterImpl @Inject internal constructor(
-  bus: EventBus<ClearPinEvent>
-) : BasePresenter<ClearPinEvent, Callback>(bus),
-    ClearPinPresenter {
+internal class CheckPinPresenterImpl @Inject internal constructor(
+  private val enforcer: Enforcer,
+  private val interactor: PinInteractor,
+  bus: EventBus<CheckPinEvent>
+) : BasePresenter<CheckPinEvent, CheckPinPresenter.Callback>(bus),
+    CheckPinPresenter {
+
+  @CheckResult
+  private fun checkPin(attempt: String): Single<Boolean> {
+    enforcer.assertNotOnMainThread()
+    return interactor.comparePin(attempt)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+  }
 
   override fun onBind() {
     listen()
         .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe {
-          if (it.success) {
-            callback.onPinClearSuccess()
+        .observeOn(Schedulers.io())
+        .flatMapSingle { checkPin(it.attempt) }
+        .subscribe { success ->
+          if (success) {
+            callback.onCheckPinSuccess()
           } else {
-            callback.onPinClearFailed()
+            callback.onCheckPinFailure()
           }
         }
         .destroy(owner)
@@ -48,18 +62,9 @@ internal class ClearPinPresenterImpl @Inject internal constructor(
   override fun onUnbind() {
   }
 
-  override fun success() {
-    clear(true)
+  override fun check(pin: String) {
+    publish(CheckPinEvent(pin))
   }
 
-  override fun failure() {
-    clear(false)
-  }
-
-  private fun clear(success: Boolean) {
-    publish(ClearPinEvent(success))
-  }
-
-  internal data class ClearPinEvent(val success: Boolean)
-
+  internal data class CheckPinEvent(val attempt: String)
 }

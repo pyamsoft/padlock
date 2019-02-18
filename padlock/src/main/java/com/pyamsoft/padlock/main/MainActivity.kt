@@ -25,7 +25,7 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.service.ServiceManager
+import com.pyamsoft.padlock.api.service.ServiceManager
 import com.pyamsoft.pydroid.ui.about.AboutFragment
 import com.pyamsoft.pydroid.ui.rating.ChangeLogBuilder
 import com.pyamsoft.pydroid.ui.rating.RatingActivity

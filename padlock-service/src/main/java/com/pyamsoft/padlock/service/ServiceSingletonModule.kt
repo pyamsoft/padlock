@@ -20,6 +20,7 @@ package com.pyamsoft.padlock.service
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
 import com.pyamsoft.padlock.api.service.ScreenStateObserver
+import com.pyamsoft.padlock.api.service.ServiceManager
 import com.pyamsoft.padlock.api.service.UsageEventProvider
 import com.pyamsoft.padlock.service.device.ApplicationInstallReceiverImpl
 import com.pyamsoft.padlock.service.device.ScreenStateObserverImpl

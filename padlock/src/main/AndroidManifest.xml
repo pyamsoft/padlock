@@ -78,7 +78,7 @@
     </activity>
 
     <activity
-        android:name=".service.PauseConfirmActivity"
+        android:name=".service.pause.PauseConfirmActivity"
         android:excludeFromRecents="true"
         android:exported="false"
         android:launchMode="singleInstance"
@@ -94,7 +94,7 @@
         android:stopWithTask="false"/>
 
     <service
-        android:name=".service.PadLockJobService"
+        android:name=".service.job.PadLockJobService"
         android:exported="false"
         android:label="PadLock Job Service"
         android:permission="android.permission.BIND_JOB_SERVICE"/>
