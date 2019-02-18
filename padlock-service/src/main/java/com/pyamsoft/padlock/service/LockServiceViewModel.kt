@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.service
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
-import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PERMISSION
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
@@ -43,15 +42,6 @@ class LockServiceViewModel @Inject internal constructor(
 
   init {
     interactor.init()
-  }
-
-  @CheckResult
-  fun onPermissionLostEvent(func: () -> Unit): Disposable {
-    return interactor.observeServiceState()
-        .filter { it == PERMISSION }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { func() }
   }
 
   @CheckResult

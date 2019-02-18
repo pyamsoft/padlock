@@ -66,6 +66,8 @@ import com.pyamsoft.padlock.receiver.BootReceiver
 import com.pyamsoft.padlock.service.PadLockJobService
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.PauseComponent
+import com.pyamsoft.padlock.service.PermissionPresenter
+import com.pyamsoft.padlock.service.PermissionPresenterImpl
 import com.pyamsoft.padlock.service.RecheckPresenter
 import com.pyamsoft.padlock.service.RecheckPresenterImpl
 import com.pyamsoft.padlock.service.RecheckPresenterImpl.RecheckEvent
@@ -283,6 +285,9 @@ interface PadLockComponent {
 
     @Binds
     internal abstract fun bindServiceFinishPresenter(impl: ServiceFinishPresenterImpl): ServiceFinishPresenter
+
+    @Binds
+    internal abstract fun bindPermissionPresenter(impl: PermissionPresenterImpl): PermissionPresenter
 
   }
 }

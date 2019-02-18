@@ -60,7 +60,8 @@ import kotlin.LazyThreadSafetyMode.NONE
 class PadLockService : Service(),
     LifecycleOwner,
     ServicePausePresenter.Callback,
-    ServiceFinishPresenter.Callback {
+    ServiceFinishPresenter.Callback,
+    PermissionPresenter.Callback {
 
   private val notificationManager by lazy(NONE) {
     requireNotNull(application.getSystemService<NotificationManager>())
@@ -73,10 +74,10 @@ class PadLockService : Service(),
   @field:Inject internal lateinit var jobSchedulerCompat: JobSchedulerCompat
 
   @field:Inject internal lateinit var viewModel: LockServiceViewModel
+  @field:Inject internal lateinit var permissionPresenter: PermissionPresenter
   @field:Inject internal lateinit var pausePresenter: ServicePausePresenter
   @field:Inject internal lateinit var finishPresenter: ServiceFinishPresenter
 
-  private var permissionDisposable by singleDisposable()
   private var screenStateDisposable by singleDisposable()
   private var foregroundDisposable by singleDisposable()
   private var recheckDisposable by singleDisposable()
@@ -108,12 +109,15 @@ class PadLockService : Service(),
         }
     )
 
-    permissionDisposable = viewModel.onPermissionLostEvent { servicePermissionLost() }
-
     pausePresenter.bind(this, this)
     finishPresenter.bind(this, this)
+    permissionPresenter.bind(this, this)
 
     registry.fakeBind()
+  }
+
+  override fun onPermissionLost() {
+    servicePermissionLost()
   }
 
   override fun onServiceFinished() {
@@ -143,7 +147,6 @@ class PadLockService : Service(),
   override fun onDestroy() {
     super.onDestroy()
     stopForeground(true)
-    permissionDisposable.tryDispose()
     foregroundDisposable.tryDispose()
     recheckDisposable.tryDispose()
     screenStateDisposable.tryDispose()
