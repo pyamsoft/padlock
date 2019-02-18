@@ -17,10 +17,7 @@
 
 package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.padlock.model.pin.CheckPinEvent
-import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.padlock.model.pin.CreatePinEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.bus.RxBus
@@ -30,17 +27,7 @@ import dagger.Provides
 @Module
 object PinSingletonProvider {
 
-  private val clearBus = RxBus.create<ClearPinEvent>()
   private val createBus = RxBus.create<CreatePinEvent>()
-  private val checkBus = RxBus.create<CheckPinEvent>()
-
-  @JvmStatic
-  @Provides
-  internal fun provideClearPublisher(): Publisher<ClearPinEvent> = clearBus
-
-  @JvmStatic
-  @Provides
-  internal fun provideClearListener(): Listener<ClearPinEvent> = clearBus
 
   @JvmStatic
   @Provides
@@ -49,12 +36,4 @@ object PinSingletonProvider {
   @JvmStatic
   @Provides
   internal fun provideCreateListener(): Listener<CreatePinEvent> = createBus
-
-  @JvmStatic
-  @Provides
-  internal fun provideCheckBus(): EventBus<CheckPinEvent> = checkBus
-
-  @JvmStatic
-  @Provides
-  internal fun provideCheckListener(): Listener<CheckPinEvent> = checkBus
 }

@@ -19,25 +19,18 @@ package com.pyamsoft.padlock.pin
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.PinInteractor
-import com.pyamsoft.padlock.model.pin.CheckPinEvent
-import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.padlock.model.pin.CreatePinEvent
-import com.pyamsoft.padlock.model.pin.PinEntryEvent.Clear
-import com.pyamsoft.padlock.model.pin.PinEntryEvent.Create
-import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Publisher
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.disposables.Disposables
 import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
-import timber.log.Timber
 import javax.inject.Inject
 
 class PinViewModel @Inject internal constructor(
   private val interactor: PinInteractor,
-  private val createPinBus: Publisher<CreatePinEvent>,
-  private val clearPinBus: Publisher<ClearPinEvent>,
-  private val checkPinBus: EventBus<CheckPinEvent>
+  private val createPinBus: Publisher<CreatePinEvent>
 ) {
 
   @CheckResult
@@ -69,30 +62,32 @@ class PinViewModel @Inject internal constructor(
         .observeOn(AndroidSchedulers.mainThread())
         .doAfterTerminate { onSubmitComplete() }
         .subscribe(Consumer {
-          when (it) {
-            is Create -> createPinBus.publish(CreatePinEvent(it.complete))
-            is Clear -> clearPinBus.publish(ClearPinEvent(it.complete))
-          }
+          //          when (it) {
+//            is Create -> createPinBus.publish(CreatePinEvent(it.complete))
+//            is Clear -> clearPinBus.publish(ClearPinEvent(it.complete))
+//          }
         })
   }
 
   @CheckResult
   fun onMasterPinCheckEvent(func: (Boolean) -> Unit): Disposable {
-    return checkPinBus.listen()
-        .map { it.matching }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(func)
+    return Disposables.empty()
+//    return checkPinBus.listen()
+//        .map { it.matching }
+//        .subscribeOn(Schedulers.io())
+//        .observeOn(AndroidSchedulers.mainThread())
+//        .subscribe(func)
   }
 
   @CheckResult
   fun checkPin(attempt: String): Disposable {
-    return interactor.comparePin(attempt)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe({ checkPinBus.publish(CheckPinEvent(it)) }, {
-          Timber.e(it, "Error checking pin and attempt")
-          checkPinBus.publish(CheckPinEvent(false))
-        })
+    return Disposables.empty()
+//    return interactor.comparePin(attempt)
+//        .subscribeOn(Schedulers.io())
+//        .observeOn(AndroidSchedulers.mainThread())
+//        .subscribe({ checkPinBus.publish(CheckPinEvent(it)) }, {
+//          Timber.e(it, "Error checking pin and attempt")
+//          checkPinBus.publish(CheckPinEvent(false))
+//        })
   }
 }

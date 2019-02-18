@@ -29,14 +29,15 @@ import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.model.list.LockListUpdatePayload
-import com.pyamsoft.padlock.model.pin.ClearPinEvent
 import com.pyamsoft.padlock.model.pin.CreatePinEvent
+import com.pyamsoft.padlock.pin.ClearPinPresenterImpl.ClearPinEvent
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.core.tryDispose
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.disposables.Disposables
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
@@ -47,7 +48,6 @@ class LockListViewModel @Inject internal constructor(
   private val serviceInteractor: LockServiceInteractor,
   private val lockListBus: Listener<LockListEvent>,
   private val lockWhitelistedBus: Listener<LockWhitelistedEvent>,
-  private val clearPinBus: Listener<ClearPinEvent>,
   private val createPinBus: Listener<CreatePinEvent>,
   private val listDiffProvider: ListDiffProvider<AppEntry>
 ) {
@@ -105,11 +105,12 @@ class LockListViewModel @Inject internal constructor(
   }
 
   @CheckResult
-  fun onClearPinEvent(onClear: (event: ClearPinEvent) -> Unit): Disposable {
-    return clearPinBus.listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(onClear)
+  internal fun onClearPinEvent(onClear: (event: ClearPinEvent) -> Unit): Disposable {
+    return Disposables.empty()
+//    return clearPinBus.listen()
+//        .subscribeOn(Schedulers.io())
+//        .observeOn(AndroidSchedulers.mainThread())
+//        .subscribe(onClear)
   }
 
   @CheckResult
