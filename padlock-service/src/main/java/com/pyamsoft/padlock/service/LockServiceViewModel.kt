@@ -36,7 +36,6 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class LockServiceViewModel @Inject internal constructor(
-  private val foregroundEventBus: Listener<ForegroundEvent>,
   private val interactor: LockServiceInteractor
 ) {
 
@@ -66,12 +65,13 @@ class LockServiceViewModel @Inject internal constructor(
     onEvent: (model: PadLockEntryModel, className: String, icon: Int) -> Unit,
     onError: (error: Throwable) -> Unit
   ): Disposable {
-    val foregroundDisposable = foregroundEventBus.listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe({ interactor.clearMatchingForegroundEvent(it) }, {
-          Timber.e(it, "Error listening for foreground event clears")
-        })
+    return Disposables.empty()
+//    val foregroundDisposable = foregroundEventBus.listen()
+//        .subscribeOn(Schedulers.io())
+//        .observeOn(AndroidSchedulers.mainThread())
+//        .subscribe({ interactor.clearMatchingForegroundEvent(it) }, {
+//          Timber.e(it, "Error listening for foreground event clears")
+//        })
 
 //    val eventDisposable = interactor.listenForForegroundEvents()
 //        .filter { !ForegroundEvent.isEmpty(it) }
@@ -86,18 +86,6 @@ class LockServiceViewModel @Inject internal constructor(
 //          Timber.e(it, "Error while watching foreground events")
 //          onError(it)
 //        })
-
-    return object : Disposable {
-
-      override fun isDisposed(): Boolean {
-        return foregroundDisposable.isDisposed
-      }
-
-      override fun dispose() {
-        foregroundDisposable.tryDispose()
-      }
-
-    }
   }
 
   @CheckResult
@@ -137,13 +125,7 @@ class LockServiceViewModel @Inject internal constructor(
     className: String,
     forcedRecheck: RecheckStatus
   ): Maybe<Triple<PadLockEntryModel, String, Int>> {
-    return interactor.processEvent(packageName, className, forcedRecheck)
-        .filter { (model, _) -> !PadLockDbModels.isEmpty(model) }
-        .filter { (_, icon) -> icon != 0 }
-        .map { Triple(it.first, className, it.second) }
-        .unsubscribeOn(Schedulers.io())
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+    return Maybe.empty()
   }
 
   fun setServicePaused(paused: ServicePauseState) {

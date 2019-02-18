@@ -27,6 +27,8 @@ import com.pyamsoft.padlock.api.preferences.MasterPinPreferences
 import com.pyamsoft.padlock.api.preferences.ServicePreferences
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ForegroundEvent
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ProcessedEventPayload
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.DISABLED
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.ENABLED
@@ -35,11 +37,8 @@ import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PERMI
 import com.pyamsoft.padlock.api.service.ScreenStateObserver
 import com.pyamsoft.padlock.api.service.UsageEventProvider
 import com.pyamsoft.padlock.model.Excludes
-import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.padlock.model.service.RecheckStatus
-import com.pyamsoft.padlock.model.service.RecheckStatus.FORCE
 import com.pyamsoft.padlock.model.service.ServicePauseState
 import com.pyamsoft.padlock.model.service.ServicePauseState.STARTED
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
@@ -58,7 +57,6 @@ import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import javax.inject.Inject
-import javax.inject.Singleton
 
 internal class LockServiceInteractorImpl @Inject internal constructor(
   private val enforcer: Enforcer,
@@ -158,7 +156,11 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     }
   }
 
-  override fun clearMatchingForegroundEvent(event: ForegroundEvent) {
+  override fun clearMatchingForegroundEvent(
+    packageName: String,
+    className: String
+  ) {
+    val event = ForegroundEvent(packageName, className)
     Timber.d("Received foreground event: $event")
     if (lastForegroundEvent == event) {
       Timber.d("LockScreen reported last foreground event was cleared.")
@@ -241,6 +243,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
         .filter { !Excludes.isPackageExcluded(it.packageName) }
         .filter { !Excludes.isClassExcluded(it.className) }
         .filter { it != lastForegroundEvent }
+        .filter { !ForegroundEvent.isEmpty(it) }
         .doOnNext { lastForegroundEvent = it }
         .onErrorReturn {
           Timber.e(it, "Error listening to foreground events")
@@ -274,7 +277,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     activityName: String
   ): MaybeTransformer<Boolean, PadLockEntryModel> {
     return MaybeTransformer { source ->
-      return@MaybeTransformer source.flatMap { _ ->
+      return@MaybeTransformer source.flatMap {
         enforcer.assertNotOnMainThread()
         Timber.d("Get locked with package: %s, class: %s", packageName, activityName)
         return@flatMap queryDao.queryWithPackageActivityName(packageName, activityName)
@@ -366,10 +369,10 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
   }
 
   override fun processEvent(
+    forced: Boolean,
     packageName: String,
-    className: String,
-    forcedRecheck: RecheckStatus
-  ): Single<Pair<PadLockEntryModel, Int>> {
+    className: String
+  ): Single<ProcessedEventPayload> {
     val windowEventObservable: Single<Boolean> = serviceEnabled()
         .compose(isEventFromActivity(packageName, className))
         .doOnSuccess {
@@ -380,14 +383,13 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
 
     return windowEventObservable.map {
       enforcer.assertNotOnMainThread()
-      if (!it && forcedRecheck !== FORCE) {
+      if (!it && !forced) {
         Timber.e("Failed to pass window checking")
         return@map false
       } else {
-        if (forcedRecheck === FORCE) {
+        if (forced) {
           Timber.d("Pass filter via forced recheck")
         }
-
         return@map true
       }
     }
@@ -402,11 +404,11 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
           enforcer.assertNotOnMainThread()
           return@flatMap packageApplicationManager.getApplicationInfo(packageName)
               .map { it.icon }
-              .map { model to it }
+              .map { ProcessedEventPayload(model, it) }
         }
         .onErrorReturn {
           Timber.e(it, "Error getting padlock entry")
-          return@onErrorReturn PadLockDbModels.EMPTY to 0
+          return@onErrorReturn ProcessedEventPayload(PadLockDbModels.EMPTY, 0)
         }
   }
 

@@ -24,8 +24,8 @@ import android.app.usage.UsageStatsManager
 import android.content.Context
 import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.api.preferences.PreferenceWatcher
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ForegroundEvent
 import com.pyamsoft.padlock.api.service.UsageEventProvider
-import com.pyamsoft.padlock.model.ForegroundEvent
 import timber.log.Timber
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject

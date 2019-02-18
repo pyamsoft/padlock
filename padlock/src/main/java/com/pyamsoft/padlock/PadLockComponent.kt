@@ -29,6 +29,7 @@ import com.pyamsoft.padlock.PadLockComponent.PadLockModule
 import com.pyamsoft.padlock.PadLockComponent.PadLockProvider
 import com.pyamsoft.padlock.R.color
 import com.pyamsoft.padlock.R.drawable
+import com.pyamsoft.padlock.api.service.LockServiceInteractor.ForegroundEvent
 import com.pyamsoft.padlock.base.BaseModule
 import com.pyamsoft.padlock.base.BaseProvider
 import com.pyamsoft.padlock.base.database.DatabaseProvider
@@ -63,6 +64,10 @@ import com.pyamsoft.padlock.purge.PurgeSingleItemDialog
 import com.pyamsoft.padlock.purge.PurgeSingletonModule
 import com.pyamsoft.padlock.purge.PurgeSingletonProvider
 import com.pyamsoft.padlock.receiver.BootReceiver
+import com.pyamsoft.padlock.service.ForegroundEventPresenter
+import com.pyamsoft.padlock.service.ForegroundEventPresenterImpl
+import com.pyamsoft.padlock.service.LockServicePresenter
+import com.pyamsoft.padlock.service.LockServicePresenterImpl
 import com.pyamsoft.padlock.service.PadLockJobService
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.PauseComponent
@@ -201,6 +206,11 @@ interface PadLockComponent {
     private val clearPinBus = RxBus.create<ClearPinEvent>()
     private val servicePauseBus = RxBus.create<ServicePauseEvent>()
     private val serviceFinishBus = RxBus.create<ServiceFinishEvent>()
+    private val foregroundEventBus = RxBus.create<ForegroundEvent>()
+
+    @JvmStatic
+    @Provides
+    internal fun provideForegroundEventBus(): EventBus<ForegroundEvent> = foregroundEventBus
 
     @JvmStatic
     @Provides
@@ -288,6 +298,12 @@ interface PadLockComponent {
 
     @Binds
     internal abstract fun bindPermissionPresenter(impl: PermissionPresenterImpl): PermissionPresenter
+
+    @Binds
+    internal abstract fun bindForegroundPresenter(impl: ForegroundEventPresenterImpl): ForegroundEventPresenter
+
+    @Binds
+    internal abstract fun bindServicePresenter(impl: LockServicePresenterImpl): LockServicePresenter
 
   }
 }

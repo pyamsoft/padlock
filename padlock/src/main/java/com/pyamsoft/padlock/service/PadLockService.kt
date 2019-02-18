@@ -59,13 +59,17 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 class PadLockService : Service(),
     LifecycleOwner,
+    LockServicePresenter.Callback,
     ServicePausePresenter.Callback,
     ServiceFinishPresenter.Callback,
+    ForegroundEventPresenter.Callback,
+    RecheckPresenter.Callback,
     PermissionPresenter.Callback {
 
   private val notificationManager by lazy(NONE) {
     requireNotNull(application.getSystemService<NotificationManager>())
   }
+  private val screenStateLifecycle = ScreenStateLifecycle()
   private val registry = LifecycleRegistry(this)
 
   private lateinit var notificationBuilder: NotificationCompat.Builder
@@ -74,13 +78,14 @@ class PadLockService : Service(),
   @field:Inject internal lateinit var jobSchedulerCompat: JobSchedulerCompat
 
   @field:Inject internal lateinit var viewModel: LockServiceViewModel
+  @field:Inject internal lateinit var presenter: LockServicePresenter
+  @field:Inject internal lateinit var recheckPresenter: RecheckPresenter
+  @field:Inject internal lateinit var foregroundEventPresenter: ForegroundEventPresenter
   @field:Inject internal lateinit var permissionPresenter: PermissionPresenter
   @field:Inject internal lateinit var pausePresenter: ServicePausePresenter
   @field:Inject internal lateinit var finishPresenter: ServiceFinishPresenter
 
   private var screenStateDisposable by singleDisposable()
-  private var foregroundDisposable by singleDisposable()
-  private var recheckDisposable by singleDisposable()
 
   override fun getLifecycle(): Lifecycle {
     return registry
@@ -99,16 +104,15 @@ class PadLockService : Service(),
 
     screenStateDisposable = viewModel.observeScreenState(
         onScreenOn = {
-          foregroundDisposable.tryDispose()
-          recheckDisposable.tryDispose()
+          screenStateLifecycle.screenOn()
           beginWatchingForLockedApplications()
         },
         onScreenOff = {
-          foregroundDisposable.tryDispose()
-          recheckDisposable.tryDispose()
+          screenStateLifecycle.screenOff()
         }
     )
 
+    presenter.bind(this, this)
     pausePresenter.bind(this, this)
     finishPresenter.bind(this, this)
     permissionPresenter.bind(this, this)
@@ -128,31 +132,50 @@ class PadLockService : Service(),
     pauseService(autoResume)
   }
 
-  private fun beginWatchingForLockedApplications() {
-    foregroundDisposable = viewModel.onForegroundApplicationLockRequest(
-        onEvent = { model: PadLockEntryModel, className: String, icon: Int ->
-          LockScreenActivity.start(this, model, className, icon)
-        },
-        onError = { Timber.e(it, "Error while watching foreground applications") }
-    )
+  override fun onForegroundEvent(
+    packageName: String,
+    className: String
+  ) {
+    presenter.clearForeground(packageName, className)
+  }
 
-    recheckDisposable = viewModel.onRecheckForcedLockEvent(
-        onEvent = { model: PadLockEntryModel, className: String, icon: Int ->
-          LockScreenActivity.start(this, model, className, icon)
-        },
-        onError = { Timber.e(it, "Error while attempting recheck") }
-    )
+  private fun beginWatchingForLockedApplications() {
+    foregroundEventPresenter.bind(screenStateLifecycle, this)
+    recheckPresenter.bind(screenStateLifecycle, this)
+  }
+
+  override fun onRecheckRequired(
+    packageName: String,
+    className: String
+  ) {
+    presenter.processIfForeground(packageName, className)
+  }
+
+  override fun onListenForegroundLock(
+    model: PadLockEntryModel,
+    className: String,
+    icon: Int
+  ) {
+    LockScreenActivity.start(this, model, className, icon)
+  }
+
+  override fun onListenForegroundError(throwable: Throwable) {
+    Timber.e(throwable, "Error while watching foreground applications, finishing service")
+    finishPresenter.finish()
+  }
+
+  override fun onListenForegroundFinished() {
+    finishPresenter.finish()
   }
 
   override fun onDestroy() {
     super.onDestroy()
     stopForeground(true)
-    foregroundDisposable.tryDispose()
-    recheckDisposable.tryDispose()
     screenStateDisposable.tryDispose()
 
     notificationManager.cancel(NOTIFICATION_ID)
 
+    screenStateLifecycle.destroy()
     registry.fakeUnbind()
 
     PadLock.getRefWatcher(this)

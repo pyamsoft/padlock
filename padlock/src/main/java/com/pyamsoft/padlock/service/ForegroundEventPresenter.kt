@@ -15,26 +15,25 @@
  *
  */
 
-package com.pyamsoft.padlock.api.service
+package com.pyamsoft.padlock.service
 
-import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.preferences.PreferenceWatcher
-import com.pyamsoft.padlock.api.service.LockServiceInteractor.ForegroundEvent
+import com.pyamsoft.padlock.service.ForegroundEventPresenter.Callback
+import com.pyamsoft.pydroid.ui.arch.Presenter
 
-interface UsageEventProvider {
+internal interface ForegroundEventPresenter : Presenter<Callback> {
 
-  @CheckResult
-  fun queryEvents(
-    begin: Long,
-    end: Long
-  ): EventQueryResult
+  fun foreground(
+    packageName: String,
+    className: String
+  )
 
-  @CheckResult
-  fun watchPermission(func: (Boolean) -> Unit): PreferenceWatcher
+  interface Callback {
 
-  interface EventQueryResult {
+    fun onForegroundEvent(
+      packageName: String,
+      className: String
+    )
 
-    @CheckResult
-    fun createForegroundEvent(func: (String, String) -> ForegroundEvent): ForegroundEvent
   }
 }
+

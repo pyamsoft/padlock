@@ -18,9 +18,7 @@
 package com.pyamsoft.padlock.api.service
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.padlock.model.service.RecheckStatus
 import com.pyamsoft.padlock.model.service.ServicePauseState
 import io.reactivex.Flowable
 import io.reactivex.Maybe
@@ -41,7 +39,10 @@ interface LockServiceInteractor {
   @CheckResult
   fun observeServiceState(): Observable<ServiceState>
 
-  fun clearMatchingForegroundEvent(event: ForegroundEvent)
+  fun clearMatchingForegroundEvent(
+    packageName: String,
+    className: String
+  )
 
   @CheckResult
   fun ifActiveMatching(
@@ -57,15 +58,38 @@ interface LockServiceInteractor {
 
   @CheckResult
   fun processEvent(
+    forced: Boolean,
     packageName: String,
-    className: String,
-    forcedRecheck: RecheckStatus
-  ): Single<Pair<PadLockEntryModel, Int>>
+    className: String
+  ): Single<ProcessedEventPayload>
 
   enum class ServiceState {
     PAUSED,
     PERMISSION,
     DISABLED,
     ENABLED
+  }
+
+  data class ProcessedEventPayload(
+    val model: PadLockEntryModel,
+    val icon: Int
+  )
+
+  data class ForegroundEvent(
+    val packageName: String,
+    val className: String
+  ) {
+    companion object {
+
+      @JvmField
+      val EMPTY = ForegroundEvent("", "")
+
+      @JvmStatic
+      @CheckResult
+      fun isEmpty(event: ForegroundEvent): Boolean {
+        return event.packageName == EMPTY.packageName || event.className == EMPTY.className
+      }
+
+    }
   }
 }
