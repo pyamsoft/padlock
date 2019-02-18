@@ -78,7 +78,6 @@ import com.pyamsoft.padlock.settings.ConfirmDeleteAllDialog
 import com.pyamsoft.padlock.settings.ConfirmDeleteDatabaseDialog
 import com.pyamsoft.padlock.settings.SettingsComponent
 import com.pyamsoft.padlock.settings.SettingsSingletonModule
-import com.pyamsoft.padlock.settings.SettingsSingletonProvider
 import com.pyamsoft.padlock.settings.SwitchLockTypeEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Listener
@@ -100,13 +99,12 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-      PadLockProvider::class, PadLockModule::class, BaseModule::class, DatabaseProvider::class,
-      PinSingletonModule::class, ServiceSingletonModule::class, PurgeSingletonModule::class,
-      PurgeSingletonProvider::class, SettingsSingletonModule::class, LockInfoSingletonModule::class,
-      LockInfoSingletonProvider::class, LockStateModule::class, LockListSingletonModule::class,
-      LockListSingletonProvider::class, LockSingletonModule::class, LockSingletonProvider::class,
-      SettingsSingletonProvider::class, BaseProvider::class, PinSingletonProvider::class,
-      ServiceSingletonProvider::class
+      PadLockProvider::class, PadLockModule::class, BaseModule::class, BaseProvider::class,
+      DatabaseProvider::class, PinSingletonModule::class, ServiceSingletonModule::class,
+      PurgeSingletonModule::class, PurgeSingletonProvider::class, SettingsSingletonModule::class,
+      LockInfoSingletonModule::class, LockInfoSingletonProvider::class, LockStateModule::class,
+      LockListSingletonModule::class, LockListSingletonProvider::class, LockSingletonModule::class,
+      LockSingletonProvider::class, PinSingletonProvider::class, ServiceSingletonProvider::class
     ]
 )
 interface PadLockComponent {
