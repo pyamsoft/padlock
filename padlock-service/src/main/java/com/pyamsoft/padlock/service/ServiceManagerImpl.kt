@@ -45,7 +45,6 @@ import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
-import javax.inject.Singleton
 
 internal class ServiceManagerImpl @Inject internal constructor(
   context: Context,
@@ -58,44 +57,73 @@ internal class ServiceManagerImpl @Inject internal constructor(
 
   private val appContext = context.applicationContext
 
+  @CheckResult
+  private fun hasUsageAccessPermission(): Boolean {
+    return UsagePermissionChecker.hasPermission(appContext)
+  }
+
+  @CheckResult
+  private fun hasMasterPassword(): Boolean {
+    return masterPinPreferences.getMasterPassword() != null
+  }
+
+  @CheckResult
+  private fun restartInPausedState(restart: Boolean): Boolean {
+    val restarted = servicePreferences.getPaused() == PAUSED && !restart
+    if (restarted) {
+      // We don't use startForeground because starting in paused mode will not call foreground service
+      // NOTE: Can crash if service is not already running from the Foreground.
+      //       most noticed in BootReceiver if restart is false
+      appContext.startService(service(PAUSE))
+    }
+
+    return restarted
+  }
+
+  @CheckResult
+  private fun restartInTempPausedState(restart: Boolean): Boolean {
+    val restarted = servicePreferences.getPaused() == TEMP_PAUSED && !restart
+    if (restarted) {
+      // We don't use startForeground because starting in paused mode will not call foreground service
+      // NOTE: Can crash if service is not already running from the Foreground.
+      //       most noticed in BootReceiver if restart is false
+      appContext.startService(service(TEMP_PAUSE))
+    }
+
+    return restarted
+  }
+
+  private fun restartService(restart: Boolean) {
+    if (restart) {
+      Timber.d("Restarting service")
+    } else {
+      Timber.d("Starting service")
+    }
+    val intent = service(START)
+    if (VERSION.SDK_INT >= VERSION_CODES.O) {
+      appContext.startForegroundService(intent)
+    } else {
+      appContext.startService(intent)
+    }
+  }
+
   override fun startService(restart: Boolean) {
     Completable.fromAction {
       enforcer.assertNotOnMainThread()
-      if (!UsagePermissionChecker.hasPermission(appContext)) {
+      if (!hasUsageAccessPermission()) {
         Timber.w("Cannot start service, missing usage permission")
         return@fromAction
       }
 
-      if (masterPinPreferences.getMasterPassword() == null) {
+      if (!hasMasterPassword()) {
         Timber.w("Cannot start service, missing master password")
         return@fromAction
       }
 
-      val pausedState = servicePreferences.getPaused()
-      if (pausedState == PAUSED && !restart) {
-        Timber.d("Starting service but in paused state")
-        // We don't use startForeground because starting in paused mode will not call foreground service
-        // NOTE: Can crash if service is not already running from the Foreground.
-        //       most noticed in BootReceiver if restart is false
-        appContext.startService(service(PAUSE))
-      } else if (pausedState == TEMP_PAUSED && !restart) {
-        Timber.d("Starting service but in temp_paused state")
-        // We don't use startForeground because starting in paused mode will not call foreground service
-        // NOTE: Can crash if service is not already running from the Foreground.
-        //       most noticed in BootReceiver if restart is false
-        appContext.startService(service(TEMP_PAUSE))
-      } else {
-        if (restart) {
-          Timber.d("Restarting service")
-        } else {
-          Timber.d("Starting service")
-        }
-        val intent = service(START)
-        if (VERSION.SDK_INT >= VERSION_CODES.O) {
-          appContext.startForegroundService(intent)
-        } else {
-          appContext.startService(intent)
-        }
+      when {
+        restartInPausedState(restart) -> Timber.d("Starting service in PAUSED state")
+        restartInTempPausedState(restart) -> Timber.d("Starting service in TEMP_PAUSED state")
+        else -> restartService(restart)
       }
     }
         .subscribeOn(Schedulers.io())
