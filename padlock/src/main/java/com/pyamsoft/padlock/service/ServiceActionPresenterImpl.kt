@@ -17,39 +17,34 @@
 
 package com.pyamsoft.padlock.service
 
-import com.pyamsoft.padlock.api.service.LockServiceInteractor
-import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PAUSED
-import com.pyamsoft.padlock.model.service.ServicePauseState
-import com.pyamsoft.padlock.service.ServicePausePresenter.Callback
-import com.pyamsoft.pydroid.core.bus.RxBus
+import com.pyamsoft.padlock.service.ServiceActionPresenterImpl.ServicePauseEvent
+import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.ui.arch.BasePresenter
 import com.pyamsoft.pydroid.ui.arch.destroy
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-internal class ServicePausePresenterImpl @Inject internal constructor(
-  private val interactor: LockServiceInteractor
-) : BasePresenter<Unit, Callback>(RxBus.empty()),
-    ServicePausePresenter {
+internal class ServiceActionPresenterImpl @Inject internal constructor(
+  bus: EventBus<ServicePauseEvent>
+) : BasePresenter<ServicePauseEvent, ServiceActionPresenter.Callback>(bus),
+    ServiceActionPresenter {
 
   override fun onBind() {
-    interactor.observeServiceState()
-        .filter { it == PAUSED }
+    listen()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { callback.onServicePaused() }
+        .subscribe { callback.onServiceActionRequestPause(it.autoResume) }
         .destroy(owner)
   }
 
   override fun onUnbind() {
   }
 
-  override fun pause() {
-    interactor.setPauseState(ServicePauseState.PAUSED)
+  override fun requestPause(autoResume: Boolean) {
+    publish(ServicePauseEvent(autoResume))
   }
 
-  override fun tempPause() {
-    interactor.setPauseState(ServicePauseState.TEMP_PAUSED)
-  }
+  internal data class ServicePauseEvent(val autoResume: Boolean)
+
 }

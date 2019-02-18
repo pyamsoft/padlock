@@ -76,13 +76,19 @@ import com.pyamsoft.padlock.service.PermissionPresenterImpl
 import com.pyamsoft.padlock.service.RecheckPresenter
 import com.pyamsoft.padlock.service.RecheckPresenterImpl
 import com.pyamsoft.padlock.service.RecheckPresenterImpl.RecheckEvent
+import com.pyamsoft.padlock.service.ScreenStatePresenter
+import com.pyamsoft.padlock.service.ScreenStatePresenterImpl
+import com.pyamsoft.padlock.service.ServiceActionPresenter
+import com.pyamsoft.padlock.service.ServiceActionPresenterImpl
+import com.pyamsoft.padlock.service.ServiceActionPresenterImpl.ServicePauseEvent
 import com.pyamsoft.padlock.service.ServiceFinishPresenter
 import com.pyamsoft.padlock.service.ServiceFinishPresenterImpl
 import com.pyamsoft.padlock.service.ServiceFinishPresenterImpl.ServiceFinishEvent
 import com.pyamsoft.padlock.service.ServicePausePresenter
 import com.pyamsoft.padlock.service.ServicePausePresenterImpl
-import com.pyamsoft.padlock.service.ServicePausePresenterImpl.ServicePauseEvent
 import com.pyamsoft.padlock.service.ServiceSingletonModule
+import com.pyamsoft.padlock.service.ServiceStartPresenter
+import com.pyamsoft.padlock.service.ServiceStartPresenterImpl
 import com.pyamsoft.padlock.settings.ClearAllPresenter
 import com.pyamsoft.padlock.settings.ClearAllPresenterImpl
 import com.pyamsoft.padlock.settings.ClearAllPresenterImpl.ClearAllEvent
@@ -291,7 +297,7 @@ interface PadLockComponent {
     internal abstract fun bindRecheckPresenter(impl: RecheckPresenterImpl): RecheckPresenter
 
     @Binds
-    internal abstract fun bindServicePausePresenter(impl: ServicePausePresenterImpl): ServicePausePresenter
+    internal abstract fun bindServiceActionPresenter(impl: ServiceActionPresenterImpl): ServiceActionPresenter
 
     @Binds
     internal abstract fun bindServiceFinishPresenter(impl: ServiceFinishPresenterImpl): ServiceFinishPresenter
@@ -304,6 +310,15 @@ interface PadLockComponent {
 
     @Binds
     internal abstract fun bindServicePresenter(impl: LockServicePresenterImpl): LockServicePresenter
+
+    @Binds
+    internal abstract fun bindScreenPresenter(impl: ScreenStatePresenterImpl): ScreenStatePresenter
+
+    @Binds
+    internal abstract fun bindPausePresenter(impl: ServicePausePresenterImpl): ServicePausePresenter
+
+    @Binds
+    internal abstract fun bindStartPresenter(impl: ServiceStartPresenterImpl): ServiceStartPresenter
 
   }
 }

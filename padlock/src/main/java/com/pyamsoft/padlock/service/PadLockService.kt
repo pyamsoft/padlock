@@ -38,9 +38,6 @@ import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat.JobType.SERVICE_TEMP_PAUSE
 import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.padlock.model.service.ServicePauseState.PAUSED
-import com.pyamsoft.padlock.model.service.ServicePauseState.STARTED
-import com.pyamsoft.padlock.model.service.ServicePauseState.TEMP_PAUSED
 import com.pyamsoft.padlock.service.ServiceManager.Commands
 import com.pyamsoft.padlock.service.ServiceManager.Commands.PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.START
@@ -48,8 +45,6 @@ import com.pyamsoft.padlock.service.ServiceManager.Commands.TEMP_PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.USER_PAUSE
 import com.pyamsoft.padlock.service.ServiceManager.Commands.USER_TEMP_PAUSE
 import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
-import com.pyamsoft.pydroid.core.singleDisposable
-import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.util.fakeBind
 import com.pyamsoft.pydroid.util.fakeUnbind
 import timber.log.Timber
@@ -60,10 +55,11 @@ import kotlin.LazyThreadSafetyMode.NONE
 class PadLockService : Service(),
     LifecycleOwner,
     LockServicePresenter.Callback,
-    ServicePausePresenter.Callback,
+    ServiceActionPresenter.Callback,
     ServiceFinishPresenter.Callback,
     ForegroundEventPresenter.Callback,
     RecheckPresenter.Callback,
+    ScreenStatePresenter.Callback,
     PermissionPresenter.Callback {
 
   private val notificationManager by lazy(NONE) {
@@ -77,15 +73,15 @@ class PadLockService : Service(),
   @field:Inject internal lateinit var serviceManager: ServiceManager
   @field:Inject internal lateinit var jobSchedulerCompat: JobSchedulerCompat
 
-  @field:Inject internal lateinit var viewModel: LockServiceViewModel
   @field:Inject internal lateinit var presenter: LockServicePresenter
+  @field:Inject internal lateinit var screenStatePresenter: ScreenStatePresenter
   @field:Inject internal lateinit var recheckPresenter: RecheckPresenter
   @field:Inject internal lateinit var foregroundEventPresenter: ForegroundEventPresenter
   @field:Inject internal lateinit var permissionPresenter: PermissionPresenter
-  @field:Inject internal lateinit var pausePresenter: ServicePausePresenter
+  @field:Inject internal lateinit var actionPresenter: ServiceActionPresenter
   @field:Inject internal lateinit var finishPresenter: ServiceFinishPresenter
-
-  private var screenStateDisposable by singleDisposable()
+  @field:Inject internal lateinit var pausePresenter: ServicePausePresenter
+  @field:Inject internal lateinit var startPresenter: ServiceStartPresenter
 
   override fun getLifecycle(): Lifecycle {
     return registry
@@ -102,22 +98,22 @@ class PadLockService : Service(),
 
     setupNotifications()
 
-    screenStateDisposable = viewModel.observeScreenState(
-        onScreenOn = {
-          screenStateLifecycle.screenOn()
-          beginWatchingForLockedApplications()
-        },
-        onScreenOff = {
-          screenStateLifecycle.screenOff()
-        }
-    )
-
     presenter.bind(this, this)
-    pausePresenter.bind(this, this)
+    screenStatePresenter.bind(this, this)
+    actionPresenter.bind(this, this)
     finishPresenter.bind(this, this)
     permissionPresenter.bind(this, this)
 
     registry.fakeBind()
+  }
+
+  override fun onScreenOn() {
+    screenStateLifecycle.screenOn()
+    beginWatchingForLockedApplications()
+  }
+
+  override fun onScreenOff() {
+    screenStateLifecycle.screenOff()
   }
 
   override fun onPermissionLost() {
@@ -128,7 +124,7 @@ class PadLockService : Service(),
     serviceStop()
   }
 
-  override fun onServicePaused(autoResume: Boolean) {
+  override fun onServiceActionRequestPause(autoResume: Boolean) {
     pauseService(autoResume)
   }
 
@@ -171,7 +167,6 @@ class PadLockService : Service(),
   override fun onDestroy() {
     super.onDestroy()
     stopForeground(true)
-    screenStateDisposable.tryDispose()
 
     notificationManager.cancel(NOTIFICATION_ID)
 
@@ -198,18 +193,18 @@ class PadLockService : Service(),
 
     Timber.d("Service received command: $command")
     when (command) {
-      START -> serviceStart()
-      PAUSE -> servicePause()
-      TEMP_PAUSE -> serviceTempPause()
-      USER_PAUSE -> serviceUserPause()
+      START -> commandServiceStart()
+      PAUSE -> commandServicePause()
+      TEMP_PAUSE -> commandServiceTempPause()
+      USER_PAUSE -> commandServiceUserPause()
       USER_TEMP_PAUSE -> serviceUserTempPause()
     }
     return Service.START_STICKY
   }
 
-  private fun serviceStart() {
+  private fun commandServiceStart() {
     Timber.d("System asked for service start")
-    viewModel.setServicePaused(STARTED)
+    startPresenter.start()
 
     // Cancel old notifications
     notificationManager.cancel(PAUSED_ID)
@@ -222,33 +217,37 @@ class PadLockService : Service(),
     startForeground(NOTIFICATION_ID, notificationBuilder.build())
   }
 
-  private fun servicePause() {
-    Timber.d("System asked for service pause")
+  private fun commandServicePause() {
+    Timber.d("System asked for service requestPause")
     // Paused by system, do not auto resume
     pauseService(false)
   }
 
-  private fun serviceTempPause() {
-    Timber.d("System asked for service temp pause")
+  private fun commandServiceTempPause() {
+    Timber.d("System asked for service temp requestPause")
     // Paused by system, auto resume later
     pauseService(true)
   }
 
-  private fun serviceUserPause() {
-    Timber.d("User asked for service pause")
+  private fun commandServiceUserPause() {
+    Timber.d("User asked for service requestPause")
     // Pause by user, check permission
     PauseConfirmActivity.start(applicationContext, autoResume = false)
   }
 
   private fun serviceUserTempPause() {
-    Timber.d("User asked for service temp pause")
-    // Auto resume pause by user, check permission
+    Timber.d("User asked for service temp requestPause")
+    // Auto resume requestPause by user, check permission
     PauseConfirmActivity.start(applicationContext, autoResume = true)
   }
 
   private fun pauseService(autoResume: Boolean) {
     Timber.d("Pause service with auto resume: $autoResume")
-    viewModel.setServicePaused(if (autoResume) TEMP_PAUSED else PAUSED)
+    if (autoResume) {
+      pausePresenter.tempPause()
+    } else {
+      pausePresenter.pause()
+    }
 
     if (autoResume) {
       // Queue the service to restart after timeout via alarm manager

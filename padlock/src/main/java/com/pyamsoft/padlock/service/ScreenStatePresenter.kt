@@ -17,19 +17,18 @@
 
 package com.pyamsoft.padlock.service
 
-import com.pyamsoft.padlock.service.ServicePausePresenter.Callback
+import com.pyamsoft.padlock.service.ScreenStatePresenter.Callback
 import com.pyamsoft.pydroid.ui.arch.Presenter
 
-internal interface ServicePausePresenter : Presenter<Callback> {
-
-  fun pause()
-
-  fun tempPause()
+internal interface ScreenStatePresenter : Presenter<Callback> {
 
   interface Callback {
 
-    fun onServicePaused()
+    fun onScreenOn()
+
+    fun onScreenOff()
 
   }
+
 }
 

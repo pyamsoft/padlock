@@ -19,20 +19,10 @@ package com.pyamsoft.padlock.service
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
-import com.pyamsoft.padlock.model.ForegroundEvent
-import com.pyamsoft.padlock.model.db.PadLockDbModels
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.padlock.model.service.RecheckStatus
-import com.pyamsoft.padlock.model.service.RecheckStatus.FORCE
 import com.pyamsoft.padlock.model.service.ServicePauseState
-import com.pyamsoft.pydroid.core.bus.Listener
-import com.pyamsoft.pydroid.core.tryDispose
-import io.reactivex.Maybe
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
-import io.reactivex.disposables.Disposables
 import io.reactivex.schedulers.Schedulers
-import timber.log.Timber
 import javax.inject.Inject
 
 class LockServiceViewModel @Inject internal constructor(
@@ -60,76 +50,8 @@ class LockServiceViewModel @Inject internal constructor(
         }
   }
 
-  @CheckResult
-  fun onForegroundApplicationLockRequest(
-    onEvent: (model: PadLockEntryModel, className: String, icon: Int) -> Unit,
-    onError: (error: Throwable) -> Unit
-  ): Disposable {
-    return Disposables.empty()
-//    val foregroundDisposable = foregroundEventBus.listen()
-//        .subscribeOn(Schedulers.io())
-//        .observeOn(AndroidSchedulers.mainThread())
-//        .subscribe({ interactor.clearMatchingForegroundEvent(it) }, {
-//          Timber.e(it, "Error listening for foreground event clears")
-//        })
-
-//    val eventDisposable = interactor.listenForForegroundEvents()
-//        .filter { !ForegroundEvent.isEmpty(it) }
-//        .subscribeOn(Schedulers.io())
-//        .observeOn(AndroidSchedulers.mainThread())
-//        .doOnCancel { Timber.d("Cancelling foreground listener") }
-//        .doAfterTerminate { serviceFinishBus.publish(ServiceFinishEvent) }
-//        .flatMapMaybe { processEvent(it.packageName, it.className, NOT_FORCE) }
-//        .subscribe({ (model: PadLockEntryModel, className: String, icon: Int) ->
-//          onEvent(model, className, icon)
-//        }, {
-//          Timber.e(it, "Error while watching foreground events")
-//          onError(it)
-//        })
-  }
-
-  @CheckResult
-  fun onRecheckForcedLockEvent(
-    onEvent: (model: PadLockEntryModel, className: String, icon: Int) -> Unit,
-    onError: (error: Throwable) -> Unit
-  ): Disposable {
-    return Disposables.empty()
-//    return recheckEventBus.listen()
-//        .flatMapMaybe { processActiveApplicationIfMatching(it.packageName, it.className) }
-//        .subscribeOn(Schedulers.io())
-//        .observeOn(AndroidSchedulers.mainThread())
-//        .subscribe({ (model: PadLockEntryModel, className: String, icon: Int) ->
-//          onEvent(model, className, icon)
-//        }, {
-//          Timber.e(it, "Error while watching foreground events")
-//          onError(it)
-//        })
-  }
-
-  @CheckResult
-  private fun processActiveApplicationIfMatching(
-    packageName: String,
-    className: String
-  ): Maybe<Triple<PadLockEntryModel, String, Int>> {
-    return interactor.ifActiveMatching(packageName, className)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .flatMap { processEvent(packageName, className, FORCE) }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-  }
-
-  @CheckResult
-  private fun processEvent(
-    packageName: String,
-    className: String,
-    forcedRecheck: RecheckStatus
-  ): Maybe<Triple<PadLockEntryModel, String, Int>> {
-    return Maybe.empty()
-  }
-
   fun setServicePaused(paused: ServicePauseState) {
-    interactor.pauseService(paused)
+    interactor.setPauseState(paused)
   }
 
 }

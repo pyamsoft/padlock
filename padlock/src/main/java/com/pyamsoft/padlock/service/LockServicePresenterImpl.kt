@@ -43,6 +43,10 @@ internal class LockServicePresenterImpl @Inject internal constructor(
 
   private var recheckDisposable by singleDisposable()
 
+  init {
+    interactor.init()
+  }
+
   override fun onBind() {
     listenForForegroundEvents()
   }

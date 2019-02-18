@@ -93,7 +93,7 @@ internal class LockServiceInteractorImpl @Inject internal constructor(
     lastForegroundEvent = ForegroundEvent.EMPTY
   }
 
-  override fun pauseService(paused: ServicePauseState) {
+  override fun setPauseState(paused: ServicePauseState) {
     servicePreferences.setPaused(paused)
   }
 

@@ -17,19 +17,17 @@
 
 package com.pyamsoft.padlock.service
 
-import com.pyamsoft.padlock.service.ServicePausePresenter.Callback
+import com.pyamsoft.padlock.service.ServiceActionPresenter.Callback
 import com.pyamsoft.pydroid.ui.arch.Presenter
 
-internal interface ServicePausePresenter : Presenter<Callback> {
+internal interface ServiceActionPresenter : Presenter<Callback> {
 
-  fun pause()
-
-  fun tempPause()
+  fun requestPause(autoResume: Boolean)
 
   interface Callback {
 
-    fun onServicePaused()
-
+    fun onServiceActionRequestPause(autoResume: Boolean)
   }
+
 }
 

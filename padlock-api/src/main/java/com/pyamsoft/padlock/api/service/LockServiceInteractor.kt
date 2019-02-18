@@ -31,7 +31,7 @@ interface LockServiceInteractor {
 
   fun cleanup()
 
-  fun pauseService(paused: ServicePauseState)
+  fun setPauseState(paused: ServicePauseState)
 
   @CheckResult
   fun isServiceEnabled(): Single<ServiceState>

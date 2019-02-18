@@ -34,7 +34,7 @@ import javax.inject.Inject
 
 class PauseConfirmActivity : ActivityBase() {
 
-  @field:Inject internal lateinit var pausePresenter: ServicePausePresenter
+  @field:Inject internal lateinit var actionPresenter: ServiceActionPresenter
   @field:Inject internal lateinit var viewModel: PauseServiceViewModel
   @field:Inject internal lateinit var theming: Theming
   @field:Inject internal lateinit var pauseView: PauseView
@@ -68,7 +68,7 @@ class PauseConfirmActivity : ActivityBase() {
     checkPinSuccessDisposable = viewModel.onCheckPinEventSuccess {
       val autoResume = intent.getBooleanExtra(EXTRA_AUTO_RESUME, false)
       Timber.d("Pausing service with auto resume: $autoResume")
-      pausePresenter.pause(autoResume)
+      actionPresenter.requestPause(autoResume)
       finish()
     }
     recreateDisposable = viewModel.onRecreateEvent { recreate() }
