@@ -19,61 +19,30 @@ package com.pyamsoft.padlock.service
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
-import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.DISABLED
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PERMISSION
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.padlock.model.service.RecheckEvent
 import com.pyamsoft.padlock.model.service.RecheckStatus
 import com.pyamsoft.padlock.model.service.RecheckStatus.FORCE
-import com.pyamsoft.padlock.model.service.RecheckStatus.NOT_FORCE
-import com.pyamsoft.padlock.model.service.ServiceFinishEvent
 import com.pyamsoft.padlock.model.service.ServicePauseState
-import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.tryDispose
 import io.reactivex.Maybe
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.disposables.Disposables
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 
 class LockServiceViewModel @Inject internal constructor(
   private val foregroundEventBus: Listener<ForegroundEvent>,
-  private val serviceFinishBus: EventBus<ServiceFinishEvent>,
-  private val recheckEventBus: Listener<RecheckEvent>,
   private val interactor: LockServiceInteractor
 ) {
 
   init {
     interactor.init()
-  }
-
-  @CheckResult
-  fun onServiceFinishEvent(func: () -> Unit): Disposable {
-    val finishDisposable = serviceFinishBus.listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { func() }
-
-    val disableDisposable = interactor.observeServiceState()
-        .filter { it == DISABLED }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { func() }
-
-    return object : Disposable {
-      override fun isDisposed(): Boolean {
-        return finishDisposable.isDisposed && disableDisposable.isDisposed
-      }
-
-      override fun dispose() {
-        finishDisposable.tryDispose()
-        disableDisposable.tryDispose()
-      }
-    }
   }
 
   @CheckResult
@@ -114,29 +83,28 @@ class LockServiceViewModel @Inject internal constructor(
           Timber.e(it, "Error listening for foreground event clears")
         })
 
-    val eventDisposable = interactor.listenForForegroundEvents()
-        .filter { !ForegroundEvent.isEmpty(it) }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .doOnCancel { Timber.d("Cancelling foreground listener") }
-        .doAfterTerminate { serviceFinishBus.publish(ServiceFinishEvent) }
-        .flatMapMaybe { processEvent(it.packageName, it.className, NOT_FORCE) }
-        .subscribe({ (model: PadLockEntryModel, className: String, icon: Int) ->
-          onEvent(model, className, icon)
-        }, {
-          Timber.e(it, "Error while watching foreground events")
-          onError(it)
-        })
+//    val eventDisposable = interactor.listenForForegroundEvents()
+//        .filter { !ForegroundEvent.isEmpty(it) }
+//        .subscribeOn(Schedulers.io())
+//        .observeOn(AndroidSchedulers.mainThread())
+//        .doOnCancel { Timber.d("Cancelling foreground listener") }
+//        .doAfterTerminate { serviceFinishBus.publish(ServiceFinishEvent) }
+//        .flatMapMaybe { processEvent(it.packageName, it.className, NOT_FORCE) }
+//        .subscribe({ (model: PadLockEntryModel, className: String, icon: Int) ->
+//          onEvent(model, className, icon)
+//        }, {
+//          Timber.e(it, "Error while watching foreground events")
+//          onError(it)
+//        })
 
     return object : Disposable {
 
       override fun isDisposed(): Boolean {
-        return foregroundDisposable.isDisposed && eventDisposable.isDisposed
+        return foregroundDisposable.isDisposed
       }
 
       override fun dispose() {
         foregroundDisposable.tryDispose()
-        eventDisposable.tryDispose()
       }
 
     }
@@ -147,16 +115,17 @@ class LockServiceViewModel @Inject internal constructor(
     onEvent: (model: PadLockEntryModel, className: String, icon: Int) -> Unit,
     onError: (error: Throwable) -> Unit
   ): Disposable {
-    return recheckEventBus.listen()
-        .flatMapMaybe { processActiveApplicationIfMatching(it.packageName, it.className) }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe({ (model: PadLockEntryModel, className: String, icon: Int) ->
-          onEvent(model, className, icon)
-        }, {
-          Timber.e(it, "Error while watching foreground events")
-          onError(it)
-        })
+    return Disposables.empty()
+//    return recheckEventBus.listen()
+//        .flatMapMaybe { processActiveApplicationIfMatching(it.packageName, it.className) }
+//        .subscribeOn(Schedulers.io())
+//        .observeOn(AndroidSchedulers.mainThread())
+//        .subscribe({ (model: PadLockEntryModel, className: String, icon: Int) ->
+//          onEvent(model, className, icon)
+//        }, {
+//          Timber.e(it, "Error while watching foreground events")
+//          onError(it)
+//        })
   }
 
   @CheckResult

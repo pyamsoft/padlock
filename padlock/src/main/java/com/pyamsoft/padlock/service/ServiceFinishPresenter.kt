@@ -15,6 +15,19 @@
  *
  */
 
-package com.pyamsoft.padlock.model.service
+package com.pyamsoft.padlock.service
 
-object ServiceFinishEvent
+import com.pyamsoft.padlock.service.ServiceFinishPresenter.Callback
+import com.pyamsoft.pydroid.ui.arch.Presenter
+
+internal interface ServiceFinishPresenter : Presenter<Callback> {
+
+  fun finish()
+
+  interface Callback {
+
+    fun onServiceFinished()
+
+  }
+}
+

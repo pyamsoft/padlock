@@ -21,4 +21,5 @@ enum class ServicePauseState {
   STARTED,
   PAUSED,
   TEMP_PAUSED
+
 }

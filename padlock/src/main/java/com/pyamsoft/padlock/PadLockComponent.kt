@@ -69,6 +69,9 @@ import com.pyamsoft.padlock.service.PauseComponent
 import com.pyamsoft.padlock.service.RecheckPresenter
 import com.pyamsoft.padlock.service.RecheckPresenterImpl
 import com.pyamsoft.padlock.service.RecheckPresenterImpl.RecheckEvent
+import com.pyamsoft.padlock.service.ServiceFinishPresenter
+import com.pyamsoft.padlock.service.ServiceFinishPresenterImpl
+import com.pyamsoft.padlock.service.ServiceFinishPresenterImpl.ServiceFinishEvent
 import com.pyamsoft.padlock.service.ServicePausePresenter
 import com.pyamsoft.padlock.service.ServicePausePresenterImpl
 import com.pyamsoft.padlock.service.ServicePausePresenterImpl.ServicePauseEvent
@@ -195,6 +198,11 @@ interface PadLockComponent {
     private val settingsStateBus = RxBus.create<SwitchLockTypeEvent>()
     private val clearPinBus = RxBus.create<ClearPinEvent>()
     private val servicePauseBus = RxBus.create<ServicePauseEvent>()
+    private val serviceFinishBus = RxBus.create<ServiceFinishEvent>()
+
+    @JvmStatic
+    @Provides
+    internal fun provideServiceFinishBus(): EventBus<ServiceFinishEvent> = serviceFinishBus
 
     @JvmStatic
     @Provides
@@ -272,6 +280,9 @@ interface PadLockComponent {
 
     @Binds
     internal abstract fun bindServicePausePresenter(impl: ServicePausePresenterImpl): ServicePausePresenter
+
+    @Binds
+    internal abstract fun bindServiceFinishPresenter(impl: ServiceFinishPresenterImpl): ServiceFinishPresenter
 
   }
 }

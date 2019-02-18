@@ -59,7 +59,8 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 class PadLockService : Service(),
     LifecycleOwner,
-    ServicePausePresenter.Callback {
+    ServicePausePresenter.Callback,
+    ServiceFinishPresenter.Callback {
 
   private val notificationManager by lazy(NONE) {
     requireNotNull(application.getSystemService<NotificationManager>())
@@ -73,8 +74,8 @@ class PadLockService : Service(),
 
   @field:Inject internal lateinit var viewModel: LockServiceViewModel
   @field:Inject internal lateinit var pausePresenter: ServicePausePresenter
+  @field:Inject internal lateinit var finishPresenter: ServiceFinishPresenter
 
-  private var finishDisposable by singleDisposable()
   private var permissionDisposable by singleDisposable()
   private var screenStateDisposable by singleDisposable()
   private var foregroundDisposable by singleDisposable()
@@ -82,10 +83,6 @@ class PadLockService : Service(),
 
   override fun getLifecycle(): Lifecycle {
     return registry
-  }
-
-  override fun onServicePaused(autoResume: Boolean) {
-    pauseService(autoResume)
   }
 
   override fun onBind(ignore: Intent?): IBinder? {
@@ -111,12 +108,20 @@ class PadLockService : Service(),
         }
     )
 
-    finishDisposable = viewModel.onServiceFinishEvent { serviceStop() }
     permissionDisposable = viewModel.onPermissionLostEvent { servicePermissionLost() }
 
     pausePresenter.bind(this, this)
+    finishPresenter.bind(this, this)
 
     registry.fakeBind()
+  }
+
+  override fun onServiceFinished() {
+    serviceStop()
+  }
+
+  override fun onServicePaused(autoResume: Boolean) {
+    pauseService(autoResume)
   }
 
   private fun beginWatchingForLockedApplications() {
@@ -138,8 +143,6 @@ class PadLockService : Service(),
   override fun onDestroy() {
     super.onDestroy()
     stopForeground(true)
-
-    finishDisposable.tryDispose()
     permissionDisposable.tryDispose()
     foregroundDisposable.tryDispose()
     recheckDisposable.tryDispose()
