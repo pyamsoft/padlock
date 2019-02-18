@@ -41,7 +41,9 @@ import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Singleton
 
+@Singleton
 internal class ApplicationInstallReceiverImpl @Inject internal constructor(
   private val context: Context,
   private val packageManagerWrapper: PackageLabelManager,
@@ -176,7 +178,7 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
       get() {
         if (field == NOTIFICATION_ID_MAX) {
           field =
-              NOTIFICATION_ID_START
+            NOTIFICATION_ID_START
         } else {
           field += 1
         }
