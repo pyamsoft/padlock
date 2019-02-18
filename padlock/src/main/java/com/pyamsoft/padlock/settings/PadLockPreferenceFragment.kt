@@ -40,6 +40,7 @@ import javax.inject.Inject
 
 class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
     SettingsPresenter.Callback,
+    SwitchLockTypePresenter.Callback,
     ClearAllPresenter.Callback,
     ClearDatabasePresenter.Callback,
     ClearPinPresenter.Callback {
@@ -47,6 +48,7 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
   @field:Inject internal lateinit var clearDatabasePresenter: ClearDatabasePresenter
   @field:Inject internal lateinit var clearAllPresenter: ClearAllPresenter
   @field:Inject internal lateinit var clearPinPresenter: ClearPinPresenter
+  @field:Inject internal lateinit var switchLockTypePresenter: SwitchLockTypePresenter
   @field:Inject internal lateinit var presenter: SettingsPresenter
 
   @field:Inject internal lateinit var settingsView: SettingsView
@@ -74,15 +76,20 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
     super.onViewCreated(view, savedInstanceState)
     settingsView.inflate(savedInstanceState)
 
-    presenter.bind(viewLifecycleOwner, this)
+    switchLockTypePresenter.bind(viewLifecycleOwner, this)
     clearPinPresenter.bind(viewLifecycleOwner, this)
     clearDatabasePresenter.bind(viewLifecycleOwner, this)
     clearAllPresenter.bind(viewLifecycleOwner, this)
+    presenter.bind(viewLifecycleOwner, this)
   }
 
   override fun onClearDatabaseRequest() {
     ConfirmDeleteAllDialog()
         .show(requireActivity(), "confirm_dialog")
+  }
+
+  override fun onSwitchLockTypeRequest(newType: String) {
+    switchLockTypePresenter.switchLockType(newType)
   }
 
   override fun onDestroyView() {

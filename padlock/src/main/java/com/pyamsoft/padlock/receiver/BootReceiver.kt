@@ -37,12 +37,19 @@ class BootReceiver : BroadcastReceiver() {
     if (intent != null) {
       if (Intent.ACTION_BOOT_COMPLETED == intent.action) {
         if (context != null) {
-          Injector.obtain<PadLockComponent>(context.applicationContext)
-              .inject(this)
+          inject(context)
           Timber.d("Boot event received, start PadLockService")
           serviceManager.startService(true)
         }
       }
+    }
+  }
+
+  private fun inject(context: Context) {
+    if (!this::serviceManager.isInitialized) {
+      Timber.d("Injecting ServiceManager into BootReceiver")
+      Injector.obtain<PadLockComponent>(context.applicationContext)
+          .inject(this)
     }
   }
 }

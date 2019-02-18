@@ -101,8 +101,10 @@ import com.pyamsoft.padlock.settings.ClearDatabasePresenterImpl.ClearDatabaseEve
 import com.pyamsoft.padlock.settings.ConfirmDeleteAllDialog
 import com.pyamsoft.padlock.settings.ConfirmDeleteDatabaseDialog
 import com.pyamsoft.padlock.settings.SettingsComponent
-import com.pyamsoft.padlock.settings.SettingsPresenterImpl.SwitchLockTypeEvent
 import com.pyamsoft.padlock.settings.SettingsSingletonModule
+import com.pyamsoft.padlock.settings.SwitchLockTypePresenter
+import com.pyamsoft.padlock.settings.SwitchLockTypePresenterImpl
+import com.pyamsoft.padlock.settings.SwitchLockTypePresenterImpl.SwitchLockTypeEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.RxBus
 import com.pyamsoft.pydroid.core.cache.Cache
@@ -300,6 +302,9 @@ interface PadLockComponent {
 
     @Binds
     internal abstract fun bindClearAllPresenter(impl: ClearAllPresenterImpl): ClearAllPresenter
+
+    @Binds
+    internal abstract fun bindSwitchLockTypePresenter(impl: SwitchLockTypePresenterImpl): SwitchLockTypePresenter
 
     @Binds
     internal abstract fun bindClearPinPresenter(impl: ClearPinPresenterImpl): ClearPinPresenter

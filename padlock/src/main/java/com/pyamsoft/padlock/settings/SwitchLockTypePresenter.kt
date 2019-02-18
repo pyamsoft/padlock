@@ -17,16 +17,20 @@
 
 package com.pyamsoft.padlock.settings
 
-import com.pyamsoft.padlock.settings.SettingsPresenter.Callback
+import com.pyamsoft.padlock.settings.SwitchLockTypePresenter.Callback
 import com.pyamsoft.pydroid.ui.arch.Presenter
 
-internal interface SettingsPresenter : Presenter<Callback> {
+internal interface SwitchLockTypePresenter : Presenter<Callback> {
+
+  fun switchLockType(newType: String)
 
   interface Callback {
 
-    fun onClearDatabaseRequest()
+    fun onLockTypeSwitchBlocked()
 
-    fun onSwitchLockTypeRequest(newType: String)
+    fun onLockTypeSwitchSuccess(newType: String)
+
+    fun onLockTypeSwitchError(throwable: Throwable)
 
   }
 

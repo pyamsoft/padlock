@@ -20,15 +20,10 @@ package com.pyamsoft.padlock.settings
 import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.padlock.scopes.FragmentScope
 import com.pyamsoft.padlock.settings.SettingsPresenter.Callback
-import com.pyamsoft.padlock.settings.SettingsPresenterImpl.SwitchLockTypeEvent
-import com.pyamsoft.padlock.settings.SettingsPresenterImpl.SwitchLockTypeEvent.SwitchLockTypeBlocked
-import com.pyamsoft.padlock.settings.SettingsPresenterImpl.SwitchLockTypeEvent.SwitchLockTypeError
-import com.pyamsoft.padlock.settings.SettingsPresenterImpl.SwitchLockTypeEvent.SwitchLockTypeSuccess
-import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.bus.RxBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.arch.BasePresenter
-import com.pyamsoft.pydroid.ui.arch.destroy
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
@@ -36,38 +31,22 @@ import javax.inject.Inject
 
 @FragmentScope
 internal class SettingsPresenterImpl @Inject internal constructor(
-  private val interactor: SettingsInteractor,
-  bus: EventBus<SwitchLockTypeEvent>
-) : BasePresenter<SwitchLockTypeEvent, Callback>(bus),
+  private val interactor: SettingsInteractor
+) : BasePresenter<Unit, Callback>(RxBus.empty()),
     SettingsView.Callback,
     SettingsPresenter {
 
   private var installListenerDisposable by singleDisposable()
-  private var lockTypeDisposable by singleDisposable()
 
   override fun onBind() {
-    listenSwitchLockType()
   }
 
   override fun onUnbind() {
-    lockTypeDisposable.tryDispose()
     installListenerDisposable.tryDispose()
   }
 
   override fun onSwitchLockTypeChanged(newType: String) {
-    lockTypeDisposable = interactor.hasExistingMasterPassword()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe({ switchingBlocked ->
-          if (switchingBlocked) {
-            publish(SwitchLockTypeBlocked)
-          } else {
-            publish(SwitchLockTypeSuccess(newType))
-          }
-        }, {
-          Timber.e(it, "Error switching lock type")
-          publish(SwitchLockTypeError(it))
-        })
+    callback.onSwitchLockTypeRequest(newType)
   }
 
   override fun onInstallListenerClicked() {
@@ -81,30 +60,6 @@ internal class SettingsPresenterImpl @Inject internal constructor(
 
   override fun onClearDatabaseClicked() {
     callback.onClearDatabaseRequest()
-  }
-
-  private fun listenSwitchLockType() {
-    listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe {
-          return@subscribe when (it) {
-            is SwitchLockTypeSuccess -> callback.onLockTypeSwitchSuccess(it.newType)
-            is SwitchLockTypeBlocked -> callback.onLockTypeSwitchBlocked()
-            is SwitchLockTypeError -> callback.onLockTypeSwitchError(it.error)
-          }
-        }
-        .destroy(owner)
-  }
-
-  internal sealed class SwitchLockTypeEvent {
-
-    data class SwitchLockTypeSuccess(val newType: String) : SwitchLockTypeEvent()
-
-    object SwitchLockTypeBlocked : SwitchLockTypeEvent()
-
-    data class SwitchLockTypeError(val error: Throwable) : SwitchLockTypeEvent()
-
   }
 
 }

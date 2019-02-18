@@ -46,6 +46,7 @@ interface SettingsComponent {
     internal abstract fun bindPresenter(impl: SettingsPresenterImpl): SettingsPresenter
 
     @Binds
-    internal abstract fun provideSettingsViewCallback(impl: SettingsPresenterImpl): SettingsView.Callback
+    internal abstract fun bindSettingsViewCallback(impl: SettingsPresenterImpl): SettingsView.Callback
+
   }
 }
