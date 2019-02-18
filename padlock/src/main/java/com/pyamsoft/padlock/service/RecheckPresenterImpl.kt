@@ -17,40 +17,36 @@
 
 package com.pyamsoft.padlock.service
 
-import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.pin.CheckPinEvent
-import com.pyamsoft.pydroid.core.bus.Listener
+import com.pyamsoft.padlock.model.service.RecheckEvent
+import com.pyamsoft.padlock.service.RecheckPresenter.Callback
+import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.ui.arch.BasePresenter
+import com.pyamsoft.pydroid.ui.arch.destroy
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.disposables.Disposables
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-class PauseServiceViewModel @Inject internal constructor(
-  private val checkPinBus: Listener<CheckPinEvent>
-) {
+internal class RecheckPresenterImpl @Inject internal constructor(
+  bus: EventBus<RecheckEvent>
+) : BasePresenter<RecheckEvent, Callback>(bus),
+    RecheckPresenter {
 
-  @CheckResult
-  fun onCheckPinEventSuccess(func: () -> Unit): Disposable {
-    return checkPinBus.listen()
-        .filter { it.matching }
+  override fun onBind() {
+    listen()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { func() }
+        .subscribe { callback.onRecheckRequired(it.packageName, it.className) }
+        .destroy(owner)
   }
 
-  @CheckResult
-  fun onRecreateEvent(func: () -> Unit): Disposable {
-    return Disposables.empty()
+  override fun onUnbind() {
   }
 
-  @CheckResult
-  fun onCheckPinEventFailed(func: () -> Unit): Disposable {
-    return checkPinBus.listen()
-        .filter { !it.matching }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { func() }
+  override fun recheck(
+    packageName: String,
+    className: String
+  ) {
+    publish(RecheckEvent(packageName, className))
   }
 
 }

@@ -50,6 +50,7 @@ import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.main.MainComponent
 import com.pyamsoft.padlock.main.MainFragmentComponent
 import com.pyamsoft.padlock.model.pin.ClearPinEvent
+import com.pyamsoft.padlock.model.service.RecheckEvent
 import com.pyamsoft.padlock.pin.ClearPinPresenter
 import com.pyamsoft.padlock.pin.ClearPinPresenterImpl
 import com.pyamsoft.padlock.pin.PinBaseFragment
@@ -66,6 +67,8 @@ import com.pyamsoft.padlock.receiver.BootReceiver
 import com.pyamsoft.padlock.service.PadLockJobService
 import com.pyamsoft.padlock.service.PadLockService
 import com.pyamsoft.padlock.service.PauseComponent
+import com.pyamsoft.padlock.service.RecheckPresenter
+import com.pyamsoft.padlock.service.RecheckPresenterImpl
 import com.pyamsoft.padlock.service.ServiceSingletonModule
 import com.pyamsoft.padlock.service.ServiceSingletonProvider
 import com.pyamsoft.padlock.settings.ClearAllEvent
@@ -80,8 +83,6 @@ import com.pyamsoft.padlock.settings.SettingsComponent
 import com.pyamsoft.padlock.settings.SettingsSingletonModule
 import com.pyamsoft.padlock.settings.SwitchLockTypeEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.bus.Listener
-import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.core.bus.RxBus
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.threads.Enforcer
@@ -186,11 +187,15 @@ interface PadLockComponent {
   @Module
   object PadLockProvider {
 
+    private val recheckBus = RxBus.create<RecheckEvent>()
     private val clearAllBus = RxBus.create<ClearAllEvent>()
     private val clearDatabaseBus = RxBus.create<ClearDatabaseEvent>()
-    private val recreateBus = RxBus.create<Unit>()
     private val settingsStateBus = RxBus.create<SwitchLockTypeEvent>()
     private val clearPinBus = RxBus.create<ClearPinEvent>()
+
+    @JvmStatic
+    @Provides
+    internal fun provideRecheckBus(): EventBus<RecheckEvent> = recheckBus
 
     @JvmStatic
     @Provides
@@ -207,16 +212,6 @@ interface PadLockComponent {
     @JvmStatic
     @Provides
     fun provideLockTypeBus(): EventBus<SwitchLockTypeEvent> = settingsStateBus
-
-    @JvmStatic
-    @Provides
-    @Named("recreate_publisher")
-    fun provideRecreatePublisher(): Publisher<Unit> = recreateBus
-
-    @JvmStatic
-    @Provides
-    @Named("recreate_listener")
-    fun provideRecreateListener(): Listener<Unit> = recreateBus
 
     @JvmStatic
     @Provides
@@ -264,6 +259,9 @@ interface PadLockComponent {
 
     @Binds
     internal abstract fun bindClearPinPresenter(impl: ClearPinPresenterImpl): ClearPinPresenter
+
+    @Binds
+    internal abstract fun bindRecheckPresenter(impl: RecheckPresenterImpl): RecheckPresenter
 
   }
 }

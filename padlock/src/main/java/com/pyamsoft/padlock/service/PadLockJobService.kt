@@ -27,14 +27,12 @@ import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat.JobType.RECHECK
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat.JobType.SERVICE_TEMP_PAUSE
 import com.pyamsoft.padlock.model.service.Recheck
-import com.pyamsoft.padlock.model.service.RecheckEvent
-import com.pyamsoft.pydroid.core.bus.Publisher
 import timber.log.Timber
 import javax.inject.Inject
 
 class PadLockJobService : JobService() {
 
-  @field:Inject internal lateinit var recheckBus: Publisher<RecheckEvent>
+  @field:Inject internal lateinit var presenter: RecheckPresenter
   @field:Inject internal lateinit var serviceManager: ServiceManager
 
   override fun onCreate() {
@@ -65,7 +63,7 @@ class PadLockJobService : JobService() {
 
     if (packageName.isNotBlank() && className.isNotBlank()) {
       Timber.d("Recheck requested for $packageName $className")
-      recheckBus.publish(RecheckEvent(packageName, className))
+      presenter.recheck(packageName, className)
     }
   }
 

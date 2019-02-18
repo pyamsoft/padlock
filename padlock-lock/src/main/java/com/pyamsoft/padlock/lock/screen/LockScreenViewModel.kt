@@ -21,10 +21,10 @@ import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.lockscreen.LockScreenInteractor
 import com.pyamsoft.padlock.model.ForegroundEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.bus.Publisher
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
+import io.reactivex.disposables.Disposables
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
@@ -36,16 +36,12 @@ class LockScreenViewModel @Inject internal constructor(
   private val interactor: LockScreenInteractor,
   @param:Named("locked_package_name") private val packageName: String,
   @param:Named("locked_activity_name") private val activityName: String,
-  @param:Named("locked_real_name") private val realName: String,
-  @param:Named("recreate_listener") private val recreateListener: Listener<Unit>
+  @param:Named("locked_real_name") private val realName: String
 ) {
 
   @CheckResult
   fun onRecreateEvent(func: () -> Unit): Disposable {
-    return recreateListener.listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { func() }
+    return Disposables.empty()
   }
 
   fun clearMatchingForegroundEvent() {
