@@ -17,31 +17,28 @@
 
 package com.pyamsoft.padlock.purge
 
-import android.os.Bundle
-import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.uicommon.ShimBaseScreen
+import com.pyamsoft.padlock.purge.PurgePresenter.Callback
+import com.pyamsoft.pydroid.ui.arch.Presenter
 
-interface PurgeView : ShimBaseScreen {
+internal interface PurgePresenter : Presenter<Callback> {
 
-  @CheckResult
-  fun getListModels(): List<String>
+  fun fetchData(forced: Boolean)
 
-  fun onSwipeToRefresh(onSwipe: () -> Unit)
+  interface Callback {
 
-  fun onListItemClicked(onClick: (position: Int, model: String) -> Unit)
+    fun onDeleteAllRequest()
 
-  fun onToolbarMenuItemClicked(onClick: (id: Int) -> Unit)
+    fun onDeleteRequest(stalePackage: String)
 
-  fun onStaleFetchBegin(forced: Boolean)
+    fun onFetchStaleBegin()
 
-  fun onStaleFetchSuccess(stalePackages: List<String>)
+    fun onFetchStaleSuccess(data: List<String>)
 
-  fun onStaleFetchError(
-    error: Throwable,
-    onRetry: () -> Unit
-  )
+    fun onFetchStaleError(throwable: Throwable)
 
-  fun onStaleFetchComplete()
+    fun onFetchStaleComplete()
 
-  fun saveListPosition(outState: Bundle?)
+  }
+
 }
+

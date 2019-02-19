@@ -21,49 +21,48 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.model.list.ListDiffProvider
-import com.pyamsoft.pydroid.core.singleDisposable
-import com.pyamsoft.pydroid.core.tryDispose
 import com.pyamsoft.pydroid.ui.app.requireToolbarActivity
-import com.pyamsoft.pydroid.ui.app.toolbarActivity
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
 
-class PurgeFragment : Fragment() {
+class PurgeFragment : Fragment(),
+    PurgeAllPresenter.Callback,
+    PurgeSinglePresenter.Callback,
+    PurgePresenter.Callback {
 
-  @field:Inject internal lateinit var viewModel: PurgeViewModel
-  @field:Inject internal lateinit var purgeView: PurgeView
+  @field:Inject internal lateinit var presenter: PurgePresenter
+  @field:Inject internal lateinit var purgeSinglePresenter: PurgeSinglePresenter
+  @field:Inject internal lateinit var purgeAllPresenter: PurgeAllPresenter
 
-  private var fetchDisposable by singleDisposable()
-  private var purgeAllDisposable by singleDisposable()
-  private var purgeOneDisposable by singleDisposable()
+  @field:Inject internal lateinit var purgeView: PurgeListView
+
+  private lateinit var layoutRoot: ConstraintLayout
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
+    val root = inflater.inflate(R.layout.layout_constraint, container, false)
+    layoutRoot = root.findViewById(R.id.layout_constraint)
+
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusPurgeComponent()
         .toolbarActivity(requireToolbarActivity())
         .owner(viewLifecycleOwner)
-        .inflater(inflater)
-        .container(container)
-        .savedInstanceState(savedInstanceState)
-        .diffProvider(object : ListDiffProvider<String> {
-          override fun data(): List<String> = purgeView.getListModels()
-        })
+        .parent(layoutRoot)
         .build()
         .inject(this)
 
-    purgeView.create()
-    return purgeView.root()
+    return root
   }
 
   override fun onViewCreated(
@@ -71,75 +70,89 @@ class PurgeFragment : Fragment() {
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
+    purgeView.inflate(savedInstanceState)
+    layoutComponents(layoutRoot)
 
-    purgeView.onSwipeToRefresh { fetchStalePackages(true) }
-    purgeView.onListItemClicked { position: Int, model: String ->
-      handleDeleteRequest(position, model)
-    }
-    purgeView.onToolbarMenuItemClicked { id: Int ->
-      when (id) {
-        R.id.menu_purge_all -> PurgeAllDialog().show(requireActivity(), "purge_all")
-        else -> Timber.w("Unhandled menu item clicked: $id")
-      }
-    }
-
-    purgeAllDisposable = viewModel.onPurgeAllEvent {
-      Timber.d("Purged all stale: $it")
-      fetchStalePackages(true)
-    }
-
-    purgeOneDisposable = viewModel.onPurgeEvent {
-      Timber.d("Purged stale: $it")
-      fetchStalePackages(true)
-    }
-
+    presenter.bind(viewLifecycleOwner, this)
+    purgeSinglePresenter.bind(viewLifecycleOwner, this)
+    purgeAllPresenter.bind(viewLifecycleOwner, this)
   }
 
-  private fun fetchStalePackages(force: Boolean) {
-    fetchDisposable = viewModel.fetchStalePackages(
-        force,
-        onFetchBegin = { purgeView.onStaleFetchBegin(it) },
-        onFetchSuccess = { purgeView.onStaleFetchSuccess(it) },
-        onFetchError = { error: Throwable ->
-          purgeView.onStaleFetchError(error) { fetchStalePackages(true) }
-        },
-        onFetchComplete = { purgeView.onStaleFetchComplete() }
-    )
+  private fun layoutComponents(layoutRoot: ConstraintLayout) {
+    ConstraintSet().apply {
+      clone(layoutRoot)
+
+      purgeView.also {
+        connect(it.id(), ConstraintSet.TOP, layoutRoot.id, ConstraintSet.TOP)
+        connect(it.id(), ConstraintSet.BOTTOM, layoutRoot.id, ConstraintSet.BOTTOM)
+        connect(it.id(), ConstraintSet.START, layoutRoot.id, ConstraintSet.START)
+        connect(it.id(), ConstraintSet.END, layoutRoot.id, ConstraintSet.END)
+        constrainHeight(it.id(), ConstraintSet.MATCH_CONSTRAINT)
+        constrainWidth(it.id(), ConstraintSet.MATCH_CONSTRAINT)
+      }
+
+      applyTo(layoutRoot)
+    }
+  }
+
+  override fun onSinglePurged(stalePackage: String) {
+    Timber.d("Purged stale: $stalePackage")
+    presenter.fetchData(true)
+  }
+
+  override fun onAllPurged(stalePackages: List<String>) {
+    Timber.d("Purged all stale: $stalePackages")
+    presenter.fetchData(true)
+  }
+
+  override fun onDeleteAllRequest() {
+    PurgeAllDialog.newInstance(purgeView.currentListData())
+        .show(requireActivity(), "purge_all")
+  }
+
+  override fun onDeleteRequest(stalePackage: String) {
+    PurgeSingleItemDialog.newInstance(stalePackage)
+        .show(requireActivity(), "purge_single")
+  }
+
+  override fun onFetchStaleBegin() {
+    purgeView.onStaleFetchBegin()
+  }
+
+  override fun onFetchStaleSuccess(data: List<String>) {
+    purgeView.onStaleFetchSuccess(data)
+  }
+
+  override fun onFetchStaleError(throwable: Throwable) {
+    purgeView.onStaleFetchError { presenter.fetchData(true) }
+  }
+
+  override fun onFetchStaleComplete() {
+    purgeView.onStaleFetchComplete()
   }
 
   override fun onDestroyView() {
     super.onDestroyView()
-    purgeOneDisposable.tryDispose()
-    purgeAllDisposable.tryDispose()
-    fetchDisposable.tryDispose()
+    purgeView.teardown()
   }
 
   override fun onStart() {
     super.onStart()
-    fetchStalePackages(false)
+    presenter.fetchData(false)
   }
 
   override fun onPause() {
     super.onPause()
     if (this::purgeView.isInitialized) {
-      purgeView.saveListPosition(null)
-    }
-
-    if (isRemoving) {
-      toolbarActivity?.withToolbar {
-        it.menu.apply {
-          removeGroup(R.id.menu_group_purge_all)
-        }
-        it.setOnMenuItemClickListener(null)
-      }
+      purgeView.storeListPosition()
     }
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
-    if (this::purgeView.isInitialized) {
-      purgeView.saveListPosition(outState)
-    }
     super.onSaveInstanceState(outState)
+    if (this::purgeView.isInitialized) {
+      purgeView.saveState(outState)
+    }
   }
 
   override fun onResume() {
@@ -148,15 +161,6 @@ class PurgeFragment : Fragment() {
       it.setTitle(R.string.app_name)
       it.setUpEnabled(false)
     }
-  }
-
-  private fun handleDeleteRequest(
-    position: Int,
-    packageName: String
-  ) {
-    Timber.d("Handle delete request for %s at %d", packageName, position)
-    PurgeSingleItemDialog.newInstance(packageName)
-        .show(requireActivity(), "purge_single")
   }
 
   companion object {

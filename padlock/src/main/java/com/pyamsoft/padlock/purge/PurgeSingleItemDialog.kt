@@ -24,25 +24,22 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
-import com.pyamsoft.padlock.model.purge.PurgeEvent
-import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.ui.app.requireArguments
 import javax.inject.Inject
 
 class PurgeSingleItemDialog : DialogFragment() {
 
-  @field:Inject internal lateinit var purgePublisher: Publisher<PurgeEvent>
+  @field:Inject internal lateinit var presenter: PurgeSinglePresenter
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-    val packageName = requireArguments().getString(PACKAGE, "")
-
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .inject(this)
 
+    val packageName = requireArguments().getString(PACKAGE, "")
     return AlertDialog.Builder(requireActivity())
         .setMessage("Really delete old entry for $packageName?")
         .setPositiveButton("Delete") { _, _ ->
-          purgePublisher.publish(PurgeEvent(packageName))
+          presenter.purge(packageName)
           dismiss()
         }
         .setNegativeButton("Cancel") { _, _ -> dismiss() }

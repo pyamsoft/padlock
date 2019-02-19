@@ -61,9 +61,15 @@ import com.pyamsoft.padlock.pin.PinComponent
 import com.pyamsoft.padlock.pin.PinSingletonModule
 import com.pyamsoft.padlock.pin.PinSingletonProvider
 import com.pyamsoft.padlock.purge.PurgeAllDialog
+import com.pyamsoft.padlock.purge.PurgeAllPresenter
+import com.pyamsoft.padlock.purge.PurgeAllPresenterImpl
+import com.pyamsoft.padlock.purge.PurgeAllPresenterImpl.PurgeAllEvent
 import com.pyamsoft.padlock.purge.PurgeComponent
 import com.pyamsoft.padlock.purge.PurgeItemComponent
 import com.pyamsoft.padlock.purge.PurgeSingleItemDialog
+import com.pyamsoft.padlock.purge.PurgeSinglePresenter
+import com.pyamsoft.padlock.purge.PurgeSinglePresenterImpl
+import com.pyamsoft.padlock.purge.PurgeSinglePresenterImpl.PurgeSingleEvent
 import com.pyamsoft.padlock.purge.PurgeSingletonModule
 import com.pyamsoft.padlock.purge.PurgeSingletonProvider
 import com.pyamsoft.padlock.receiver.BootReceiver
@@ -223,6 +229,17 @@ interface PadLockComponent {
     private val clearPinBus = RxBus.create<ClearPinEvent>()
     private val checkPinBus = RxBus.create<CheckPinEvent>()
 
+    private val purgeSingleBus = RxBus.create<PurgeSingleEvent>()
+    private val purgeAllBus = RxBus.create<PurgeAllEvent>()
+
+    @JvmStatic
+    @Provides
+    internal fun providePurgeSingleBus(): EventBus<PurgeSingleEvent> = purgeSingleBus
+
+    @JvmStatic
+    @Provides
+    internal fun providePurgeAllBus(): EventBus<PurgeAllEvent> = purgeAllBus
+
     @JvmStatic
     @Provides
     internal fun provideForegroundEventBus(): EventBus<ForegroundEvent> = foregroundEventBus
@@ -338,6 +355,12 @@ interface PadLockComponent {
 
     @Binds
     internal abstract fun bindStartPresenter(impl: ServiceStartPresenterImpl): ServiceStartPresenter
+
+    @Binds
+    internal abstract fun bindPurgeSinglePresenter(impl: PurgeSinglePresenterImpl): PurgeSinglePresenter
+
+    @Binds
+    internal abstract fun bindPurgeAllPresenter(impl: PurgeAllPresenterImpl): PurgeAllPresenter
 
   }
 }
