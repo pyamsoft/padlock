@@ -25,6 +25,9 @@ import android.content.Context
 import androidx.annotation.CheckResult
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
+import com.popinnow.android.repo.Repo
+import com.popinnow.android.repo.moshi.MoshiPersister
+import com.popinnow.android.repo.newRepoBuilder
 import com.pyamsoft.padlock.PadLockComponent.PadLockModule
 import com.pyamsoft.padlock.PadLockComponent.PadLockProvider
 import com.pyamsoft.padlock.R.color
@@ -71,7 +74,6 @@ import com.pyamsoft.padlock.purge.PurgeSinglePresenter
 import com.pyamsoft.padlock.purge.PurgeSinglePresenterImpl
 import com.pyamsoft.padlock.purge.PurgeSinglePresenterImpl.PurgeSingleEvent
 import com.pyamsoft.padlock.purge.PurgeSingletonModule
-import com.pyamsoft.padlock.purge.PurgeSingletonProvider
 import com.pyamsoft.padlock.receiver.BootReceiver
 import com.pyamsoft.padlock.service.ForegroundEventPresenter
 import com.pyamsoft.padlock.service.ForegroundEventPresenterImpl
@@ -118,11 +120,15 @@ import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.Types
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
 import dagger.Provides
+import java.io.File
+import java.util.concurrent.TimeUnit.HOURS
+import java.util.concurrent.TimeUnit.MINUTES
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -131,7 +137,7 @@ import javax.inject.Singleton
     modules = [
       PadLockProvider::class, PadLockModule::class, BaseModule::class, BaseProvider::class,
       DatabaseProvider::class, PinSingletonModule::class, ServiceSingletonModule::class,
-      PurgeSingletonModule::class, PurgeSingletonProvider::class, SettingsSingletonModule::class,
+      PurgeSingletonModule::class, SettingsSingletonModule::class,
       LockInfoSingletonModule::class, LockInfoSingletonProvider::class, LockStateModule::class,
       LockListSingletonModule::class, LockListSingletonProvider::class, LockSingletonModule::class,
       LockSingletonProvider::class, PinSingletonProvider::class
@@ -283,8 +289,7 @@ interface PadLockComponent {
     @JvmStatic
     @Provides
     @Named("cache_list_state")
-    fun provideListStateCache(): Cache =
-      ListStateUtil
+    fun provideListStateCache(): Cache = ListStateUtil
 
     @JvmStatic
     @Provides
@@ -309,6 +314,24 @@ interface PadLockComponent {
     @Named("notification_color")
     @ColorRes
     fun provideNotificationColor(): Int = color.blue500
+
+    @JvmStatic
+    @Provides
+    @Named("repo_purge_list")
+    internal fun providePurgeRepo(
+      context: Context,
+      moshi: Moshi
+    ): Repo<List<String>> {
+      val type = Types.newParameterizedType(List::class.java, String::class.java)
+      return newRepoBuilder<List<String>>()
+          .memoryCache(30, MINUTES)
+          .persister(
+              2, HOURS,
+              File(context.cacheDir, "repo-purge-list"),
+              MoshiPersister.create(moshi, type)
+          )
+          .build()
+    }
   }
 
   @Module
