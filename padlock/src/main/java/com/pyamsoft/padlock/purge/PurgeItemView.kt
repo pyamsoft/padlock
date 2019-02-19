@@ -17,9 +17,36 @@
 
 package com.pyamsoft.padlock.purge
 
-interface PurgeItemView {
+import android.view.ViewGroup
+import android.widget.FrameLayout
+import android.widget.TextView
+import com.pyamsoft.padlock.R
+import com.pyamsoft.pydroid.ui.arch.BaseUiView
+import javax.inject.Inject
 
-  fun bind(model: String)
+internal class PurgeItemView @Inject internal constructor(
+  parent: ViewGroup
+) : BaseUiView<Unit>(parent, Unit) {
 
-  fun unbind()
+  override val layout: Int = R.layout.adapter_item_purge
+
+  private val layoutRoot by lazyView<FrameLayout>(R.id.item_purge_root)
+  private val itemName by lazyView<TextView>(R.id.item_purge_name)
+
+  override fun id(): Int {
+    return layoutRoot.id
+  }
+
+  fun bind(model: String) {
+    itemName.text = model
+  }
+
+  override fun teardown() {
+    unbind()
+  }
+
+  fun unbind() {
+    itemName.text = ""
+  }
+
 }

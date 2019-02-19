@@ -17,15 +17,11 @@
 
 package com.pyamsoft.padlock.purge
 
-import android.view.View
-import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.purge.PurgeItemComponent.PurgeModule
-import dagger.Binds
+import android.view.ViewGroup
 import dagger.BindsInstance
-import dagger.Module
 import dagger.Subcomponent
 
-@Subcomponent(modules = [PurgeModule::class])
+@Subcomponent
 interface PurgeItemComponent {
 
   fun inject(holder: PurgeItem.ViewHolder)
@@ -33,17 +29,9 @@ interface PurgeItemComponent {
   @Subcomponent.Builder
   interface Builder {
 
-    @BindsInstance fun itemView(itemView: View): Builder
+    @BindsInstance fun parent(parent: ViewGroup): Builder
 
     fun build(): PurgeItemComponent
-  }
-
-  @Module
-  abstract class PurgeModule {
-
-    @Binds
-    internal abstract fun bindItemView(impl: PurgeItemViewImpl): PurgeItemView
-
   }
 }
 

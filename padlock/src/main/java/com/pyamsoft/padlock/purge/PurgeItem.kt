@@ -18,6 +18,7 @@
 package com.pyamsoft.padlock.purge
 
 import android.view.View
+import android.widget.FrameLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.mikepenz.fastadapter.items.ModelAbstractItem
 import com.pyamsoft.padlock.Injector
@@ -33,7 +34,7 @@ class PurgeItem internal constructor(
 
   override fun getType(): Int = R.id.adapter_purge
 
-  override fun getLayoutRes(): Int = R.layout.adapter_item_purge
+  override fun getLayoutRes(): Int = R.layout.listitem_frame
 
   override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
 
@@ -52,14 +53,17 @@ class PurgeItem internal constructor(
 
   class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    @field:Inject lateinit var view: PurgeItemView
+    @field:Inject internal lateinit var view: PurgeItemView
 
     init {
+      val parent = itemView.findViewById<FrameLayout>(R.id.listitem_frame)
       Injector.obtain<PadLockComponent>(itemView.context.applicationContext)
           .plusPurgeItemComponent()
-          .itemView(itemView)
+          .parent(parent)
           .build()
           .inject(this)
+
+      view.inflate(null)
     }
 
     fun bind(model: String) {
