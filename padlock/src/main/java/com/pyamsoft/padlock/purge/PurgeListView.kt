@@ -202,12 +202,17 @@ internal class PurgeListView @Inject internal constructor(
     listView.visibility = View.VISIBLE
   }
 
+  private fun hideRecycler() {
+    listView.visibility = View.GONE
+    emptyState.setText(R.string.purge_all_clean)
+    emptyState.visibility = View.VISIBLE
+  }
+
   private fun decideListState() {
     if (modelAdapter.adapterItemCount > 0) {
       showRecycler()
     } else {
-      listView.visibility = View.GONE
-      emptyState.visibility = View.VISIBLE
+      hideRecycler()
     }
   }
 
