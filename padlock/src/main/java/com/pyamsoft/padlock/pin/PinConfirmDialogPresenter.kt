@@ -17,16 +17,14 @@
 
 package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.pydroid.arch.UiView
+import com.pyamsoft.padlock.pin.PinConfirmDialogPresenter.Callback
+import com.pyamsoft.pydroid.arch.Presenter
 
-internal interface BasicPinView : UiView {
+interface PinConfirmDialogPresenter : Presenter<Callback> {
 
-  fun enable()
+  interface Callback {
 
-  fun disable()
+    fun onAttemptSubmit(attempt: String)
 
-  fun submit()
-
-  fun clearDisplay()
-
+  }
 }

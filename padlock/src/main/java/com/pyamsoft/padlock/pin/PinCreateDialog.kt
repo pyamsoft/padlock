@@ -25,7 +25,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager.LayoutParams
 import androidx.fragment.app.DialogFragment
-import com.pyamsoft.padlock.R.layout
+import com.pyamsoft.padlock.Injector
+import com.pyamsoft.padlock.PadLockComponent
+import com.pyamsoft.padlock.R
 import com.pyamsoft.pydroid.ui.app.noTitle
 import javax.inject.Inject
 
@@ -59,9 +61,15 @@ class PinCreateDialog : DialogFragment(),
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-    val root = inflater.inflate(layout.layout_frame, container, false)
+    val root = inflater.inflate(R.layout.layout_frame, container, false)
+    val layoutRoot = root.findViewById<ViewGroup>(R.id.layout_frame)
 
-    // TODO Inject
+    Injector.obtain<PadLockComponent>(root.context.applicationContext)
+        .plusPinComponent()
+        .owner(viewLifecycleOwner)
+        .parent(layoutRoot)
+        .build()
+        .inject(this)
 
     return root
   }

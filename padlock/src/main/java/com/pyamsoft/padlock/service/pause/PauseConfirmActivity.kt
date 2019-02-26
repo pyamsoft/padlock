@@ -24,9 +24,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.pin.CheckPinPresenter
-import com.pyamsoft.padlock.pin.ConfirmPinView
-import com.pyamsoft.padlock.pin.PinDialog
+import com.pyamsoft.padlock.pin.ConfirmPinPresenter
+import com.pyamsoft.padlock.pin.PinConfirmDialog
 import com.pyamsoft.padlock.service.ServiceActionPresenter
 import com.pyamsoft.pydroid.ui.app.ActivityBase
 import com.pyamsoft.pydroid.ui.theme.ThemeInjector
@@ -35,11 +34,10 @@ import timber.log.Timber
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
-class PauseConfirmActivity : ActivityBase(), CheckPinPresenter.Callback {
+class PauseConfirmActivity : ActivityBase(), ConfirmPinPresenter.Callback {
 
-  @field:Inject internal lateinit var checkPinPresenter: CheckPinPresenter
+  @field:Inject internal lateinit var confirmPinPresenter: ConfirmPinPresenter
   @field:Inject internal lateinit var actionPresenter: ServiceActionPresenter
-  @field:Inject internal lateinit var pinView: ConfirmPinView
 
   override val fragmentContainerId: Int
     get() = layoutRoot.id
@@ -59,21 +57,22 @@ class PauseConfirmActivity : ActivityBase(), CheckPinPresenter.Callback {
     setContentView(R.layout.layout_constraint)
 
     Injector.obtain<PadLockComponent>(application)
-        .plusPauseComponent()
+        .plusPinComponent()
         .owner(this)
         .parent(layoutRoot)
         .build()
         .inject(this)
 
-    pinView.inflate(savedInstanceState)
-    checkPinPresenter.bind(this, this)
+    confirmPinPresenter.bind(this, this)
+
+    PinConfirmDialog.newInstance(true)
+        .show(this, PinConfirmDialog.TAG)
   }
 
-  override fun onCheckPinBegin() {
-    pinView.disable()
+  override fun onConfirmPinBegin() {
   }
 
-  override fun onCheckPinSuccess() {
+  override fun onConfirmPinSuccess() {
     Timber.d("Pin check succeeds!")
     val autoResume = intent.getBooleanExtra(EXTRA_AUTO_RESUME, false)
     Timber.d("Pausing service with auto resume: $autoResume")
@@ -81,12 +80,10 @@ class PauseConfirmActivity : ActivityBase(), CheckPinPresenter.Callback {
     finish()
   }
 
-  override fun onCheckPinFailure() {
-    pinView.showPinError()
+  override fun onConfirmPinFailure() {
   }
 
-  override fun onCheckPinComplete() {
-    pinView.enable()
+  override fun onConfirmPinComplete() {
   }
 
   override fun onNewIntent(intent: Intent) {
@@ -95,24 +92,13 @@ class PauseConfirmActivity : ActivityBase(), CheckPinPresenter.Callback {
     setIntent(intent)
   }
 
-  private fun addPinFragment() {
-    PinDialog.newInstance(checkOnly = true, finishOnDismiss = true)
-        .show(this, PinDialog.TAG)
-  }
-
   override fun finish() {
     super.finish()
     overridePendingTransition(0, 0)
   }
 
-  override fun onSaveInstanceState(outState: Bundle) {
-    super.onSaveInstanceState(outState)
-    pinView.saveState(outState)
-  }
-
   override fun onDestroy() {
     super.onDestroy()
-    pinView.teardown()
     overridePendingTransition(0, 0)
   }
 

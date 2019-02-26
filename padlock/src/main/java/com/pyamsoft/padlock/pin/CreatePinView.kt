@@ -17,7 +17,7 @@
 
 package com.pyamsoft.padlock.pin
 
-internal interface CreatePinView : BasicPinView {
+internal interface CreatePinView : PinView {
 
   interface Callback {
 

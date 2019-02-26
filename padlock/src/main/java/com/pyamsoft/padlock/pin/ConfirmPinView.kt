@@ -17,7 +17,7 @@
 
 package com.pyamsoft.padlock.pin
 
-internal interface ConfirmPinView : BasicPinView {
+internal interface ConfirmPinView : PinView {
 
   fun showPinError()
 

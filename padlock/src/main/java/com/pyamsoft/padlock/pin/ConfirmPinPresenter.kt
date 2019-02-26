@@ -15,27 +15,26 @@
  *
  */
 
-package com.pyamsoft.padlock.service.pause
+package com.pyamsoft.padlock.pin
 
-import android.view.ViewGroup
-import androidx.lifecycle.LifecycleOwner
-import dagger.BindsInstance
-import dagger.Subcomponent
+import com.pyamsoft.pydroid.arch.Presenter
 
-@Subcomponent
-interface PauseComponent {
+interface ConfirmPinPresenter : Presenter<ConfirmPinPresenter.Callback> {
 
-  fun inject(activity: PauseConfirmActivity)
+  fun confirm(pin: String)
 
-  @Subcomponent.Builder
-  interface Builder {
 
-    @BindsInstance fun owner(owner: LifecycleOwner): Builder
+  interface Callback {
 
-    @BindsInstance fun parent(parent: ViewGroup): Builder
+    fun onConfirmPinBegin()
 
-    fun build(): PauseComponent
+    fun onConfirmPinSuccess()
+
+    fun onConfirmPinFailure()
+
+    fun onConfirmPinComplete()
 
   }
-
 }
+
+

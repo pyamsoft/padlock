@@ -53,16 +53,15 @@ import com.pyamsoft.padlock.lock.LockSingletonProvider
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.main.MainComponent
 import com.pyamsoft.padlock.main.MainFragmentComponent
-import com.pyamsoft.padlock.pin.CheckPinPresenter
-import com.pyamsoft.padlock.pin.CheckPinPresenterImpl
-import com.pyamsoft.padlock.pin.CheckPinPresenterImpl.CheckPinEvent
 import com.pyamsoft.padlock.pin.ClearPinPresenter
 import com.pyamsoft.padlock.pin.ClearPinPresenterImpl
 import com.pyamsoft.padlock.pin.ClearPinPresenterImpl.ClearPinEvent
+import com.pyamsoft.padlock.pin.ConfirmPinPresenter
+import com.pyamsoft.padlock.pin.ConfirmPinPresenterImpl
+import com.pyamsoft.padlock.pin.ConfirmPinPresenterImpl.CheckPinEvent
 import com.pyamsoft.padlock.pin.CreatePinPresenter
 import com.pyamsoft.padlock.pin.CreatePinPresenterImpl
 import com.pyamsoft.padlock.pin.CreatePinPresenterImpl.CreatePinEvent
-import com.pyamsoft.padlock.pin.PinBaseFragment
 import com.pyamsoft.padlock.pin.PinComponent
 import com.pyamsoft.padlock.pin.PinSingletonModule
 import com.pyamsoft.padlock.pin.PinSingletonProvider
@@ -102,7 +101,6 @@ import com.pyamsoft.padlock.service.ServiceSingletonModule
 import com.pyamsoft.padlock.service.ServiceStartPresenter
 import com.pyamsoft.padlock.service.ServiceStartPresenterImpl
 import com.pyamsoft.padlock.service.job.PadLockJobService
-import com.pyamsoft.padlock.service.pause.PauseComponent
 import com.pyamsoft.padlock.settings.ClearAllPresenter
 import com.pyamsoft.padlock.settings.ClearAllPresenterImpl
 import com.pyamsoft.padlock.settings.ClearAllPresenterImpl.ClearAllEvent
@@ -156,8 +154,6 @@ interface PadLockComponent {
 
   fun inject(service: PadLockJobService)
 
-  fun inject(base: PinBaseFragment)
-
   fun inject(dialog: PurgeAllDialog)
 
   fun inject(dialog: PurgeSingleItemDialog)
@@ -186,9 +182,6 @@ interface PadLockComponent {
 
   @CheckResult
   fun plusSettingsComponent(): SettingsComponent.Builder
-
-  @CheckResult
-  fun plusPauseComponent(): PauseComponent.Builder
 
   @CheckResult
   fun plusPurgeComponent(): PurgeComponent.Builder
@@ -361,7 +354,7 @@ interface PadLockComponent {
     internal abstract fun bindClearPinPresenter(impl: ClearPinPresenterImpl): ClearPinPresenter
 
     @Binds
-    internal abstract fun bindCheckPinPresenter(impl: CheckPinPresenterImpl): CheckPinPresenter
+    internal abstract fun bindCheckPinPresenter(impl: ConfirmPinPresenterImpl): ConfirmPinPresenter
 
     @Binds
     internal abstract fun bindRecheckPresenter(impl: RecheckPresenterImpl): RecheckPresenter

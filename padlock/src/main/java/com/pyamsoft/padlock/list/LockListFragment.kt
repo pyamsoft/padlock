@@ -32,7 +32,7 @@ import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PAUSE
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PERMISSION
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
-import com.pyamsoft.padlock.pin.PinDialog
+import com.pyamsoft.padlock.pin.PinConfirmDialog
 import com.pyamsoft.padlock.api.service.ServiceManager
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.pydroid.core.singleDisposable
@@ -232,8 +232,8 @@ class LockListFragment : Fragment() {
 
     if (fromClick) {
       if (UsagePermissionChecker.hasPermission(requireContext())) {
-        PinDialog.newInstance(checkOnly = false, finishOnDismiss = false)
-            .show(requireActivity(), PinDialog.TAG)
+        PinConfirmDialog.newInstance(checkOnly = false, finishOnDismiss = false)
+            .show(requireActivity(), PinConfirmDialog.TAG)
       }
     }
   }
@@ -243,8 +243,8 @@ class LockListFragment : Fragment() {
 
     if (fromClick) {
       if (UsagePermissionChecker.hasPermission(requireContext())) {
-        PinDialog.newInstance(checkOnly = false, finishOnDismiss = false)
-            .show(requireActivity(), PinDialog.TAG)
+        PinConfirmDialog.newInstance(checkOnly = false, finishOnDismiss = false)
+            .show(requireActivity(), PinConfirmDialog.TAG)
       }
     }
   }

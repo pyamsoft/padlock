@@ -17,12 +17,16 @@
 
 package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.padlock.uicommon.ShimBaseScreen
+import com.pyamsoft.pydroid.arch.UiView
 
-interface PinView : ShimBaseScreen {
+internal interface PinView : UiView {
 
-  fun onToolbarNavigationClicked(onClick: () -> Unit)
+  fun enable()
 
-  fun onToolbarMenuItemClicked(onClick: (id: Int) -> Unit)
+  fun disable()
+
+  fun submit()
+
+  fun clearDisplay()
 
 }

@@ -27,7 +27,7 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.pin.ClearPinPresenter
-import com.pyamsoft.padlock.pin.PinDialog
+import com.pyamsoft.padlock.pin.PinConfirmDialog
 import com.pyamsoft.pydroid.ui.app.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.app.requireView
 import com.pyamsoft.pydroid.ui.settings.AppSettingsPreferenceFragment
@@ -112,8 +112,8 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
     Snackbreak.bindTo(viewLifecycleOwner)
         .long(requireView(), "You must clear the current code before changing type")
         .setAction("Okay", DebouncedOnClickListener.create {
-          PinDialog.newInstance(checkOnly = false, finishOnDismiss = false)
-              .show(requireActivity(), PinDialog.TAG)
+          PinConfirmDialog.newInstance(checkOnly = false, finishOnDismiss = false)
+              .show(requireActivity(), PinConfirmDialog.TAG)
         })
         .show()
   }

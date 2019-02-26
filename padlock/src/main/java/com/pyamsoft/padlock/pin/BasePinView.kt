@@ -25,7 +25,7 @@ internal abstract class BasePinView<C : Any> protected constructor(
   parent: ViewGroup,
   callback: C,
   protected val isConfirmMode: Boolean
-) : BaseUiView<C>(parent, callback), BasicPinView {
+) : BaseUiView<C>(parent, callback), PinView {
 
   protected abstract val layoutRoot: ViewGroup
 

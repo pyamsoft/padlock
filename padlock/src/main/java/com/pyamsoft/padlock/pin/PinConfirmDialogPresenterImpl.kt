@@ -17,21 +17,26 @@
 
 package com.pyamsoft.padlock.pin
 
-import com.andrognito.patternlockview.PatternLockView
 
-interface PinPatternView : PinBaseView {
+import com.pyamsoft.padlock.pin.PinConfirmDialogPresenter.Callback
+import com.pyamsoft.padlock.scopes.FragmentScope
+import com.pyamsoft.pydroid.arch.BasePresenter
+import com.pyamsoft.pydroid.core.bus.RxBus
+import javax.inject.Inject
 
-  fun onPatternEntry(
-    onPattern: (list: List<PatternLockView.Dot>) -> Unit,
-    onClear: () -> Unit
-  )
+@FragmentScope
+internal class PinConfirmDialogPresenterImpl @Inject internal constructor(
+) : BasePresenter<Unit, Callback>(RxBus.empty()),
+    ConfirmPinView.Callback,
+    PinConfirmDialogPresenter {
 
-  fun setPatternCorrect()
+  override fun onBind() {
+  }
 
-  fun setPatternWrong()
+  override fun onSubmit(attempt: String) {
+    callback.onAttemptSubmit(attempt)
+  }
 
-  fun infoPatternNotLongEnough()
-
-  fun infoPatternNeedsRepeat()
-
+  override fun onUnbind() {
+  }
 }

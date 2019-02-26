@@ -22,12 +22,12 @@ import com.pyamsoft.padlock.api.service.LockServiceInteractor
 import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.service.LockServicePresenter.Callback
+import com.pyamsoft.pydroid.arch.BasePresenter
+import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.RxBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.core.tryDispose
-import com.pyamsoft.pydroid.arch.BasePresenter
-import com.pyamsoft.pydroid.arch.destroy
 import io.reactivex.Maybe
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -37,9 +37,8 @@ import javax.inject.Inject
 internal class LockServicePresenterImpl @Inject internal constructor(
   private val enforcer: Enforcer,
   private val interactor: LockServiceInteractor
-) : BasePresenter<Unit, Callback>(
-    RxBus.empty()
-), LockServicePresenter {
+) : BasePresenter<Unit, Callback>(RxBus.empty()),
+    LockServicePresenter {
 
   private var recheckDisposable by singleDisposable()
 

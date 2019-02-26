@@ -33,6 +33,7 @@ import com.pyamsoft.padlock.scopes.FragmentScope
 import com.pyamsoft.padlock.service.pause.PauseConfirmActivity
 import com.pyamsoft.pydroid.ui.theme.Theming
 import dagger.Binds
+import dagger.BindsInstance
 import dagger.Module
 import dagger.Provides
 import dagger.Subcomponent
@@ -43,15 +44,17 @@ interface PinComponent {
 
   fun inject(dialog: PauseConfirmActivity)
 
-  fun inject(dialog: PinDialog)
+  fun inject(dialog: PinConfirmDialog)
 
   fun inject(dialog: PinCreateDialog)
 
   @Subcomponent.Builder
   interface Builder {
 
+    @BindsInstance
     fun owner(owner: LifecycleOwner): Builder
 
+    @BindsInstance
     fun parent(parent: ViewGroup): Builder
 
     fun build(): PinComponent
@@ -61,12 +64,16 @@ interface PinComponent {
   abstract class PinModule {
 
     @Binds
-    @CheckResult
     internal abstract fun bindPinCreateDialogPresenter(impl: PinCreateDialogPresenterImpl): PinCreateDialogPresenter
 
     @Binds
-    @CheckResult
-    internal abstract fun bindViewCallback(impl: PinCreateDialogPresenterImpl): CreatePinView.Callback
+    internal abstract fun bindCreateViewCallback(impl: PinCreateDialogPresenterImpl): CreatePinView.Callback
+
+    @Binds
+    internal abstract fun bindPinConfirmDialogPresenter(impl: PinConfirmDialogPresenterImpl): PinConfirmDialogPresenter
+
+    @Binds
+    internal abstract fun bindConfirmViewCallback(impl: PinConfirmDialogPresenterImpl): ConfirmPinView.Callback
 
   }
 

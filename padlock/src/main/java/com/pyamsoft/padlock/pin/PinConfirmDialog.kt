@@ -24,7 +24,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
+import android.view.ViewGroup.LayoutParams
 import androidx.annotation.CheckResult
 import androidx.fragment.app.DialogFragment
 import com.pyamsoft.padlock.Injector
@@ -34,18 +34,20 @@ import com.pyamsoft.pydroid.ui.app.noTitle
 import com.pyamsoft.pydroid.ui.app.requireArguments
 import javax.inject.Inject
 
-class PinDialog : DialogFragment() {
+class PinConfirmDialog : DialogFragment(),
+    ConfirmPinPresenter.Callback,
+    PinConfirmDialogPresenter.Callback {
 
-  @field:Inject internal lateinit var pinView: CreatePinView
+  @field:Inject internal lateinit var pinView: ConfirmPinView
+  @field:Inject internal lateinit var presenter: PinConfirmDialogPresenter
+  @field:Inject internal lateinit var confirmPresenter: ConfirmPinPresenter
 
-  private var checkOnly: Boolean = false
   private var finishOnDismiss: Boolean = false
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     isCancelable = true
 
-    checkOnly = requireArguments().getBoolean(CHECK_ONLY, false)
     finishOnDismiss = requireArguments().getBoolean(FINISH_ON_DISMISS, false)
   }
 
@@ -54,8 +56,8 @@ class PinDialog : DialogFragment() {
     // The dialog is super small for some reason. We have to set the size manually, in onResume
     dialog.window?.apply {
       setLayout(
-          WindowManager.LayoutParams.MATCH_PARENT,
-          WindowManager.LayoutParams.WRAP_CONTENT
+          LayoutParams.MATCH_PARENT,
+          LayoutParams.WRAP_CONTENT
       )
       setGravity(Gravity.CENTER)
     }
@@ -67,13 +69,12 @@ class PinDialog : DialogFragment() {
     savedInstanceState: Bundle?
   ): View? {
     val root = inflater.inflate(R.layout.layout_frame, container, false)
+    val layoutRoot = root.findViewById<ViewGroup>(R.id.layout_frame)
 
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+    Injector.obtain<PadLockComponent>(root.context.applicationContext)
         .plusPinComponent()
         .owner(viewLifecycleOwner)
-        .inflater(inflater)
-        .container(container)
-        .savedInstanceState(savedInstanceState)
+        .parent(layoutRoot)
         .build()
         .inject(this)
 
@@ -91,6 +92,8 @@ class PinDialog : DialogFragment() {
   ) {
     super.onViewCreated(view, savedInstanceState)
     pinView.inflate(savedInstanceState)
+
+    presenter.bind(viewLifecycleOwner, this)
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
@@ -98,33 +101,53 @@ class PinDialog : DialogFragment() {
     pinView.saveState(outState)
   }
 
-  override fun onDismiss(dialog: DialogInterface?) {
-    super.onDismiss(dialog)
-    if (finishOnDismiss) {
-      activity?.also { it.finish() }
-    }
-  }
-
   override fun onDestroyView() {
     super.onDestroyView()
     pinView.teardown()
   }
 
+  override fun onDismiss(dialog: DialogInterface?) {
+    super.onDismiss(dialog)
+    if (finishOnDismiss) {
+      requireActivity().finish()
+    }
+  }
+
+  override fun onAttemptSubmit(attempt: String) {
+    confirmPresenter.confirm(attempt)
+  }
+
+  override fun onConfirmPinBegin() {
+    pinView.disable()
+  }
+
+  override fun onConfirmPinSuccess() {
+    onPinCallback()
+  }
+
+  override fun onConfirmPinFailure() {
+    onPinCallback()
+  }
+
+  override fun onConfirmPinComplete() {
+    pinView.enable()
+  }
+
+  private fun onPinCallback() {
+    pinView.clearDisplay()
+    dismiss()
+  }
+
   companion object {
 
-    const val TAG = "PinDialog"
-    internal const val CHECK_ONLY = "check_only"
+    const val TAG = "PinConfirmDialog"
     private const val FINISH_ON_DISMISS = "finish_dismiss"
 
     @JvmStatic
     @CheckResult
-    fun newInstance(
-      checkOnly: Boolean,
-      finishOnDismiss: Boolean
-    ): PinDialog {
-      return PinDialog().apply {
+    fun newInstance(finishOnDismiss: Boolean): PinConfirmDialog {
+      return PinConfirmDialog().apply {
         arguments = Bundle().apply {
-          putBoolean(CHECK_ONLY, checkOnly)
           putBoolean(FINISH_ON_DISMISS, finishOnDismiss)
         }
       }

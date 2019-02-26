@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.pin
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.PinInteractor
-import com.pyamsoft.padlock.pin.CheckPinPresenterImpl.CheckPinEvent
+import com.pyamsoft.padlock.pin.ConfirmPinPresenterImpl.CheckPinEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.arch.BasePresenter
@@ -29,12 +29,12 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-internal class CheckPinPresenterImpl @Inject internal constructor(
+internal class ConfirmPinPresenterImpl @Inject internal constructor(
   private val enforcer: Enforcer,
   private val interactor: PinInteractor,
   bus: EventBus<CheckPinEvent>
-) : BasePresenter<CheckPinEvent, CheckPinPresenter.Callback>(bus),
-    CheckPinPresenter {
+) : BasePresenter<CheckPinEvent, ConfirmPinPresenter.Callback>(bus),
+    ConfirmPinPresenter {
 
   @CheckResult
   private fun checkPin(attempt: String): Single<Boolean> {
@@ -52,9 +52,9 @@ internal class CheckPinPresenterImpl @Inject internal constructor(
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe { success ->
           if (success) {
-            callback.onCheckPinSuccess()
+            callback.onConfirmPinSuccess()
           } else {
-            callback.onCheckPinFailure()
+            callback.onConfirmPinFailure()
           }
         }
         .destroy(owner)
@@ -63,7 +63,7 @@ internal class CheckPinPresenterImpl @Inject internal constructor(
   override fun onUnbind() {
   }
 
-  override fun check(pin: String) {
+  override fun confirm(pin: String) {
     publish(CheckPinEvent(pin))
   }
 
