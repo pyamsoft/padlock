@@ -30,7 +30,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
 import com.pyamsoft.padlock.api.service.ServiceManager
@@ -62,7 +61,8 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
 
   init {
     filter.addDataScheme("package")
-    notificationManager = requireNotNull(context.getSystemService<NotificationManager>())
+    notificationManager =
+      context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
       setupNotificationChannel()

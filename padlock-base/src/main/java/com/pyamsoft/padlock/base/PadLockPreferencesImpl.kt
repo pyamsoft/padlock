@@ -17,11 +17,11 @@
 
 package com.pyamsoft.padlock.base
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener
-import androidx.core.content.edit
-import androidx.preference.PreferenceManager
+import android.preference.PreferenceManager
 import com.pyamsoft.padlock.api.preferences.ClearPreferences
 import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
 import com.pyamsoft.padlock.api.preferences.LockListPreferences
@@ -74,6 +74,12 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     lockScreenTypeDefault = res.getString(R.string.lock_screen_type_default)
   }
 
+  private inline fun edit(onEdit: SharedPreferences.Editor.() -> Unit) {
+    preferences.edit()
+        .apply(onEdit)
+        .apply()
+  }
+
   override fun getCurrentLockType(): LockScreenType =
     LockScreenType.valueOf(preferences.getString(lockScreenType, lockScreenTypeDefault).orEmpty())
 
@@ -83,13 +89,13 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
   override fun getHint(): String? = preferences.getString(HINT, null)
 
   override fun setHint(hint: String) {
-    preferences.edit {
+    edit {
       putString(HINT, hint)
     }
   }
 
   override fun clearHint() {
-    preferences.edit {
+    edit {
       remove(HINT)
     }
   }
@@ -103,7 +109,7 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
   override fun isSystemVisible(): Boolean = preferences.getBoolean(IS_SYSTEM, false)
 
   override fun setSystemVisible(visible: Boolean) {
-    preferences.edit {
+    edit {
       putBoolean(IS_SYSTEM, visible)
     }
   }
@@ -111,13 +117,13 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
   override fun getMasterPassword(): String? = preferences.getString(MASTER_PASSWORD, null)
 
   override fun setMasterPassword(pw: String) {
-    preferences.edit {
+    edit {
       putString(MASTER_PASSWORD, pw)
     }
   }
 
   override fun clearMasterPassword() {
-    preferences.edit {
+    edit {
       remove(MASTER_PASSWORD)
     }
   }
@@ -127,7 +133,7 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
   }
 
   override fun setPaused(paused: ServicePauseState) {
-    preferences.edit {
+    edit {
       putString(PAUSED, paused.name)
     }
   }
@@ -150,16 +156,19 @@ internal class PadLockPreferencesImpl @Inject internal constructor(
     }
   }
 
-  override fun clearAll() {
-    preferences.edit(commit = true) {
-      clear()
-    }
+  @SuppressLint("ApplySharedPref")
+  private fun clear(preferences: SharedPreferences) {
+    preferences.edit()
+        .clear()
+        .commit()
+  }
 
+  override fun clearAll() {
     val defaultValuesKey = PreferenceManager.KEY_HAS_SET_DEFAULT_VALUES
     val defaultPrefs = context.getSharedPreferences(defaultValuesKey, Context.MODE_PRIVATE)
-    defaultPrefs.edit(commit = true) {
-      clear()
-    }
+
+    clear(preferences)
+    clear(defaultPrefs)
   }
 
   private class GlobalPreferenceWatcher internal constructor(

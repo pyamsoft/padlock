@@ -22,7 +22,6 @@ import android.app.AppOpsManager.OnOpChangedListener
 import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Context
-import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.api.preferences.PreferenceWatcher
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ForegroundEvent
 import com.pyamsoft.padlock.api.service.UsageEventProvider
@@ -38,7 +37,7 @@ internal class UsageEventProviderImpl @Inject internal constructor(
 ) : UsageEventProvider {
 
   private val usage by lazy(NONE) {
-    requireNotNull(context.getSystemService<UsageStatsManager>())
+    context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
   }
 
   private val internalWatchers = LinkedHashSet<(Boolean) -> Unit>()
@@ -74,7 +73,7 @@ internal class UsageEventProviderImpl @Inject internal constructor(
 
     private var isWatching = AtomicBoolean(false)
 
-    private val appOps = requireNotNull(context.getSystemService<AppOpsManager>())
+    private val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
     private val callback = OnOpChangedListener { op, packageName ->
       if (op == AppOpsManager.OPSTR_GET_USAGE_STATS) {
         if (packageName == context.packageName) {

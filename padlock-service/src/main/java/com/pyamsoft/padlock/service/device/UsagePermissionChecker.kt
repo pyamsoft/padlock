@@ -24,7 +24,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.CheckResult
 import androidx.core.content.ContextCompat
-import androidx.core.content.getSystemService
 
 object UsagePermissionChecker {
 
@@ -32,7 +31,7 @@ object UsagePermissionChecker {
   @CheckResult
   fun hasPermission(context: Context): Boolean {
     val appContext = context.applicationContext
-    val appOpsService = requireNotNull(appContext.getSystemService<AppOpsManager>())
+    val appOpsService = appContext.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
     val mode = appOpsService.checkOpNoThrow(
         AppOpsManager.OPSTR_GET_USAGE_STATS,
         android.os.Process.myUid(), appContext.packageName

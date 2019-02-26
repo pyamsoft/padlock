@@ -24,16 +24,16 @@ import android.content.IntentFilter
 import android.hardware.display.DisplayManager
 import android.view.Display
 import androidx.annotation.CheckResult
-import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.api.service.ScreenStateObserver
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Singleton
 internal class ScreenStateObserverImpl @Inject internal constructor(
   private val context: Context
 ) : BroadcastReceiver(), ScreenStateObserver {
 
-  private val displayManager = requireNotNull(context.getSystemService<DisplayManager>())
+  private val displayManager = context.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
   private var callback: ((Boolean) -> Unit)? = null
 
   @CheckResult

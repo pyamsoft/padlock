@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.base.database
 
 import android.content.Context
 import androidx.annotation.CheckResult
-import androidx.core.database.getStringOrNull
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -289,39 +288,46 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
         val inserts = ArrayList<Completable>()
         sqldelight.readableDatabase.use { db ->
           db.query("SELECT * FROM ${SqlDelightMigrations.TABLE_NAME}")
-              .use {
+              .use { cursor ->
 
                 // Migrate them into Room via insert
-                if (it.moveToFirst()) {
+                if (cursor.moveToFirst()) {
                   val columnPackageName =
-                    it.getColumnIndexOrThrow(SqlDelightMigrations.PACKAGE_NAME)
+                    cursor.getColumnIndexOrThrow(SqlDelightMigrations.PACKAGE_NAME)
                   val columnActivityName =
-                    it.getColumnIndexOrThrow(SqlDelightMigrations.ACTIVITY_NAME)
-                  val columnLockCode = it.getColumnIndexOrThrow(SqlDelightMigrations.LOCK_CODE)
+                    cursor.getColumnIndexOrThrow(SqlDelightMigrations.ACTIVITY_NAME)
+                  val columnLockCode = cursor.getColumnIndexOrThrow(SqlDelightMigrations.LOCK_CODE)
                   val columnLockUntilTime =
-                    it.getColumnIndexOrThrow(SqlDelightMigrations.LOCK_UNTIL_TIME)
+                    cursor.getColumnIndexOrThrow(SqlDelightMigrations.LOCK_UNTIL_TIME)
                   val columnIgnoreUntilTime =
-                    it.getColumnIndexOrThrow(SqlDelightMigrations.IGNORE_UNTIL_TIME)
+                    cursor.getColumnIndexOrThrow(SqlDelightMigrations.IGNORE_UNTIL_TIME)
                   val columnSystemApplication =
-                    it.getColumnIndexOrThrow(SqlDelightMigrations.SYSTEM_APPLICATION)
+                    cursor.getColumnIndexOrThrow(SqlDelightMigrations.SYSTEM_APPLICATION)
 
                   // Some old versions did not have whitelist column
-                  val columnWhitelist = it.getColumnIndex(SqlDelightMigrations.WHITELIST)
+                  val columnWhitelist = cursor.getColumnIndex(SqlDelightMigrations.WHITELIST)
 
-                  while (it.moveToNext()) {
-                    val packageName: String = it.getString(columnPackageName)
-                    val activityName: String = it.getString(columnActivityName)
-                    val lockCode: String? = it.getStringOrNull(columnLockCode)
-                    val lockUntilTime: Long = it.getLong(columnLockUntilTime)
-                    val ignoreUntilTime: Long = it.getLong(columnIgnoreUntilTime)
-                    val systemApplication: Boolean = it.getInt(columnSystemApplication) != 0
+                  while (cursor.moveToNext()) {
+                    val packageName: String = cursor.getString(columnPackageName)
+                    val activityName: String = cursor.getString(columnActivityName)
+                    val lockCode: String?
+                    val lockUntilTime: Long = cursor.getLong(columnLockUntilTime)
+                    val ignoreUntilTime: Long = cursor.getLong(columnIgnoreUntilTime)
+                    val systemApplication: Boolean = cursor.getInt(columnSystemApplication) != 0
+
+                    // LockCode can be null
+                    if (cursor.isNull(columnLockCode)) {
+                      lockCode = null
+                    } else {
+                      lockCode = cursor.getString(columnLockCode)
+                    }
 
                     // Some old versions did not have whitelist column - default to false
                     val whitelist: Boolean
                     if (columnWhitelist < 0) {
                       whitelist = false
                     } else {
-                      whitelist = it.getInt(columnWhitelist) != 0
+                      whitelist = cursor.getInt(columnWhitelist) != 0
                     }
 
                     // Queue up the insert into the new DB, migrating old data
@@ -403,7 +409,6 @@ internal abstract class PadLockDbImpl internal constructor() : RoomDatabase(), P
 
   @CheckResult
   internal abstract fun deleteDao(): DbEntryDeleteDao
-
 
   private object EmptyCallback : SupportSQLiteOpenHelper.Callback(
       SqlDelightMigrations.SQLDELIGHT_DB_VERSION

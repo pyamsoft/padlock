@@ -58,6 +58,8 @@ kapt {
 }
 
 dependencies {
+  implementation "androidx.core:core:$core"
+
   kapt "com.google.dagger:dagger-compiler:$dagger"
   api project(':padlock-api')
 }

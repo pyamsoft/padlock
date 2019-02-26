@@ -68,6 +68,11 @@ dependencies {
   // Dagger
   api "com.google.dagger:dagger:$dagger"
   kapt "com.google.dagger:dagger-compiler:$dagger"
+
+  // Repo
+  api "com.popinnow.android.repo:repo:$repo"
+  api "com.popinnow.android.repo:repo-persister-moshi:$repo"
+
   api project(':padlock-model')
 }
 

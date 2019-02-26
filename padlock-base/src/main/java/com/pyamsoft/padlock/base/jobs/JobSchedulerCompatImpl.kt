@@ -24,7 +24,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.os.PersistableBundle
 import androidx.annotation.CheckResult
-import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat.JobType
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat.JobType.RECHECK
@@ -44,7 +43,7 @@ internal class JobSchedulerCompatImpl @Inject internal constructor(
   private val serviceComponent by lazy { ComponentName(context, jobServiceClass) }
   private val recheckCache by lazy { ConcurrentHashMap<String, Int>() }
   private val jobScheduler by lazy {
-    requireNotNull(context.getSystemService<JobScheduler>())
+    context.getSystemService(Context.JOB_SCHEDULER_SERVICE) as JobScheduler
   }
 
   @CheckResult
