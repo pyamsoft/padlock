@@ -15,18 +15,16 @@
  *
  */
 
-package com.pyamsoft.padlock.purge
+package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.padlock.purge.PurgeAllPresenter.Callback
-import com.pyamsoft.pydroid.arch.Presenter
+internal interface ConfirmPinView : BasicPinView {
 
-internal interface PurgeAllPresenter : Presenter<Callback> {
-
-  fun purge(stalePackages: List<String>)
+  fun showPinError()
 
   interface Callback {
 
-    fun onAllPurged(stalePackages: List<String>)
-  }
-}
+    fun onSubmit(attempt: String)
 
+  }
+
+}

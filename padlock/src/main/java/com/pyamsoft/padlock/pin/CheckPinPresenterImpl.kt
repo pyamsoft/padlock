@@ -22,8 +22,8 @@ import com.pyamsoft.padlock.api.PinInteractor
 import com.pyamsoft.padlock.pin.CheckPinPresenterImpl.CheckPinEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.threads.Enforcer
-import com.pyamsoft.pydroid.ui.arch.BasePresenter
-import com.pyamsoft.pydroid.ui.arch.destroy
+import com.pyamsoft.pydroid.arch.BasePresenter
+import com.pyamsoft.pydroid.arch.destroy
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -41,7 +41,7 @@ internal class CheckPinPresenterImpl @Inject internal constructor(
     enforcer.assertNotOnMainThread()
     return interactor.comparePin(attempt)
         .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .observeOn(Schedulers.io())
   }
 
   override fun onBind() {
@@ -49,6 +49,7 @@ internal class CheckPinPresenterImpl @Inject internal constructor(
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
         .flatMapSingle { checkPin(it.attempt) }
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe { success ->
           if (success) {
             callback.onCheckPinSuccess()
@@ -68,3 +69,4 @@ internal class CheckPinPresenterImpl @Inject internal constructor(
 
   internal data class CheckPinEvent(val attempt: String)
 }
+

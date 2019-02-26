@@ -21,8 +21,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
+import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
@@ -44,15 +43,15 @@ class PurgeFragment : Fragment(),
 
   @field:Inject internal lateinit var purgeView: PurgeListView
 
-  private lateinit var layoutRoot: ConstraintLayout
+  private lateinit var layoutRoot: FrameLayout
 
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-    val root = inflater.inflate(R.layout.layout_constraint, container, false)
-    layoutRoot = root.findViewById(R.id.layout_constraint)
+    val root = inflater.inflate(R.layout.layout_frame, container, false)
+    layoutRoot = root.findViewById(R.id.layout_frame)
 
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusPurgeComponent()
@@ -71,28 +70,10 @@ class PurgeFragment : Fragment(),
   ) {
     super.onViewCreated(view, savedInstanceState)
     purgeView.inflate(savedInstanceState)
-    layoutComponents(layoutRoot)
 
     presenter.bind(viewLifecycleOwner, this)
     purgeSinglePresenter.bind(viewLifecycleOwner, this)
     purgeAllPresenter.bind(viewLifecycleOwner, this)
-  }
-
-  private fun layoutComponents(layoutRoot: ConstraintLayout) {
-    ConstraintSet().apply {
-      clone(layoutRoot)
-
-      purgeView.also {
-        connect(it.id(), ConstraintSet.TOP, layoutRoot.id, ConstraintSet.TOP)
-        connect(it.id(), ConstraintSet.BOTTOM, layoutRoot.id, ConstraintSet.BOTTOM)
-        connect(it.id(), ConstraintSet.START, layoutRoot.id, ConstraintSet.START)
-        connect(it.id(), ConstraintSet.END, layoutRoot.id, ConstraintSet.END)
-        constrainHeight(it.id(), ConstraintSet.MATCH_CONSTRAINT)
-        constrainWidth(it.id(), ConstraintSet.MATCH_CONSTRAINT)
-      }
-
-      applyTo(layoutRoot)
-    }
   }
 
   override fun onSinglePurged(stalePackage: String) {

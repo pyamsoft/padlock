@@ -18,7 +18,7 @@
 package com.pyamsoft.padlock.purge
 
 import com.pyamsoft.padlock.purge.PurgePresenter.Callback
-import com.pyamsoft.pydroid.ui.arch.Presenter
+import com.pyamsoft.pydroid.arch.Presenter
 
 internal interface PurgePresenter : Presenter<Callback> {
 

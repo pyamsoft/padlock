@@ -17,36 +17,42 @@
 
 package com.pyamsoft.padlock.pin
 
-import android.os.Bundle
-import android.view.LayoutInflater
+import android.content.Context
 import android.view.ViewGroup
 import androidx.annotation.CheckResult
+import androidx.annotation.ColorRes
+import androidx.core.content.withStyledAttributes
 import androidx.lifecycle.LifecycleOwner
+import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
+import com.pyamsoft.padlock.model.LockScreenType.TYPE_PATTERN
+import com.pyamsoft.padlock.model.LockScreenType.TYPE_TEXT
 import com.pyamsoft.padlock.pin.PinComponent.PinModule
+import com.pyamsoft.padlock.pin.PinComponent.PinProvider
+import com.pyamsoft.padlock.scopes.FragmentScope
+import com.pyamsoft.padlock.service.pause.PauseConfirmActivity
+import com.pyamsoft.pydroid.ui.theme.Theming
 import dagger.Binds
-import dagger.BindsInstance
 import dagger.Module
+import dagger.Provides
 import dagger.Subcomponent
 
-@Subcomponent(modules = [PinModule::class])
+@FragmentScope
+@Subcomponent(modules = [PinModule::class, PinProvider::class])
 interface PinComponent {
+
+  fun inject(dialog: PauseConfirmActivity)
 
   fun inject(dialog: PinDialog)
 
-  fun inject(fragment: PinPatternFragment)
-
-  fun inject(fragment: PinTextFragment)
+  fun inject(dialog: PinCreateDialog)
 
   @Subcomponent.Builder
   interface Builder {
 
-    @BindsInstance fun owner(owner: LifecycleOwner): Builder
+    fun owner(owner: LifecycleOwner): Builder
 
-    @BindsInstance fun inflater(inflater: LayoutInflater): Builder
-
-    @BindsInstance fun container(container: ViewGroup?): Builder
-
-    @BindsInstance fun savedInstanceState(savedInstanceState: Bundle?): Builder
+    fun parent(parent: ViewGroup): Builder
 
     fun build(): PinComponent
   }
@@ -56,16 +62,69 @@ interface PinComponent {
 
     @Binds
     @CheckResult
-    internal abstract fun bindView(impl: PinViewImpl): PinView
+    internal abstract fun bindPinCreateDialogPresenter(impl: PinCreateDialogPresenterImpl): PinCreateDialogPresenter
 
     @Binds
     @CheckResult
-    internal abstract fun bindPatternView(impl: PinPatternViewImpl): PinPatternView
+    internal abstract fun bindViewCallback(impl: PinCreateDialogPresenterImpl): CreatePinView.Callback
 
-    @Binds
+  }
+
+  @Module
+  object PinProvider {
+
+    @Provides
+    @JvmStatic
     @CheckResult
-    internal abstract fun bindTextView(impl: PinTextViewImpl): PinTextView
+    internal fun provideConfirmPinView(
+      owner: LifecycleOwner,
+      theming: Theming,
+      preferences: LockScreenPreferences,
+      parent: ViewGroup,
+      callback: ConfirmPinView.Callback
+    ): ConfirmPinView {
+      return when (preferences.getCurrentLockType()) {
+        TYPE_PATTERN -> PatternConfirmPinView(
+            owner, parent, callback, themeColor(theming, parent.context)
+        )
+        TYPE_TEXT -> TextConfirmPinView(owner, parent, callback)
+      }
+    }
 
+    @Provides
+    @JvmStatic
+    @CheckResult
+    internal fun provideCreatePinView(
+      theming: Theming,
+      preferences: LockScreenPreferences,
+      parent: ViewGroup,
+      callback: CreatePinView.Callback
+    ): CreatePinView {
+      return when (preferences.getCurrentLockType()) {
+        TYPE_PATTERN -> PatternCreatePinView(parent, callback, themeColor(theming, parent.context))
+        TYPE_TEXT -> TextCreatePinView(parent, callback)
+      }
+    }
+
+    @CheckResult
+    @JvmStatic
+    @ColorRes
+    private fun themeColor(
+      theming: Theming,
+      context: Context
+    ): Int {
+      val theme: Int
+      if (theming.isDarkTheme()) {
+        theme = R.style.Theme_PadLock_Dark_Dialog
+      } else {
+        theme = R.style.Theme_PadLock_Light_Dialog
+      }
+
+      @ColorRes var color = 0
+      val attrs = intArrayOf(android.R.attr.colorForeground)
+      context.withStyledAttributes(theme, attrs) { color = getResourceId(0, 0) }
+      return color
+    }
   }
 }
 

@@ -15,18 +15,22 @@
  *
  */
 
-package com.pyamsoft.padlock.purge
+package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.padlock.purge.PurgeAllPresenter.Callback
-import com.pyamsoft.pydroid.arch.Presenter
+import android.view.ViewGroup
+import androidx.annotation.ColorRes
+import com.pyamsoft.padlock.pin.CreatePinView.Callback
+import javax.inject.Inject
 
-internal interface PurgeAllPresenter : Presenter<Callback> {
+internal class PatternCreatePinView @Inject internal constructor(
+  parent: ViewGroup,
+  callback: Callback,
+  @ColorRes normalDotColor: Int
+) : CreatePinView,
+    PatternPinView<Callback>(parent, callback, true, normalDotColor) {
 
-  fun purge(stalePackages: List<String>)
-
-  interface Callback {
-
-    fun onAllPurged(stalePackages: List<String>)
+  override fun submit() {
+    callback.onSubmit(getAttempt(), getReConfirmAttempt(), getOptionalHint())
   }
-}
 
+}

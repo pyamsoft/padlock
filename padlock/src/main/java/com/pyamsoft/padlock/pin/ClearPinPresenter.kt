@@ -17,7 +17,7 @@
 
 package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.pydroid.ui.arch.Presenter
+import com.pyamsoft.pydroid.arch.Presenter
 
 interface ClearPinPresenter : Presenter<ClearPinPresenter.Callback> {
 

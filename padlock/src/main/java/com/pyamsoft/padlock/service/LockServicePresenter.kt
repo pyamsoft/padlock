@@ -19,7 +19,7 @@ package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.service.LockServicePresenter.Callback
-import com.pyamsoft.pydroid.ui.arch.Presenter
+import com.pyamsoft.pydroid.arch.Presenter
 
 internal interface LockServicePresenter : Presenter<Callback> {
 

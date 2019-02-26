@@ -15,18 +15,20 @@
  *
  */
 
-package com.pyamsoft.padlock.purge
+package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.padlock.purge.PurgeAllPresenter.Callback
+import com.pyamsoft.padlock.pin.PinCreateDialogPresenter.Callback
 import com.pyamsoft.pydroid.arch.Presenter
 
-internal interface PurgeAllPresenter : Presenter<Callback> {
-
-  fun purge(stalePackages: List<String>)
+interface PinCreateDialogPresenter : Presenter<Callback> {
 
   interface Callback {
 
-    fun onAllPurged(stalePackages: List<String>)
+    fun onAttemptSubmit(
+      attempt: String,
+      reEntry: String,
+      hint: String
+    )
+
   }
 }
-

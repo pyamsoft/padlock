@@ -104,14 +104,14 @@ abstract class PinBaseFragment : Fragment() {
     reEntry: String,
     hint: String
   ) {
-    if (checkOnly) {
-      submitDisposable = viewModel.checkPin(pin)
-    } else {
-      submitDisposable = viewModel.submit(pin, reEntry, hint) {
-        clearDisplay()
-        dismissParent()
-      }
-    }
+//    if (checkOnly) {
+//      submitDisposable = viewModel.checkPin(pin)
+//    } else {
+//      submitDisposable = viewModel.submit(pin, reEntry, hint) {
+//        clearDisplay()
+//        dismissParent()
+//      }
+//    }
   }
 
   private fun validateChildLifecycle() {

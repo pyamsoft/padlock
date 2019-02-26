@@ -15,18 +15,27 @@
  *
  */
 
-package com.pyamsoft.padlock.purge
+package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.padlock.purge.PurgeAllPresenter.Callback
-import com.pyamsoft.pydroid.arch.Presenter
+import android.view.ViewGroup
+import androidx.annotation.CheckResult
+import com.pyamsoft.pydroid.arch.BaseUiView
 
-internal interface PurgeAllPresenter : Presenter<Callback> {
+internal abstract class BasePinView<C : Any> protected constructor(
+  parent: ViewGroup,
+  callback: C,
+  protected val isConfirmMode: Boolean
+) : BaseUiView<C>(parent, callback), BasicPinView {
 
-  fun purge(stalePackages: List<String>)
+  protected abstract val layoutRoot: ViewGroup
 
-  interface Callback {
+  @CheckResult
+  protected abstract fun getAttempt(): String
 
-    fun onAllPurged(stalePackages: List<String>)
-  }
+  @CheckResult
+  protected abstract fun getReConfirmAttempt(): String
+
+  @CheckResult
+  protected abstract fun getOptionalHint(): String
+
 }
-

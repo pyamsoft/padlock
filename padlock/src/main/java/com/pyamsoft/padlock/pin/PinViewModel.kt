@@ -51,25 +51,6 @@ class PinViewModel @Inject internal constructor(
   }
 
   @CheckResult
-  fun submit(
-    currentAttempt: String,
-    reEntryAttempt: String,
-    hint: String,
-    onSubmitComplete: () -> Unit
-  ): Disposable {
-    return interactor.submitPin(currentAttempt, reEntryAttempt, hint)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .doAfterTerminate { onSubmitComplete() }
-        .subscribe(Consumer {
-          //          when (it) {
-//            is Create -> createPinBus.publish(CreatePinEvent(it.complete))
-//            is Clear -> clearPinBus.publish(ClearPinEvent(it.complete))
-//          }
-        })
-  }
-
-  @CheckResult
   fun onMasterPinCheckEvent(func: (Boolean) -> Unit): Disposable {
     return Disposables.empty()
 //    return checkPinBus.listen()
@@ -77,17 +58,5 @@ class PinViewModel @Inject internal constructor(
 //        .subscribeOn(Schedulers.io())
 //        .observeOn(AndroidSchedulers.mainThread())
 //        .subscribe(func)
-  }
-
-  @CheckResult
-  fun checkPin(attempt: String): Disposable {
-    return Disposables.empty()
-//    return interactor.comparePin(attempt)
-//        .subscribeOn(Schedulers.io())
-//        .observeOn(AndroidSchedulers.mainThread())
-//        .subscribe({ checkPinBus.publish(CheckPinEvent(it)) }, {
-//          Timber.e(it, "Error checking pin and attempt")
-//          checkPinBus.publish(CheckPinEvent(false))
-//        })
   }
 }

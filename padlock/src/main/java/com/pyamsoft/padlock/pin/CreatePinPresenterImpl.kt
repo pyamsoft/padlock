@@ -15,11 +15,11 @@
  *
  */
 
-package com.pyamsoft.padlock.settings
+package com.pyamsoft.padlock.pin
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.api.SettingsInteractor
-import com.pyamsoft.padlock.settings.ClearDatabasePresenterImpl.ClearDatabaseEvent
+import com.pyamsoft.padlock.api.PinInteractor
+import com.pyamsoft.padlock.pin.CreatePinPresenterImpl.CreatePinEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.arch.BasePresenter
@@ -29,39 +29,57 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-internal class ClearDatabasePresenterImpl @Inject internal constructor(
-  private val interactor: SettingsInteractor,
+internal class CreatePinPresenterImpl @Inject internal constructor(
   private val enforcer: Enforcer,
-  bus: EventBus<ClearDatabaseEvent>
-) : BasePresenter<ClearDatabaseEvent, ClearDatabasePresenter.Callback>(bus),
-    ClearDatabasePresenter {
+  private val interactor: PinInteractor,
+  bus: EventBus<CreatePinEvent>
+) : BasePresenter<CreatePinEvent, CreatePinPresenter.Callback>(bus),
+    CreatePinPresenter {
 
   @CheckResult
-  private fun clearDatabase(): Single<Unit> {
+  private fun createPin(
+    attempt: String,
+    reEntry: String,
+    hint: String
+  ): Single<Boolean> {
     enforcer.assertNotOnMainThread()
-    return interactor.clearDatabase()
+    return interactor.createPin(attempt, reEntry, hint)
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
+        .doOnSubscribe { callback.onCreatePinBegin() }
+        .doAfterTerminate { callback.onCreatePinComplete() }
   }
 
   override fun onBind() {
     listen()
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
-        .flatMapSingle { clearDatabase() }
+        .flatMapSingle { createPin(it.attempt, it.reEntry, it.hint) }
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { callback.onDatabaseCleared() }
+        .subscribe { success ->
+          if (success) {
+            callback.onCreatePinSuccess()
+          } else {
+            callback.onCreatePinFailure()
+          }
+        }
         .destroy(owner)
   }
 
   override fun onUnbind() {
   }
 
-  override fun clear() {
-    publish(ClearDatabaseEvent)
+  override fun create(
+    attempt: String,
+    reEntry: String,
+    hint: String
+  ) {
+    publish(CreatePinEvent(attempt, reEntry, hint))
   }
 
-  internal object ClearDatabaseEvent
-
+  internal data class CreatePinEvent(
+    val attempt: String,
+    val reEntry: String,
+    val hint: String
+  )
 }
-

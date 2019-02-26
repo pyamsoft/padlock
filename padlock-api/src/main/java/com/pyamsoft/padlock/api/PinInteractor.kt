@@ -18,7 +18,6 @@
 package com.pyamsoft.padlock.api
 
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.model.pin.PinEntryEvent
 import io.reactivex.Single
 
 interface PinInteractor {
@@ -30,9 +29,12 @@ interface PinInteractor {
   fun comparePin(attempt: String): Single<Boolean>
 
   @CheckResult
-  fun submitPin(
+  fun createPin(
     currentAttempt: String,
     reEntryAttempt: String,
     hint: String
-  ): Single<PinEntryEvent>
+  ): Single<Boolean>
+
+  @CheckResult
+  fun clearPin(attempt: String): Single<Boolean>
 }

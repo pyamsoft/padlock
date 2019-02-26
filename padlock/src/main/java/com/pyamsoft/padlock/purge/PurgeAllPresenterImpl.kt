@@ -22,8 +22,8 @@ import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.purge.PurgeAllPresenterImpl.PurgeAllEvent
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.threads.Enforcer
-import com.pyamsoft.pydroid.ui.arch.BasePresenter
-import com.pyamsoft.pydroid.ui.arch.destroy
+import com.pyamsoft.pydroid.arch.BasePresenter
+import com.pyamsoft.pydroid.arch.destroy
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -41,7 +41,7 @@ internal class PurgeAllPresenterImpl @Inject internal constructor(
     enforcer.assertNotOnMainThread()
     return interactor.deleteEntries(stalePackages)
         .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .observeOn(Schedulers.io())
         .andThen(Single.just(stalePackages))
   }
 
@@ -50,6 +50,7 @@ internal class PurgeAllPresenterImpl @Inject internal constructor(
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
         .flatMapSingle { purgeAll(it.stalePackages) }
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe { callback.onAllPurged(it) }
         .destroy(owner)
   }

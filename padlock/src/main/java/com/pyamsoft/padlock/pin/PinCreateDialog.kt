@@ -18,35 +18,28 @@
 package com.pyamsoft.padlock.pin
 
 import android.app.Dialog
-import android.content.DialogInterface
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
-import androidx.annotation.CheckResult
+import android.view.WindowManager.LayoutParams
 import androidx.fragment.app.DialogFragment
-import com.pyamsoft.padlock.Injector
-import com.pyamsoft.padlock.PadLockComponent
-import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.R.layout
 import com.pyamsoft.pydroid.ui.app.noTitle
-import com.pyamsoft.pydroid.ui.app.requireArguments
 import javax.inject.Inject
 
-class PinDialog : DialogFragment() {
+class PinCreateDialog : DialogFragment(),
+    PinCreateDialogPresenter.Callback,
+    CreatePinPresenter.Callback {
 
   @field:Inject internal lateinit var pinView: CreatePinView
-
-  private var checkOnly: Boolean = false
-  private var finishOnDismiss: Boolean = false
+  @field:Inject internal lateinit var presenter: PinCreateDialogPresenter
+  @field:Inject internal lateinit var createPresenter: CreatePinPresenter
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     isCancelable = true
-
-    checkOnly = requireArguments().getBoolean(CHECK_ONLY, false)
-    finishOnDismiss = requireArguments().getBoolean(FINISH_ON_DISMISS, false)
   }
 
   override fun onResume() {
@@ -54,8 +47,8 @@ class PinDialog : DialogFragment() {
     // The dialog is super small for some reason. We have to set the size manually, in onResume
     dialog.window?.apply {
       setLayout(
-          WindowManager.LayoutParams.MATCH_PARENT,
-          WindowManager.LayoutParams.WRAP_CONTENT
+          LayoutParams.MATCH_PARENT,
+          LayoutParams.WRAP_CONTENT
       )
       setGravity(Gravity.CENTER)
     }
@@ -66,16 +59,9 @@ class PinDialog : DialogFragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-    val root = inflater.inflate(R.layout.layout_frame, container, false)
+    val root = inflater.inflate(layout.layout_frame, container, false)
 
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusPinComponent()
-        .owner(viewLifecycleOwner)
-        .inflater(inflater)
-        .container(container)
-        .savedInstanceState(savedInstanceState)
-        .build()
-        .inject(this)
+    // TODO Inject
 
     return root
   }
@@ -91,6 +77,8 @@ class PinDialog : DialogFragment() {
   ) {
     super.onViewCreated(view, savedInstanceState)
     pinView.inflate(savedInstanceState)
+
+    presenter.bind(viewLifecycleOwner, this)
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
@@ -98,37 +86,42 @@ class PinDialog : DialogFragment() {
     pinView.saveState(outState)
   }
 
-  override fun onDismiss(dialog: DialogInterface?) {
-    super.onDismiss(dialog)
-    if (finishOnDismiss) {
-      activity?.also { it.finish() }
-    }
-  }
-
   override fun onDestroyView() {
     super.onDestroyView()
     pinView.teardown()
   }
 
+  override fun onAttemptSubmit(
+    attempt: String,
+    reEntry: String,
+    hint: String
+  ) {
+    createPresenter.create(attempt, reEntry, hint)
+  }
+
+  override fun onCreatePinBegin() {
+    pinView.disable()
+  }
+
+  override fun onCreatePinSuccess() {
+    onPinCreateCallback()
+  }
+
+  override fun onCreatePinFailure() {
+    onPinCreateCallback()
+  }
+
+  override fun onCreatePinComplete() {
+    pinView.enable()
+  }
+
+  private fun onPinCreateCallback() {
+    pinView.clearDisplay()
+    dismiss()
+  }
+
   companion object {
 
-    const val TAG = "PinDialog"
-    internal const val CHECK_ONLY = "check_only"
-    private const val FINISH_ON_DISMISS = "finish_dismiss"
-
-    @JvmStatic
-    @CheckResult
-    fun newInstance(
-      checkOnly: Boolean,
-      finishOnDismiss: Boolean
-    ): PinDialog {
-      return PinDialog().apply {
-        arguments = Bundle().apply {
-          putBoolean(CHECK_ONLY, checkOnly)
-          putBoolean(FINISH_ON_DISMISS, finishOnDismiss)
-        }
-      }
-    }
+    const val TAG = "PinCreateDialog"
   }
 }
-

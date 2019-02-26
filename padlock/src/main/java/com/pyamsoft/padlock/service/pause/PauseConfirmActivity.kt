@@ -21,11 +21,11 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.pin.CheckPinPresenter
+import com.pyamsoft.padlock.pin.ConfirmPinView
 import com.pyamsoft.padlock.pin.PinDialog
 import com.pyamsoft.padlock.service.ServiceActionPresenter
 import com.pyamsoft.pydroid.ui.app.ActivityBase
@@ -39,7 +39,7 @@ class PauseConfirmActivity : ActivityBase(), CheckPinPresenter.Callback {
 
   @field:Inject internal lateinit var checkPinPresenter: CheckPinPresenter
   @field:Inject internal lateinit var actionPresenter: ServiceActionPresenter
-  @field:Inject internal lateinit var pauseView: PauseView
+  @field:Inject internal lateinit var pinView: ConfirmPinView
 
   override val fragmentContainerId: Int
     get() = layoutRoot.id
@@ -65,32 +65,12 @@ class PauseConfirmActivity : ActivityBase(), CheckPinPresenter.Callback {
         .build()
         .inject(this)
 
-    createComponents(savedInstanceState)
-    layoutComponents(layoutRoot)
-    addPinFragment()
-
+    pinView.inflate(savedInstanceState)
     checkPinPresenter.bind(this, this)
   }
 
-  private fun createComponents(savedInstanceState: Bundle?) {
-    pauseView.inflate(savedInstanceState)
-  }
-
-  private fun layoutComponents(layoutRoot: ConstraintLayout) {
-    ConstraintSet().apply {
-      clone(layoutRoot)
-
-      pauseView.also {
-        connect(it.id(), ConstraintSet.TOP, layoutRoot.id, ConstraintSet.TOP)
-        connect(it.id(), ConstraintSet.BOTTOM, layoutRoot.id, ConstraintSet.BOTTOM)
-        connect(it.id(), ConstraintSet.START, layoutRoot.id, ConstraintSet.START)
-        connect(it.id(), ConstraintSet.END, layoutRoot.id, ConstraintSet.END)
-        constrainHeight(it.id(), ConstraintSet.MATCH_CONSTRAINT)
-        constrainWidth(it.id(), ConstraintSet.MATCH_CONSTRAINT)
-      }
-
-      applyTo(layoutRoot)
-    }
+  override fun onCheckPinBegin() {
+    pinView.disable()
   }
 
   override fun onCheckPinSuccess() {
@@ -102,7 +82,11 @@ class PauseConfirmActivity : ActivityBase(), CheckPinPresenter.Callback {
   }
 
   override fun onCheckPinFailure() {
-    pauseView.showPinFailed()
+    pinView.showPinError()
+  }
+
+  override fun onCheckPinComplete() {
+    pinView.enable()
   }
 
   override fun onNewIntent(intent: Intent) {
@@ -123,12 +107,12 @@ class PauseConfirmActivity : ActivityBase(), CheckPinPresenter.Callback {
 
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
-    pauseView.saveState(outState)
+    pinView.saveState(outState)
   }
 
   override fun onDestroy() {
     super.onDestroy()
-    pauseView.teardown()
+    pinView.teardown()
     overridePendingTransition(0, 0)
   }
 

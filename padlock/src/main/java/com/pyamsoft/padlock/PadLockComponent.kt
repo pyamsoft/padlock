@@ -59,6 +59,9 @@ import com.pyamsoft.padlock.pin.CheckPinPresenterImpl.CheckPinEvent
 import com.pyamsoft.padlock.pin.ClearPinPresenter
 import com.pyamsoft.padlock.pin.ClearPinPresenterImpl
 import com.pyamsoft.padlock.pin.ClearPinPresenterImpl.ClearPinEvent
+import com.pyamsoft.padlock.pin.CreatePinPresenter
+import com.pyamsoft.padlock.pin.CreatePinPresenterImpl
+import com.pyamsoft.padlock.pin.CreatePinPresenterImpl.CreatePinEvent
 import com.pyamsoft.padlock.pin.PinBaseFragment
 import com.pyamsoft.padlock.pin.PinComponent
 import com.pyamsoft.padlock.pin.PinSingletonModule
@@ -234,6 +237,7 @@ interface PadLockComponent {
 
     private val clearPinBus = RxBus.create<ClearPinEvent>()
     private val checkPinBus = RxBus.create<CheckPinEvent>()
+    private val createPinBus = RxBus.create<CreatePinEvent>()
 
     private val purgeSingleBus = RxBus.create<PurgeSingleEvent>()
     private val purgeAllBus = RxBus.create<PurgeAllEvent>()
@@ -261,6 +265,10 @@ interface PadLockComponent {
     @JvmStatic
     @Provides
     internal fun provideRecheckBus(): EventBus<RecheckEvent> = recheckBus
+
+    @JvmStatic
+    @Provides
+    internal fun provideCreatePinBus(): EventBus<CreatePinEvent> = createPinBus
 
     @JvmStatic
     @Provides
@@ -345,6 +353,9 @@ interface PadLockComponent {
 
     @Binds
     internal abstract fun bindSwitchLockTypePresenter(impl: SwitchLockTypePresenterImpl): SwitchLockTypePresenter
+
+    @Binds
+    internal abstract fun bindCreatePinPresenter(impl: CreatePinPresenterImpl): CreatePinPresenter
 
     @Binds
     internal abstract fun bindClearPinPresenter(impl: ClearPinPresenterImpl): ClearPinPresenter

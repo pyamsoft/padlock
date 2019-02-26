@@ -18,7 +18,7 @@
 package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.service.ScreenStatePresenter.Callback
-import com.pyamsoft.pydroid.ui.arch.Presenter
+import com.pyamsoft.pydroid.arch.Presenter
 
 internal interface ScreenStatePresenter : Presenter<Callback> {
 

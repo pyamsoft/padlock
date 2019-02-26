@@ -18,7 +18,7 @@
 package com.pyamsoft.padlock.settings
 
 import com.pyamsoft.padlock.settings.ClearAllPresenter.Callback
-import com.pyamsoft.pydroid.ui.arch.Presenter
+import com.pyamsoft.pydroid.arch.Presenter
 
 internal interface ClearAllPresenter: Presenter<Callback> {
 

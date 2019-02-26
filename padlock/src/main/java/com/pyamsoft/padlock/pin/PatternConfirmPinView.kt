@@ -15,33 +15,30 @@
  *
  */
 
-package com.pyamsoft.padlock.service.pause
+package com.pyamsoft.padlock.pin
 
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import androidx.lifecycle.LifecycleObserver
+import androidx.annotation.ColorRes
 import androidx.lifecycle.LifecycleOwner
-import com.pyamsoft.padlock.R
-import com.pyamsoft.pydroid.arch.BaseUiView
+import com.pyamsoft.padlock.pin.ConfirmPinView.Callback
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import javax.inject.Inject
 
-internal class PauseView @Inject internal constructor(
-  private val owner: LifecycleOwner,
-  parent: ViewGroup
-) : BaseUiView<Unit>(parent, Unit), LifecycleObserver {
+internal class PatternConfirmPinView @Inject internal constructor(
+  owner: LifecycleOwner,
+  parent: ViewGroup,
+  callback: Callback,
+  @ColorRes normalDotColor: Int
+) : ConfirmPinView,
+    PatternPinView<Callback>(owner, parent, callback, true, normalDotColor) {
 
-  private val frameView by lazyView<FrameLayout>(R.id.layout_frame)
-
-  override val layout: Int = R.layout.layout_frame
-
-  override fun id(): Int {
-    return frameView.id
+  override fun submit() {
+    callback.onSubmit(getAttempt())
   }
 
-  fun showPinFailed() {
+  override fun showPinError() {
     Snackbreak.bindTo(owner)
-        .short(frameView, "Invalid PIN")
+        .short(layoutRoot, "Invalid PIN")
         .show()
   }
 
