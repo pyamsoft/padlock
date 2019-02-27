@@ -37,12 +37,14 @@ import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockScreenActivity : ActivityBase() {
+class LockScreenActivity : ActivityBase(), CloseOldPresenter.Callback {
 
   @field:Inject internal lateinit var lockScreen: LockScreenView
   @field:Inject internal lateinit var viewModel: LockScreenViewModel
   @field:Inject internal lateinit var inputViewModel: PinScreenInputViewModel
   @field:Inject internal lateinit var theming: Theming
+
+  @field:Inject internal lateinit var closeOldPresenter: CloseOldPresenter
 
   private lateinit var lockScreenComponent: LockScreenComponent
   private lateinit var lockedActivityName: String
@@ -54,7 +56,6 @@ class LockScreenActivity : ActivityBase() {
 
   private var alreadyUnlockedDisposable by singleDisposable()
   private var lockScreenTypeDisposable by singleDisposable()
-  private var recreateDisposable by singleDisposable()
   private var displayNameDisposable by singleDisposable()
   private var ignoreTimeDisposable by singleDisposable()
 
@@ -109,12 +110,17 @@ class LockScreenActivity : ActivityBase() {
 
     displayNameDisposable = viewModel.loadDisplayNameFromPackage { lockScreen.setToolbarTitle(it) }
 
-    recreateDisposable = viewModel.onRecreateEvent { recreate() }
-
     lockScreenTypeDisposable = inputViewModel.resolveLockScreenType(
         onTypeText = { onTypeText() },
         onTypePattern = { onTypePattern() }
     )
+
+    closeOldPresenter.bind(this, this)
+  }
+
+  override fun onCloseOld() {
+    Timber.w("Close event received for this old lock screen: $this")
+    finish()
   }
 
   override fun onResume() {
@@ -143,11 +149,6 @@ class LockScreenActivity : ActivityBase() {
 
   private fun onAlreadyUnlocked() {
     Timber.d("$lockedPackageName $lockedActivityName is already unlocked")
-    finish()
-  }
-
-  private fun onCloseOldReceived() {
-    Timber.w("Close event received for this LockScreen: %s", this)
     finish()
   }
 
@@ -198,7 +199,6 @@ class LockScreenActivity : ActivityBase() {
 
     alreadyUnlockedDisposable.tryDispose()
     lockScreenTypeDisposable.tryDispose()
-    recreateDisposable.tryDispose()
     displayNameDisposable.tryDispose()
     ignoreTimeDisposable.tryDispose()
   }

@@ -39,11 +39,6 @@ class LockScreenViewModel @Inject internal constructor(
   @param:Named("locked_real_name") private val realName: String
 ) {
 
-  @CheckResult
-  fun onRecreateEvent(func: () -> Unit): Disposable {
-    return Disposables.empty()
-  }
-
   fun clearMatchingForegroundEvent() {
     Timber.d("Publish foreground clear event for $packageName, $realName")
     foregroundEventBus.publish(ForegroundEvent(packageName, realName))
