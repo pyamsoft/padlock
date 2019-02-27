@@ -17,15 +17,52 @@
 
 package com.pyamsoft.padlock.lock
 
+import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.uicommon.ShimBaseScreen
+import androidx.appcompat.widget.Toolbar
+import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.lock.LockToolbarView.Callback
+import com.pyamsoft.pydroid.arch.BaseUiView
+import javax.inject.Inject
 
-interface LockToolbarView : ShimBaseScreen {
+internal class LockToolbarView @Inject internal constructor(
+  parent: ViewGroup,
+  callback: Callback
+) : BaseUiView<Callback>(parent, callback) {
+
+  override val layout: Int = R.layout.toolbar
+
+  private val toolbar by lazyView<Toolbar>(R.id.toolbar)
+
+  override fun id(): Int {
+    return toolbar.id
+  }
 
   @CheckResult
-  fun isExcludeChecked(): Boolean
+  fun isExcludeChecked(): Boolean {
+    TODO()
+  }
 
   @CheckResult
-  fun getSelectedIgnoreTime(): Long
+  fun getSelectedIgnoreTime(): Long {
+    TODO()
+  }
 
+  override fun onInflated(
+    view: View,
+    savedInstanceState: Bundle?
+  ) {
+    super.onInflated(view, savedInstanceState)
+  }
+
+  override fun saveState(outState: Bundle) {
+    super.saveState(outState)
+    // TODO
+  }
+
+  interface Callback {
+
+  }
 }
