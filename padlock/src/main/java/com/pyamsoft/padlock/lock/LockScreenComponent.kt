@@ -41,20 +41,35 @@ interface LockScreenComponent {
   @Subcomponent.Builder
   interface Builder {
 
-    @BindsInstance fun activity(activity: LockScreenActivity): Builder
+    @BindsInstance
+    @CheckResult
+    fun activity(activity: LockScreenActivity): Builder
 
-    @BindsInstance fun savedInstanceState(@Named("activity_bundle") bundle: Bundle?): Builder
+    @BindsInstance
+    @CheckResult
+    fun savedInstanceState(@Named("activity_bundle") bundle: Bundle?): Builder
 
-    @BindsInstance fun packageName(@Named("locked_package_name") packageName: String): Builder
+    @BindsInstance
+    @CheckResult
+    fun packageName(@Named("locked_package_name") packageName: String): Builder
 
-    @BindsInstance fun activityName(@Named("locked_activity_name") activityName: String): Builder
+    @BindsInstance
+    @CheckResult
+    fun activityName(@Named("locked_activity_name") activityName: String): Builder
 
-    @BindsInstance fun realName(@Named("locked_real_name") realName: String): Builder
+    @BindsInstance
+    @CheckResult
+    fun realName(@Named("locked_real_name") realName: String): Builder
 
-    @BindsInstance fun lockedIcon(@Named("locked_icon") lockedIcon: Int): Builder
+    @BindsInstance
+    @CheckResult
+    fun lockedIcon(@Named("locked_icon") lockedIcon: Int): Builder
 
-    @BindsInstance fun system(@Named("locked_system") system: Boolean): Builder
+    @BindsInstance
+    @CheckResult
+    fun system(@Named("locked_system") system: Boolean): Builder
 
+    @CheckResult
     fun build(): LockScreenComponent
   }
 

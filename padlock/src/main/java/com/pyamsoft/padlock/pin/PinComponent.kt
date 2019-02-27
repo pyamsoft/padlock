@@ -52,11 +52,14 @@ interface PinComponent {
   interface Builder {
 
     @BindsInstance
+    @CheckResult
     fun owner(owner: LifecycleOwner): Builder
 
     @BindsInstance
+    @CheckResult
     fun parent(parent: ViewGroup): Builder
 
+    @CheckResult
     fun build(): PinComponent
   }
 
@@ -102,14 +105,17 @@ interface PinComponent {
     @JvmStatic
     @CheckResult
     internal fun provideCreatePinView(
+      owner: LifecycleOwner,
       theming: Theming,
       preferences: LockScreenPreferences,
       parent: ViewGroup,
       callback: CreatePinView.Callback
     ): CreatePinView {
       return when (preferences.getCurrentLockType()) {
-        TYPE_PATTERN -> PatternCreatePinView(parent, callback, themeColor(theming, parent.context))
-        TYPE_TEXT -> TextCreatePinView(parent, callback)
+        TYPE_PATTERN -> PatternCreatePinView(
+            owner, parent, callback, themeColor(theming, parent.context)
+        )
+        TYPE_TEXT -> TextCreatePinView(owner, parent, callback)
       }
     }
 

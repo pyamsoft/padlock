@@ -20,6 +20,7 @@ package com.pyamsoft.padlock.list
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.annotation.CheckResult
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.list.LockInfoComponent.LockInfoModule
@@ -39,28 +40,51 @@ interface LockInfoComponent {
   @Subcomponent.Builder
   interface Builder {
 
-    @BindsInstance fun activity(activity: FragmentActivity): Builder
+    @BindsInstance
+    @CheckResult
+    fun activity(activity: FragmentActivity): Builder
 
-    @BindsInstance fun owner(owner: LifecycleOwner): Builder
+    @BindsInstance
+    @CheckResult
+    fun owner(owner: LifecycleOwner): Builder
 
-    @BindsInstance fun diffProvider(diffProvider: ListDiffProvider<ActivityEntry>): Builder
+    @BindsInstance
+    @CheckResult
+    fun diffProvider(diffProvider: ListDiffProvider<ActivityEntry>): Builder
 
-    @BindsInstance fun packageName(@Named("package_name") packageName: String): Builder
+    @BindsInstance
+    @CheckResult
+    fun packageName(@Named("package_name") packageName: String): Builder
 
-    @BindsInstance fun appName(@Named("app_name") appName: String): Builder
+    @BindsInstance
+    @CheckResult
+    fun appName(@Named("app_name") appName: String): Builder
 
-    @BindsInstance fun listStateTag(@Named("list_state_tag") listStateTag: String): Builder
+    @BindsInstance
+    @CheckResult
+    fun listStateTag(@Named("list_state_tag") listStateTag: String): Builder
 
-    @BindsInstance fun appIcon(@Named("app_icon") appIcon: Int): Builder
+    @BindsInstance
+    @CheckResult
+    fun appIcon(@Named("app_icon") appIcon: Int): Builder
 
-    @BindsInstance fun appSystem(@Named("app_system") system: Boolean): Builder
+    @BindsInstance
+    @CheckResult
+    fun appSystem(@Named("app_system") system: Boolean): Builder
 
-    @BindsInstance fun inflater(inflater: LayoutInflater): Builder
+    @BindsInstance
+    @CheckResult
+    fun inflater(inflater: LayoutInflater): Builder
 
-    @BindsInstance fun container(container: ViewGroup?): Builder
+    @BindsInstance
+    @CheckResult
+    fun container(container: ViewGroup?): Builder
 
-    @BindsInstance fun savedInstanceState(savedInstanceState: Bundle?): Builder
+    @BindsInstance
+    @CheckResult
+    fun savedInstanceState(savedInstanceState: Bundle?): Builder
 
+    @CheckResult
     fun build(): LockInfoComponent
   }
 

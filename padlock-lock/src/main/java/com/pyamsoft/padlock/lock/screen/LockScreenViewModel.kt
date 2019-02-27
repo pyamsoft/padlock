@@ -68,16 +68,6 @@ class LockScreenViewModel @Inject internal constructor(
   }
 
   @CheckResult
-  fun closeOld(onCloseOldEvent: (event: CloseOldEvent) -> Unit): Disposable {
-    // Send bus event first before we register or we may catch our own event.
-    bus.publish(CloseOldEvent(packageName, activityName))
-
-    return bus.listen()
-        .filter { it.packageName == packageName && it.activityName == activityName }
-        .subscribe(onCloseOldEvent)
-  }
-
-  @CheckResult
   fun createWithDefaultIgnoreTime(onIgnoreTimesLoaded: (time: Long) -> Unit): Disposable {
     return interactor.getDefaultIgnoreTime()
         .subscribeOn(Schedulers.io())

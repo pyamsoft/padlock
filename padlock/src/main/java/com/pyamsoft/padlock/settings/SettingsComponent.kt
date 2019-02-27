@@ -17,6 +17,7 @@
 
 package com.pyamsoft.padlock.settings
 
+import androidx.annotation.CheckResult
 import androidx.preference.PreferenceScreen
 import com.pyamsoft.padlock.scopes.FragmentScope
 import com.pyamsoft.padlock.settings.SettingsComponent.SettingsModule
@@ -34,8 +35,11 @@ interface SettingsComponent {
   @Subcomponent.Builder
   interface Builder {
 
-    @BindsInstance fun preferenceScreen(preferenceScreen: PreferenceScreen): Builder
+    @BindsInstance
+    @CheckResult
+    fun preferenceScreen(preferenceScreen: PreferenceScreen): Builder
 
+    @CheckResult
     fun build(): SettingsComponent
   }
 

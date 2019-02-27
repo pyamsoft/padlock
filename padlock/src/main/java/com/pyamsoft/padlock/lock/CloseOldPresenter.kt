@@ -15,27 +15,18 @@
  *
  */
 
-package com.pyamsoft.padlock.purge
+package com.pyamsoft.padlock.lock
 
-import android.view.ViewGroup
-import androidx.annotation.CheckResult
-import dagger.BindsInstance
-import dagger.Subcomponent
+import com.pyamsoft.padlock.lock.CloseOldPresenter.Callback
+import com.pyamsoft.pydroid.arch.Presenter
 
-@Subcomponent
-interface PurgeItemComponent {
+internal interface CloseOldPresenter : Presenter<Callback> {
 
-  fun inject(holder: PurgeItem.ViewHolder)
+  interface Callback {
 
-  @Subcomponent.Builder
-  interface Builder {
+    fun onCloseOld()
 
-    @BindsInstance
-    @CheckResult
-    fun parent(parent: ViewGroup): Builder
-
-    @CheckResult
-    fun build(): PurgeItemComponent
   }
+
 }
 

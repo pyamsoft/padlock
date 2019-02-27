@@ -201,16 +201,27 @@ interface PadLockComponent {
   @Component.Builder
   interface Builder {
 
-    @BindsInstance fun theming(theming: Theming): Builder
+    @BindsInstance
+    @CheckResult
+    fun theming(theming: Theming): Builder
 
-    @BindsInstance fun moshi(moshi: Moshi): Builder
+    @BindsInstance
+    @CheckResult
+    fun moshi(moshi: Moshi): Builder
 
-    @BindsInstance fun enforcer(enforcer: Enforcer): Builder
+    @BindsInstance
+    @CheckResult
+    fun enforcer(enforcer: Enforcer): Builder
 
-    @BindsInstance fun application(application: Application): Builder
+    @BindsInstance
+    @CheckResult
+    fun application(application: Application): Builder
 
-    @BindsInstance fun imageLoader(imageLoader: ImageLoader): Builder
+    @BindsInstance
+    @CheckResult
+    fun imageLoader(imageLoader: ImageLoader): Builder
 
+    @CheckResult
     fun build(): PadLockComponent
 
   }

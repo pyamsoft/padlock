@@ -32,8 +32,11 @@ interface MainComponent {
   @Subcomponent.Builder
   interface Builder {
 
-    @BindsInstance fun mainActivity(mainActivity: MainActivity): Builder
+    @BindsInstance
+    @CheckResult
+    fun mainActivity(mainActivity: MainActivity): Builder
 
+    @CheckResult
     fun build(): MainComponent
   }
 

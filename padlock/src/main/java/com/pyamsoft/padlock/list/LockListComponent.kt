@@ -20,6 +20,7 @@ package com.pyamsoft.padlock.list
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.annotation.CheckResult
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.list.LockListComponent.LockListModule
@@ -39,22 +40,39 @@ interface LockListComponent {
   @Subcomponent.Builder
   interface Builder {
 
-    @BindsInstance fun listStateTag(tag: String): Builder
+    @BindsInstance
+    @CheckResult
+    fun listStateTag(tag: String): Builder
 
-    @BindsInstance fun toolbarActivity(toolbarActivity: ToolbarActivity): Builder
+    @BindsInstance
+    @CheckResult
+    fun toolbarActivity(toolbarActivity: ToolbarActivity): Builder
 
-    @BindsInstance fun activity(activity: FragmentActivity): Builder
+    @BindsInstance
+    @CheckResult
+    fun activity(activity: FragmentActivity): Builder
 
-    @BindsInstance fun owner(owner: LifecycleOwner): Builder
+    @BindsInstance
+    @CheckResult
+    fun owner(owner: LifecycleOwner): Builder
 
-    @BindsInstance fun inflater(inflater: LayoutInflater): Builder
+    @BindsInstance
+    @CheckResult
+    fun inflater(inflater: LayoutInflater): Builder
 
-    @BindsInstance fun container(container: ViewGroup?): Builder
+    @BindsInstance
+    @CheckResult
+    fun container(container: ViewGroup?): Builder
 
-    @BindsInstance fun savedInstanceState(savedInstanceState: Bundle?): Builder
+    @BindsInstance
+    @CheckResult
+    fun savedInstanceState(savedInstanceState: Bundle?): Builder
 
-    @BindsInstance fun diffProvider(diffProvider: ListDiffProvider<AppEntry>): Builder
+    @BindsInstance
+    @CheckResult
+    fun diffProvider(diffProvider: ListDiffProvider<AppEntry>): Builder
 
+    @CheckResult
     fun build(): LockListComponent
   }
 

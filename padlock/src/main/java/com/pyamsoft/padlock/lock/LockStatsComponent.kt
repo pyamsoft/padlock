@@ -18,6 +18,7 @@
 package com.pyamsoft.padlock.lock
 
 import android.view.LayoutInflater
+import androidx.annotation.CheckResult
 import androidx.lifecycle.Lifecycle
 import com.pyamsoft.padlock.lock.LockStatsComponent.LockStatsModule
 import dagger.Binds
@@ -41,10 +42,15 @@ interface LockStatsComponent {
   @Subcomponent.Builder
   interface Builder {
 
-    @BindsInstance fun lifecycle(lifecycle: Lifecycle): Builder
+    @BindsInstance
+    @CheckResult
+    fun lifecycle(lifecycle: Lifecycle): Builder
 
-    @BindsInstance fun inflater(inflater: LayoutInflater): Builder
+    @BindsInstance
+    @CheckResult
+    fun inflater(inflater: LayoutInflater): Builder
 
+    @CheckResult
     fun build(): LockStatsComponent
 
   }

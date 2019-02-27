@@ -20,6 +20,7 @@ package com.pyamsoft.padlock.lock
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.annotation.CheckResult
 import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.lock.LockScreenFragmentComponent.LockScreenModule
 import dagger.Binds
@@ -47,14 +48,23 @@ interface LockScreenFragmentComponent {
   @Subcomponent.Builder
   interface Builder {
 
-    @BindsInstance fun owner(owner: LifecycleOwner): Builder
+    @BindsInstance
+    @CheckResult
+    fun owner(owner: LifecycleOwner): Builder
 
-    @BindsInstance fun inflater(inflater: LayoutInflater): Builder
+    @BindsInstance
+    @CheckResult
+    fun inflater(inflater: LayoutInflater): Builder
 
-    @BindsInstance fun container(container: ViewGroup?): Builder
+    @BindsInstance
+    @CheckResult
+    fun container(container: ViewGroup?): Builder
 
-    @BindsInstance fun savedInstanceState(savedInstanceState: Bundle?): Builder
+    @BindsInstance
+    @CheckResult
+    fun savedInstanceState(savedInstanceState: Bundle?): Builder
 
+    @CheckResult
     fun build(): LockScreenFragmentComponent
 
   }

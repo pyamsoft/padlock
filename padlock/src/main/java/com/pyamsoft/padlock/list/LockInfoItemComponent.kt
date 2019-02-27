@@ -18,6 +18,7 @@
 package com.pyamsoft.padlock.list
 
 import android.view.View
+import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.list.LockInfoItemComponent.LockInfoModule
 import dagger.Binds
 import dagger.BindsInstance
@@ -34,8 +35,11 @@ interface LockInfoItemComponent {
   @Subcomponent.Builder
   interface Builder {
 
-    @BindsInstance fun itemView(itemView: View): Builder
+    @BindsInstance
+    @CheckResult
+    fun itemView(itemView: View): Builder
 
+    @CheckResult
     fun build(): LockInfoItemComponent
   }
 

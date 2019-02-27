@@ -18,6 +18,7 @@
 package com.pyamsoft.padlock.list
 
 import android.view.View
+import androidx.annotation.CheckResult
 import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.list.LockListItemComponent.LockListModule
 import dagger.Binds
@@ -33,10 +34,15 @@ interface LockListItemComponent {
   @Subcomponent.Builder
   interface Builder {
 
-    @BindsInstance fun owner(owner: LifecycleOwner): Builder
+    @BindsInstance
+    @CheckResult
+    fun owner(owner: LifecycleOwner): Builder
 
-    @BindsInstance fun itemView(itemView: View): Builder
+    @BindsInstance
+    @CheckResult
+    fun itemView(itemView: View): Builder
 
+    @CheckResult
     fun build(): LockListItemComponent
   }
 

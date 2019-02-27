@@ -15,52 +15,43 @@
  *
  */
 
-package com.pyamsoft.padlock.purge
+package com.pyamsoft.padlock.lock
 
-import android.view.ViewGroup
 import androidx.annotation.CheckResult
-import androidx.lifecycle.LifecycleOwner
-import com.pyamsoft.padlock.purge.PurgeComponent.PurgeModule
+import com.pyamsoft.padlock.lock.LockComponent.LockModule
 import com.pyamsoft.padlock.scopes.FragmentScope
-import com.pyamsoft.pydroid.ui.app.ToolbarActivity
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module
 import dagger.Subcomponent
+import javax.inject.Named
 
 @FragmentScope
-@Subcomponent(modules = [PurgeModule::class])
-interface PurgeComponent {
+@Subcomponent(modules = [LockModule::class])
+interface LockComponent {
 
-  fun inject(fragment: PurgeFragment)
+  fun inject(activity: LockScreenActivity)
 
   @Subcomponent.Builder
   interface Builder {
 
     @BindsInstance
     @CheckResult
-    fun toolbarActivity(toolbarActivity: ToolbarActivity): Builder
+    fun packageName(@Named("locked_package_name") packageName: String): Builder
 
     @BindsInstance
     @CheckResult
-    fun owner(owner: LifecycleOwner): Builder
-
-    @BindsInstance
-    @CheckResult
-    fun parent(parent: ViewGroup): Builder
+    fun activityName(@Named("locked_activity_name") activityName: String): Builder
 
     @CheckResult
-    fun build(): PurgeComponent
+    fun build(): LockComponent
   }
 
   @Module
-  abstract class PurgeModule {
+  abstract class LockModule {
 
     @Binds
-    internal abstract fun bindPresenter(impl: PurgePresenterImpl): PurgePresenter
-
-    @Binds
-    internal abstract fun bindPurgeViewCallback(impl: PurgePresenterImpl): PurgeListView.Callback
+    internal abstract fun bindClosePresenter(impl: CloseOldPresenterImpl): CloseOldPresenter
 
   }
 }

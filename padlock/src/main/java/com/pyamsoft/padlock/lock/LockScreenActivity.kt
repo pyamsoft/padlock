@@ -57,7 +57,6 @@ class LockScreenActivity : ActivityBase() {
   private var recreateDisposable by singleDisposable()
   private var displayNameDisposable by singleDisposable()
   private var ignoreTimeDisposable by singleDisposable()
-  private var closeOldDisposable by singleDisposable()
 
   override val fragmentContainerId: Int = R.id.lock_screen_container
 
@@ -104,8 +103,6 @@ class LockScreenActivity : ActivityBase() {
         else -> it.isChecked = true
       }
     }
-
-    closeOldDisposable = viewModel.closeOld { onCloseOldReceived() }
 
     ignoreTimeDisposable =
       viewModel.createWithDefaultIgnoreTime { lockScreen.initIgnoreTimeSelection(it) }
@@ -204,7 +201,6 @@ class LockScreenActivity : ActivityBase() {
     recreateDisposable.tryDispose()
     displayNameDisposable.tryDispose()
     ignoreTimeDisposable.tryDispose()
-    closeOldDisposable.tryDispose()
   }
 
   override fun finish() {
