@@ -22,7 +22,6 @@ import com.pyamsoft.padlock.api.lockscreen.LockEntryInteractor
 import com.pyamsoft.padlock.api.lockscreen.LockHelper
 import com.pyamsoft.padlock.api.lockscreen.LockPassed
 import com.pyamsoft.padlock.api.lockscreen.LockScreenInteractor
-import com.pyamsoft.padlock.lock.screen.LockScreenInteractorImpl
 import com.pyamsoft.pydroid.core.cache.Cache
 import dagger.Binds
 import dagger.Module

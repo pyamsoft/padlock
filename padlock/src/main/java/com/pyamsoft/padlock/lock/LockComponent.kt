@@ -17,23 +17,42 @@
 
 package com.pyamsoft.padlock.lock
 
+import android.view.ViewGroup
 import androidx.annotation.CheckResult
+import androidx.lifecycle.LifecycleOwner
+import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
 import com.pyamsoft.padlock.lock.LockComponent.LockModule
+import com.pyamsoft.padlock.lock.LockComponent.LockProvider
+import com.pyamsoft.padlock.model.LockScreenType.TYPE_PATTERN
+import com.pyamsoft.padlock.model.LockScreenType.TYPE_TEXT
+import com.pyamsoft.padlock.pin.ConfirmPinView
+import com.pyamsoft.padlock.pin.PatternConfirmPinView
+import com.pyamsoft.padlock.pin.TextConfirmPinView
 import com.pyamsoft.padlock.scopes.FragmentScope
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module
+import dagger.Provides
 import dagger.Subcomponent
 import javax.inject.Named
 
 @FragmentScope
-@Subcomponent(modules = [LockModule::class])
+@Subcomponent(modules = [LockProvider::class, LockModule::class])
 interface LockComponent {
 
   fun inject(activity: LockScreenActivity)
 
   @Subcomponent.Builder
   interface Builder {
+
+    @BindsInstance
+    @CheckResult
+    fun owner(owner: LifecycleOwner): Builder
+
+    @BindsInstance
+    @CheckResult
+    fun parent(parent: ViewGroup): Builder
 
     @BindsInstance
     @CheckResult
@@ -48,10 +67,32 @@ interface LockComponent {
   }
 
   @Module
+  object LockProvider {
+
+    @Provides
+    @JvmStatic
+    @CheckResult
+    internal fun provideConfirmPinView(
+      owner: LifecycleOwner,
+      preferences: LockScreenPreferences,
+      parent: ViewGroup,
+      callback: ConfirmPinView.Callback
+    ): ConfirmPinView {
+      return when (preferences.getCurrentLockType()) {
+        TYPE_PATTERN -> PatternConfirmPinView(owner, parent, callback, R.color.white)
+        TYPE_TEXT -> TextConfirmPinView(owner, parent, callback)
+      }
+    }
+  }
+
+  @Module
   abstract class LockModule {
 
     @Binds
-    internal abstract fun bindClosePresenter(impl: CloseOldPresenterImpl): CloseOldPresenter
+    internal abstract fun bindLockScreenPresenter(impl: LockScreenPresenterImpl): LockScreenPresenter
+
+    @Binds
+    internal abstract fun bindCallback(impl: LockScreenPresenterImpl): ConfirmPinView.Callback
 
   }
 }

@@ -21,78 +21,53 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.CallSuper
-import androidx.fragment.app.Fragment
+import androidx.annotation.CheckResult
+import androidx.constraintlayout.widget.ConstraintLayout
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.lock.screen.LockScreenViewModel
-import com.pyamsoft.padlock.lock.screen.PinScreenInputViewModel
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.pydroid.core.singleDisposable
-import com.pyamsoft.pydroid.core.tryDispose
+import com.pyamsoft.padlock.pin.ConfirmPinView
+import com.pyamsoft.padlock.service.ForegroundEventPresenter
 import com.pyamsoft.pydroid.ui.app.ActivityBase
-import com.pyamsoft.pydroid.ui.theme.Theming
-import com.pyamsoft.pydroid.ui.util.commit
+import com.pyamsoft.pydroid.ui.theme.ThemeInjector
 import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockScreenActivity : ActivityBase(), CloseOldPresenter.Callback {
+class LockScreenActivity : ActivityBase(),
+    LockScreenPresenter.Callback {
 
   @field:Inject internal lateinit var lockScreen: LockScreenView
-  @field:Inject internal lateinit var viewModel: LockScreenViewModel
-  @field:Inject internal lateinit var inputViewModel: PinScreenInputViewModel
-  @field:Inject internal lateinit var theming: Theming
+  @field:Inject internal lateinit var pinScreen: ConfirmPinView
 
-  @field:Inject internal lateinit var closeOldPresenter: CloseOldPresenter
+  @field:Inject internal lateinit var presenter: LockScreenPresenter
+  @field:Inject internal lateinit var foregroundPresenter: ForegroundEventPresenter
 
-  private lateinit var lockScreenComponent: LockScreenComponent
-  private lateinit var lockedActivityName: String
-  private lateinit var lockedPackageName: String
-  private lateinit var lockedRealName: String
-  private var lockedSystem: Boolean = false
-  private var lockedCode: String? = null
-  private var lockedIcon: Int = 0
+  override val fragmentContainerId: Int = 0
 
-  private var alreadyUnlockedDisposable by singleDisposable()
-  private var lockScreenTypeDisposable by singleDisposable()
-  private var displayNameDisposable by singleDisposable()
-  private var ignoreTimeDisposable by singleDisposable()
-
-  override val fragmentContainerId: Int = R.id.lock_screen_container
-
-  override fun getSystemService(name: String): Any {
-    if (Injector.name == name) {
-      return lockScreenComponent
-    } else {
-      return super.getSystemService(name)
-    }
-  }
+  private lateinit var layoutRoot: ConstraintLayout
 
   @CallSuper
   override fun onCreate(savedInstanceState: Bundle?) {
-    overridePendingTransition(0, 0)
-    getValuesFromBundle()
-
-    lockScreenComponent = Injector.obtain<PadLockComponent>(applicationContext)
-        .plusLockScreenComponent()
-        .activity(this)
-        .savedInstanceState(savedInstanceState)
-        .packageName(lockedPackageName)
-        .activityName(lockedActivityName)
-        .realName(lockedRealName)
-        .lockedIcon(lockedIcon)
-        .system(lockedSystem)
-        .build()
-
-    lockScreenComponent.inject(this)
-
-    if (theming.isDarkTheme()) {
+    if (ThemeInjector.obtain(applicationContext).isDarkTheme()) {
       setTheme(R.style.Theme_PadLock_Dark_Lock)
     } else {
       setTheme(R.style.Theme_PadLock_Light_Lock)
     }
+    overridePendingTransition(0, 0)
+
     super.onCreate(savedInstanceState)
+    setContentView(R.layout.layout_constraint)
+    layoutRoot = findViewById(R.id.layout_constraint)
+
+    Injector.obtain<PadLockComponent>(applicationContext)
+        .plusLockComponent()
+        .packageName(getLockedPackageName())
+        .activityName(getLockedActivityName())
+        .build()
+        .inject(this)
+
     lockScreen.create()
 
     lockScreen.onToolbarNavigationClicked { onBackPressed() }
@@ -105,17 +80,7 @@ class LockScreenActivity : ActivityBase(), CloseOldPresenter.Callback {
       }
     }
 
-    ignoreTimeDisposable =
-      viewModel.createWithDefaultIgnoreTime { lockScreen.initIgnoreTimeSelection(it) }
-
-    displayNameDisposable = viewModel.loadDisplayNameFromPackage { lockScreen.setToolbarTitle(it) }
-
-    lockScreenTypeDisposable = inputViewModel.resolveLockScreenType(
-        onTypeText = { onTypeText() },
-        onTypePattern = { onTypePattern() }
-    )
-
-    closeOldPresenter.bind(this, this)
+    presenter.bind(this, this)
   }
 
   override fun onCloseOld() {
@@ -123,60 +88,59 @@ class LockScreenActivity : ActivityBase(), CloseOldPresenter.Callback {
     finish()
   }
 
+  override fun onDisplayNameLoaded(name: String) {
+    lockScreen.setToolbarTitle(name)
+  }
+
+  override fun onDefaultIgnoreTimeLoaded(time: Long) {
+    lockScreen.initIgnoreTimeSelection(time)
+  }
+
   override fun onResume() {
     super.onResume()
-    checkIfAlreadyUnlocked()
+    presenter.checkUnlocked()
   }
 
-  private fun checkIfAlreadyUnlocked() {
-    alreadyUnlockedDisposable = viewModel.checkIfAlreadyUnlocked { onAlreadyUnlocked() }
+  override fun onSubmitUnlockAttempt(attempt: String) {
+    // TODO gather excluded and timeout and submit
   }
 
-  private fun getValuesFromBundle() {
-    requireNotNull(intent.extras).also {
-      lockedCode = it.getString(ENTRY_LOCK_CODE)
-      lockedPackageName = it.getString(ENTRY_PACKAGE_NAME, "")
-      lockedActivityName = it.getString(ENTRY_ACTIVITY_NAME, "")
-      lockedRealName = it.getString(ENTRY_REAL_NAME, "")
-      lockedIcon = it.getInt(ENTRY_ICON, 0)
-      lockedSystem = it.getBoolean(ENTRY_IS_SYSTEM, false)
-    }
-
-    require(lockedPackageName.isNotBlank())
-    require(lockedActivityName.isNotBlank())
-    require(lockedRealName.isNotBlank())
+  @CheckResult
+  private fun getLockedPackageName(): String {
+    return requireNotNull(intent.extras).getString(ENTRY_PACKAGE_NAME, "")
+        .also { require(it.isNotBlank()) }
   }
 
-  private fun onAlreadyUnlocked() {
-    Timber.d("$lockedPackageName $lockedActivityName is already unlocked")
+  @CheckResult
+  private fun getLockedActivityName(): String {
+    return requireNotNull(intent.extras).getString(ENTRY_ACTIVITY_NAME, "")
+        .also { require(it.isNotBlank()) }
+  }
+
+  @CheckResult
+  private fun getLockedRealName(): String {
+    return requireNotNull(intent.extras).getString(ENTRY_REAL_NAME, "")
+        .also { require(it.isNotBlank()) }
+  }
+
+  @CheckResult
+  private fun getLockedCode(): String? {
+    return requireNotNull(intent.extras).getString(ENTRY_LOCK_CODE)
+  }
+
+  @CheckResult
+  private fun getLockedIcon(): Int {
+    return requireNotNull(intent.extras).getInt(ENTRY_ICON, 0)
+  }
+
+  @CheckResult
+  private fun getLockedIsSystem(): Boolean {
+    return requireNotNull(intent.extras).getBoolean(ENTRY_IS_SYSTEM, false)
+  }
+
+  override fun onAlreadyUnlocked() {
+    Timber.d("${getLockedPackageName()} ${getLockedActivityName()} unlocked, close lock screen")
     finish()
-  }
-
-  private fun pushFragment(
-    pushFragment: Fragment,
-    tag: String
-  ) {
-    val fragmentManager = supportFragmentManager
-    val fragment = fragmentManager.findFragmentByTag(LockScreenTextFragment.TAG)
-    if (fragment == null) {
-      fragmentManager.beginTransaction()
-          .add(fragmentContainerId, pushFragment, tag)
-          .commit(this)
-    }
-  }
-
-  private fun onTypePattern() {
-    pushFragment(
-        LockScreenPatternFragment.newInstance(lockedCode, lockedSystem),
-        LockScreenPatternFragment.TAG
-    )
-  }
-
-  private fun onTypeText() {
-    pushFragment(
-        LockScreenTextFragment.newInstance(lockedCode, lockedSystem),
-        LockScreenTextFragment.TAG
-    )
   }
 
   override fun onPause() {
@@ -185,7 +149,8 @@ class LockScreenActivity : ActivityBase(), CloseOldPresenter.Callback {
       lockScreen.closeToolbar()
     }
 
-    viewModel.clearMatchingForegroundEvent()
+    // Clear the current foreground
+    foregroundPresenter.foreground(getLockedPackageName(), getLockedRealName())
   }
 
   override fun onBackPressed() {
@@ -195,12 +160,8 @@ class LockScreenActivity : ActivityBase(), CloseOldPresenter.Callback {
   @CallSuper
   override fun onDestroy() {
     super.onDestroy()
+    pinScreen.teardown()
     overridePendingTransition(0, 0)
-
-    alreadyUnlockedDisposable.tryDispose()
-    lockScreenTypeDisposable.tryDispose()
-    displayNameDisposable.tryDispose()
-    ignoreTimeDisposable.tryDispose()
   }
 
   override fun finish() {
@@ -208,9 +169,10 @@ class LockScreenActivity : ActivityBase(), CloseOldPresenter.Callback {
     overridePendingTransition(0, 0)
   }
 
-  override fun onSaveInstanceState(outState: Bundle?) {
-    outState?.let { lockScreen.saveState(it) }
+  override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
+    pinScreen.saveState(outState)
+    lockScreen.saveState(outState)
   }
 
   companion object {
@@ -239,8 +201,9 @@ class LockScreenActivity : ActivityBase(), CloseOldPresenter.Callback {
       realName: String,
       icon: Int
     ) {
-      val notPadLock = (entry.packageName() != context.applicationContext.packageName)
-      val intent = Intent(context.applicationContext, LockScreenActivity::class.java).apply {
+      val appContext = context.applicationContext
+      val notPadLock = (entry.packageName() != appContext.packageName)
+      val intent = Intent(appContext, LockScreenActivity::class.java).apply {
         putExtra(LockScreenActivity.ENTRY_PACKAGE_NAME, entry.packageName())
         putExtra(LockScreenActivity.ENTRY_ACTIVITY_NAME, entry.activityName())
         putExtra(LockScreenActivity.ENTRY_LOCK_CODE, entry.lockCode())
@@ -264,10 +227,8 @@ class LockScreenActivity : ActivityBase(), CloseOldPresenter.Callback {
         throw RuntimeException("Cannot launch LockScreen for whitelisted applications")
       }
 
-      Timber.d(
-          "Start lock activity for entry: ${entry.packageName()} ${entry.activityName()} (real $realName)"
-      )
-      context.applicationContext.startActivity(intent)
+      Timber.d("Lock: ${entry.packageName()} ${entry.activityName()} (real $realName)")
+      appContext.startActivity(intent)
     }
   }
 }

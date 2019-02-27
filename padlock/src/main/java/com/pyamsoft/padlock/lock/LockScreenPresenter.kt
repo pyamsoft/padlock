@@ -17,14 +17,24 @@
 
 package com.pyamsoft.padlock.lock
 
-import com.pyamsoft.padlock.lock.CloseOldPresenter.Callback
+import com.pyamsoft.padlock.lock.LockScreenPresenter.Callback
 import com.pyamsoft.pydroid.arch.Presenter
 
-internal interface CloseOldPresenter : Presenter<Callback> {
+internal interface LockScreenPresenter : Presenter<Callback> {
+
+  fun checkUnlocked()
 
   interface Callback {
 
     fun onCloseOld()
+
+    fun onDisplayNameLoaded(name: String)
+
+    fun onDefaultIgnoreTimeLoaded(time: Long)
+
+    fun onAlreadyUnlocked()
+
+    fun onSubmitUnlockAttempt(attempt: String)
 
   }
 

@@ -48,7 +48,6 @@ import com.pyamsoft.padlock.list.info.LockInfoSingletonModule
 import com.pyamsoft.padlock.list.info.LockInfoSingletonProvider
 import com.pyamsoft.padlock.list.modify.LockStateModule
 import com.pyamsoft.padlock.lock.LockComponent
-import com.pyamsoft.padlock.lock.LockScreenComponent
 import com.pyamsoft.padlock.lock.LockSingletonModule
 import com.pyamsoft.padlock.lock.LockSingletonProvider
 import com.pyamsoft.padlock.main.MainActivity
@@ -182,9 +181,6 @@ interface PadLockComponent {
   fun plusLockComponent(): LockComponent.Builder
 
   @CheckResult
-  fun plusLockScreenComponent(): LockScreenComponent.Builder
-
-  @CheckResult
   fun plusSettingsComponent(): SettingsComponent.Builder
 
   @CheckResult
@@ -233,70 +229,65 @@ interface PadLockComponent {
   @Module
   object PadLockProvider {
 
-    private val clearAllBus = RxBus.create<ClearAllEvent>()
-    private val clearDatabaseBus = RxBus.create<ClearDatabaseEvent>()
-    private val settingsStateBus = RxBus.create<SwitchLockTypeEvent>()
-
-    private val recheckBus = RxBus.create<RecheckEvent>()
-
-    private val servicePauseBus = RxBus.create<ServicePauseEvent>()
-    private val serviceFinishBus = RxBus.create<ServiceFinishEvent>()
-    private val foregroundEventBus = RxBus.create<ForegroundEvent>()
-
-    private val clearPinBus = RxBus.create<ClearPinEvent>()
-    private val checkPinBus = RxBus.create<CheckPinEvent>()
-    private val createPinBus = RxBus.create<CreatePinEvent>()
-
-    private val purgeSingleBus = RxBus.create<PurgeSingleEvent>()
-    private val purgeAllBus = RxBus.create<PurgeAllEvent>()
+    @JvmStatic
+    @Provides
+    @Singleton
+    internal fun providePurgeSingleBus(): EventBus<PurgeSingleEvent> = RxBus.create()
 
     @JvmStatic
     @Provides
-    internal fun providePurgeSingleBus(): EventBus<PurgeSingleEvent> = purgeSingleBus
+    @Singleton
+    internal fun providePurgeAllBus(): EventBus<PurgeAllEvent> = RxBus.create()
 
     @JvmStatic
     @Provides
-    internal fun providePurgeAllBus(): EventBus<PurgeAllEvent> = purgeAllBus
+    @Singleton
+    internal fun provideForegroundEventBus(): EventBus<ForegroundEvent> = RxBus.create()
 
     @JvmStatic
     @Provides
-    internal fun provideForegroundEventBus(): EventBus<ForegroundEvent> = foregroundEventBus
+    @Singleton
+    internal fun provideServiceFinishBus(): EventBus<ServiceFinishEvent> = RxBus.create()
 
     @JvmStatic
     @Provides
-    internal fun provideServiceFinishBus(): EventBus<ServiceFinishEvent> = serviceFinishBus
+    @Singleton
+    internal fun provideServicePauseBus(): EventBus<ServicePauseEvent> = RxBus.create()
 
     @JvmStatic
     @Provides
-    internal fun provideServicePauseBus(): EventBus<ServicePauseEvent> = servicePauseBus
+    @Singleton
+    internal fun provideRecheckBus(): EventBus<RecheckEvent> = RxBus.create()
 
     @JvmStatic
     @Provides
-    internal fun provideRecheckBus(): EventBus<RecheckEvent> = recheckBus
+    @Singleton
+    internal fun provideCreatePinBus(): EventBus<CreatePinEvent> = RxBus.create()
 
     @JvmStatic
     @Provides
-    internal fun provideCreatePinBus(): EventBus<CreatePinEvent> = createPinBus
+    @Singleton
+    internal fun provideClearPinBus(): EventBus<ClearPinEvent> = RxBus.create()
 
     @JvmStatic
     @Provides
-    internal fun provideClearPinBus(): EventBus<ClearPinEvent> = clearPinBus
+    @Singleton
+    internal fun provideCheckPinBus(): EventBus<CheckPinEvent> = RxBus.create()
 
     @JvmStatic
     @Provides
-    internal fun provideCheckPinBus(): EventBus<CheckPinEvent> = checkPinBus
+    @Singleton
+    internal fun provideClearAllBus(): EventBus<ClearAllEvent> = RxBus.create()
 
     @JvmStatic
     @Provides
-    internal fun provideClearAllBus(): EventBus<ClearAllEvent> = clearAllBus
+    @Singleton
+    internal fun provideClearDatabaseBus(): EventBus<ClearDatabaseEvent> = RxBus.create()
 
     @JvmStatic
     @Provides
-    internal fun provideClearDatabaseBus(): EventBus<ClearDatabaseEvent> = clearDatabaseBus
-
-    @JvmStatic
-    @Provides
-    internal fun provideLockTypeBus(): EventBus<SwitchLockTypeEvent> = settingsStateBus
+    @Singleton
+    internal fun provideLockTypeBus(): EventBus<SwitchLockTypeEvent> = RxBus.create()
 
     @JvmStatic
     @Provides

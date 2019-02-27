@@ -231,9 +231,9 @@ internal class LockInfoViewImpl @Inject internal constructor(
   private fun setupToolbar() {
     val theme: Int
     if (theming.isDarkTheme()) {
-      theme = R.style.ThemeOverlay_AppCompat
+      theme = R.style.ThemeOverlay_MaterialComponents
     } else {
-      theme = R.style.ThemeOverlay_AppCompat_Light
+      theme = R.style.ThemeOverlay_MaterialComponents_Light
     }
     binding.lockInfoToolbar.apply {
       popupTheme = theme

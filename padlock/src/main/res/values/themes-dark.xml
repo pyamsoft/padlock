@@ -56,7 +56,7 @@
   <!-- Lock Screen Theme -->
   <style name="Theme.PadLock.Dark.Lock" parent="@style/Base.Theme.PadLock.Dark.Lock"/>
 
-  <style name="ThemeOverlay.PadLock.Dark.Lock" parent="@style/ThemeOverlay.AppCompat">
+  <style name="ThemeOverlay.PadLock.Dark.Lock" parent="@style/ThemeOverlay.MaterialComponents">
     <item name="android:colorControlActivated">@color/blue700</item>
     <item name="android:colorControlHighlight">@color/blue500</item>
     <item name="android:colorControlNormal">@color/grey300</item>

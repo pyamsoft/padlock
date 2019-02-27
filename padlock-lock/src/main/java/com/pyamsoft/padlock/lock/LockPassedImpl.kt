@@ -48,5 +48,8 @@ internal class LockPassedImpl @Inject internal constructor(
   override fun check(
     packageName: String,
     activityName: String
-  ): Boolean = passedSet.contains("$packageName$activityName")
+  ): Boolean {
+    enforcer.assertNotOnMainThread()
+    return passedSet.contains("$packageName$activityName")
+  }
 }

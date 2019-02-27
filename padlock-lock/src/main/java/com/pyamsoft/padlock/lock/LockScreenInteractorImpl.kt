@@ -15,7 +15,7 @@
  *
  */
 
-package com.pyamsoft.padlock.lock.screen
+package com.pyamsoft.padlock.lock
 
 import com.pyamsoft.padlock.api.lockscreen.LockPassed
 import com.pyamsoft.padlock.api.lockscreen.LockScreenInteractor
