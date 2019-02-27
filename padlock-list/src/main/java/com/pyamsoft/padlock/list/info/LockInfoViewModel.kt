@@ -64,16 +64,12 @@ class LockInfoViewModel @Inject internal constructor(
   ): Disposable {
     val whitelistDisposable = lockWhitelistedBus.listen()
         .filter { it.packageName == packageName }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
         .subscribe { onWhitelist(it) }
 
     val errorDisposable = bus.listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
         .flatMapSingle { modifyDatabaseEntry(it) }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(Schedulers.trampoline())
+        .observeOn(Schedulers.trampoline())
         .doOnError {
           Timber.e(it, "Error occurred modifying database entry")
           onError(it)
@@ -106,6 +102,8 @@ class LockInfoViewModel @Inject internal constructor(
       )
           .andThen(Single.just(Unit))
     }
+        .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.io())
   }
 
   @CheckResult

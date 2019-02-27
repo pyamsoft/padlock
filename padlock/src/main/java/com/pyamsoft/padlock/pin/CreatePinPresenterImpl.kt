@@ -20,12 +20,11 @@ package com.pyamsoft.padlock.pin
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.PinInteractor
 import com.pyamsoft.padlock.pin.CreatePinPresenterImpl.CreatePinEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
+import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
@@ -51,11 +50,9 @@ internal class CreatePinPresenterImpl @Inject internal constructor(
   }
 
   override fun onBind() {
-    listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-        .flatMapSingle { createPin(it.attempt, it.reEntry, it.hint) }
-        .observeOn(AndroidSchedulers.mainThread())
+    listen().flatMapSingle { createPin(it.attempt, it.reEntry, it.hint) }
+        .subscribeOn(Schedulers.trampoline())
+        .observeOn(Schedulers.trampoline())
         .subscribe { success ->
           if (success) {
             callback.onCreatePinSuccess()

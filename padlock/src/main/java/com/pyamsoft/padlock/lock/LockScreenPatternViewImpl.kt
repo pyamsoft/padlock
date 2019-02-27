@@ -34,7 +34,7 @@ import com.pyamsoft.padlock.databinding.FragmentLockScreenPatternBinding
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import javax.inject.Inject
 
-internal class LockScreenPatternViewImpl @Inject internal constructor(
+internal class ockScreenPatternViewImpl @Inject internal constructor(
   private val owner: LifecycleOwner,
   private val inflater: LayoutInflater,
   private val container: ViewGroup?

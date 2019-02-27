@@ -20,23 +20,16 @@ package com.pyamsoft.padlock.pin
 import android.view.ViewGroup
 import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.pin.ConfirmPinView.Callback
-import com.pyamsoft.pydroid.ui.util.Snackbreak
 import javax.inject.Inject
 
 internal class TextConfirmPinView @Inject internal constructor(
-  private val owner: LifecycleOwner,
+  owner: LifecycleOwner,
   parent: ViewGroup,
   callback: Callback
-) : ConfirmPinView, TextPinView<Callback>(parent, callback, true) {
+) : ConfirmPinView, TextPinView<Callback>(owner, parent, callback, true) {
 
   override fun submit() {
     callback.onSubmit(getAttempt())
-  }
-
-  override fun showPinError() {
-    Snackbreak.bindTo(owner)
-        .short(layoutRoot, "Invalid PIN")
-        .show()
   }
 
 }

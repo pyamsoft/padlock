@@ -19,15 +19,17 @@ package com.pyamsoft.padlock.pin
 
 import android.view.ViewGroup
 import androidx.annotation.ColorRes
+import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.pin.CreatePinView.Callback
 import javax.inject.Inject
 
 internal class PatternCreatePinView @Inject internal constructor(
+  owner: LifecycleOwner,
   parent: ViewGroup,
   callback: Callback,
   @ColorRes normalDotColor: Int
 ) : CreatePinView,
-    PatternPinView<Callback>(parent, callback, true, normalDotColor) {
+    PatternPinView<Callback>(owner, parent, callback, true, normalDotColor) {
 
   override fun submit() {
     callback.onSubmit(getAttempt(), getReConfirmAttempt(), getOptionalHint())

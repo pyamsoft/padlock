@@ -74,8 +74,6 @@ class LockScreenViewModel @Inject internal constructor(
 
     return bus.listen()
         .filter { it.packageName == packageName && it.activityName == activityName }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
         .subscribe(onCloseOldEvent)
   }
 

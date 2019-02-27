@@ -19,11 +19,9 @@ package com.pyamsoft.padlock.pin
 
 import com.pyamsoft.padlock.pin.ClearPinPresenter.Callback
 import com.pyamsoft.padlock.pin.ClearPinPresenterImpl.ClearPinEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import com.pyamsoft.pydroid.core.bus.EventBus
 import javax.inject.Inject
 
 internal class ClearPinPresenterImpl @Inject internal constructor(
@@ -32,16 +30,13 @@ internal class ClearPinPresenterImpl @Inject internal constructor(
     ClearPinPresenter {
 
   override fun onBind() {
-    listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe {
-          if (it.success) {
-            callback.onPinClearSuccess()
-          } else {
-            callback.onPinClearFailed()
-          }
-        }
+    listen().subscribe {
+      if (it.success) {
+        callback.onPinClearSuccess()
+      } else {
+        callback.onPinClearFailed()
+      }
+    }
         .destroy(owner)
   }
 

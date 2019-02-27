@@ -19,11 +19,9 @@ package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.service.RecheckPresenter.Callback
 import com.pyamsoft.padlock.service.RecheckPresenterImpl.RecheckEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import com.pyamsoft.pydroid.core.bus.EventBus
 import javax.inject.Inject
 
 internal class RecheckPresenterImpl @Inject internal constructor(
@@ -32,10 +30,7 @@ internal class RecheckPresenterImpl @Inject internal constructor(
     RecheckPresenter {
 
   override fun onBind() {
-    listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { callback.onRecheckRequired(it.packageName, it.className) }
+    listen().subscribe { callback.onRecheckRequired(it.packageName, it.className) }
         .destroy(owner)
   }
 

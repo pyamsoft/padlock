@@ -21,9 +21,9 @@ import com.pyamsoft.padlock.api.service.LockServiceInteractor
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.DISABLED
 import com.pyamsoft.padlock.service.ServiceFinishPresenter.Callback
 import com.pyamsoft.padlock.service.ServiceFinishPresenterImpl.ServiceFinishEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
+import com.pyamsoft.pydroid.core.bus.EventBus
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
@@ -35,10 +35,7 @@ internal class ServiceFinishPresenterImpl @Inject internal constructor(
     ServiceFinishPresenter {
 
   override fun onBind() {
-    listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { callback.onServiceFinished() }
+    listen().subscribe { callback.onServiceFinished() }
         .destroy(owner)
 
     interactor.observeServiceState()

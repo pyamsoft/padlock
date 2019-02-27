@@ -28,16 +28,18 @@ import android.widget.TextView
 import androidx.annotation.CheckResult
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.lifecycle.LifecycleOwner
 import com.google.android.material.textfield.TextInputLayout
 import com.pyamsoft.padlock.R
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import timber.log.Timber
 
 internal abstract class TextPinView<C : Any> protected constructor(
+  owner: LifecycleOwner,
   parent: ViewGroup,
   callback: C,
   isConfirmMode: Boolean
-) : BasePinView<C>(parent, callback, isConfirmMode) {
+) : BasePinView<C>(owner, parent, callback, isConfirmMode) {
 
   private val attemptLayout by lazyView<TextInputLayout>(R.id.pin_text_attempt)
   private val reConfirmAttemptLayout by lazyView<TextInputLayout>(R.id.pin_text_reconfirm_attempt)

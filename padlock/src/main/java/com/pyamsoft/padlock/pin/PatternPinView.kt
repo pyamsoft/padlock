@@ -29,15 +29,14 @@ import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.PatternLockView.Dot
 import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.R
-import com.pyamsoft.pydroid.ui.util.Snackbreak
 
 internal abstract class PatternPinView<C : Any> protected constructor(
-  protected val owner: LifecycleOwner,
+  owner: LifecycleOwner,
   parent: ViewGroup,
   callback: C,
   isConfirmMode: Boolean,
   @ColorRes private val normalDotColor: Int
-) : BasePinView<C>(parent, callback, isConfirmMode) {
+) : BasePinView<C>(owner, parent, callback, isConfirmMode) {
 
   private val lockView by lazyView<PatternLockView>(R.id.pin_pattern_lock)
 
@@ -166,10 +165,7 @@ internal abstract class PatternPinView<C : Any> protected constructor(
   }
 
   private fun promptPatternRepeat() {
-    clearDisplay()
-    Snackbreak.bindTo(owner)
-        .short(layoutRoot, "Please confirm pattern")
-        .show()
+    showMessage("Please confirm pattern")
   }
 
   override fun getAttempt(): String {

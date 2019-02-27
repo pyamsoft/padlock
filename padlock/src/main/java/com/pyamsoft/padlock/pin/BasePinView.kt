@@ -19,9 +19,12 @@ package com.pyamsoft.padlock.pin
 
 import android.view.ViewGroup
 import androidx.annotation.CheckResult
+import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.pydroid.arch.BaseUiView
+import com.pyamsoft.pydroid.ui.util.Snackbreak
 
 internal abstract class BasePinView<C : Any> protected constructor(
+  protected val owner: LifecycleOwner,
   parent: ViewGroup,
   callback: C,
   protected val isConfirmMode: Boolean
@@ -37,5 +40,12 @@ internal abstract class BasePinView<C : Any> protected constructor(
 
   @CheckResult
   protected abstract fun getOptionalHint(): String
+
+  fun showMessage(message: String) {
+    clearDisplay()
+    Snackbreak.bindTo(owner)
+        .short(layoutRoot, message)
+        .show()
+  }
 
 }

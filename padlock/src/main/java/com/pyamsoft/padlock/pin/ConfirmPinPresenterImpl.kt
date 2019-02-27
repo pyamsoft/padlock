@@ -20,17 +20,14 @@ package com.pyamsoft.padlock.pin
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.PinInteractor
 import com.pyamsoft.padlock.pin.ConfirmPinPresenterImpl.CheckPinEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
+import com.pyamsoft.pydroid.core.bus.EventBus
 import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 internal class ConfirmPinPresenterImpl @Inject internal constructor(
-  private val enforcer: Enforcer,
   private val interactor: PinInteractor,
   bus: EventBus<CheckPinEvent>
 ) : BasePresenter<CheckPinEvent, ConfirmPinPresenter.Callback>(bus),
@@ -38,18 +35,15 @@ internal class ConfirmPinPresenterImpl @Inject internal constructor(
 
   @CheckResult
   private fun checkPin(attempt: String): Single<Boolean> {
-    enforcer.assertNotOnMainThread()
     return interactor.comparePin(attempt)
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
   }
 
   override fun onBind() {
-    listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-        .flatMapSingle { checkPin(it.attempt) }
-        .observeOn(AndroidSchedulers.mainThread())
+    listen().flatMapSingle { checkPin(it.attempt) }
+        .subscribeOn(Schedulers.trampoline())
+        .observeOn(Schedulers.trampoline())
         .subscribe { success ->
           if (success) {
             callback.onConfirmPinSuccess()

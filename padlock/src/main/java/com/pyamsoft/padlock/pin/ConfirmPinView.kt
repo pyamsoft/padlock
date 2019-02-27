@@ -19,8 +19,6 @@ package com.pyamsoft.padlock.pin
 
 internal interface ConfirmPinView : PinView {
 
-  fun showPinError()
-
   interface Callback {
 
     fun onSubmit(attempt: String)

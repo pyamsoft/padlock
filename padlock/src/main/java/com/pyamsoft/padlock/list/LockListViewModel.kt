@@ -73,16 +73,12 @@ class LockListViewModel @Inject internal constructor(
     onError: (error: Throwable) -> Unit
   ): Disposable {
     val whitelistDisposable = lockWhitelistedBus.listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
         .subscribe { onWhitelist(it) }
 
     val errorDisposable = lockListBus.listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
         .flatMapSingle { modifyDatabaseEntry(it.isChecked, it.packageName, it.code, it.isSystem) }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeOn(Schedulers.trampoline())
+        .observeOn(Schedulers.trampoline())
         .doOnError {
           Timber.e(it, "Error occurred modifying database entry")
           onError(it)
@@ -115,10 +111,7 @@ class LockListViewModel @Inject internal constructor(
 
   @CheckResult
   fun onCreatePinEvent(onCreate: (event: CreatePinEvent) -> Unit): Disposable {
-    return createPinBus.listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(onCreate)
+    return createPinBus.listen().subscribe(onCreate)
   }
 
   @CheckResult
@@ -146,6 +139,8 @@ class LockListViewModel @Inject internal constructor(
           PadLockDbModels.PACKAGE_ACTIVITY_NAME, code, system
       )
           .andThen(Single.just(Unit))
+          .subscribeOn(Schedulers.io())
+          .observeOn(Schedulers.io())
     }
   }
 

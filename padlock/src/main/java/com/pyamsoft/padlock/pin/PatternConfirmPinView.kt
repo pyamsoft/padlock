@@ -21,7 +21,6 @@ import android.view.ViewGroup
 import androidx.annotation.ColorRes
 import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.pin.ConfirmPinView.Callback
-import com.pyamsoft.pydroid.ui.util.Snackbreak
 import javax.inject.Inject
 
 internal class PatternConfirmPinView @Inject internal constructor(
@@ -34,12 +33,6 @@ internal class PatternConfirmPinView @Inject internal constructor(
 
   override fun submit() {
     callback.onSubmit(getAttempt())
-  }
-
-  override fun showPinError() {
-    Snackbreak.bindTo(owner)
-        .short(layoutRoot, "Invalid PIN")
-        .show()
   }
 
 }

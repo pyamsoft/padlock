@@ -18,11 +18,9 @@
 package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.service.ServiceActionPresenterImpl.ServicePauseEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.schedulers.Schedulers
+import com.pyamsoft.pydroid.core.bus.EventBus
 import javax.inject.Inject
 
 internal class ServiceActionPresenterImpl @Inject internal constructor(
@@ -31,10 +29,7 @@ internal class ServiceActionPresenterImpl @Inject internal constructor(
     ServiceActionPresenter {
 
   override fun onBind() {
-    listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe { callback.onServiceActionRequestPause(it.autoResume) }
+    listen().subscribe { callback.onServiceActionRequestPause(it.autoResume) }
         .destroy(owner)
   }
 

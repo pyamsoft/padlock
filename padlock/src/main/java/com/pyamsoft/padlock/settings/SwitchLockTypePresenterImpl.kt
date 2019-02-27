@@ -22,11 +22,11 @@ import com.pyamsoft.padlock.settings.SwitchLockTypePresenterImpl.SwitchLockTypeE
 import com.pyamsoft.padlock.settings.SwitchLockTypePresenterImpl.SwitchLockTypeEvent.SwitchLockTypeBlocked
 import com.pyamsoft.padlock.settings.SwitchLockTypePresenterImpl.SwitchLockTypeEvent.SwitchLockTypeError
 import com.pyamsoft.padlock.settings.SwitchLockTypePresenterImpl.SwitchLockTypeEvent.SwitchLockTypeSuccess
+import com.pyamsoft.pydroid.arch.BasePresenter
+import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
-import com.pyamsoft.pydroid.arch.BasePresenter
-import com.pyamsoft.pydroid.arch.destroy
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
@@ -41,16 +41,13 @@ internal class SwitchLockTypePresenterImpl @Inject internal constructor(
   private var lockTypeDisposable by singleDisposable()
 
   override fun onBind() {
-    listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe {
-          return@subscribe when (it) {
-            is SwitchLockTypeSuccess -> callback.onLockTypeSwitchSuccess(it.newType)
-            is SwitchLockTypeBlocked -> callback.onLockTypeSwitchBlocked()
-            is SwitchLockTypeError -> callback.onLockTypeSwitchError(it.error)
-          }
-        }
+    listen().subscribe {
+      return@subscribe when (it) {
+        is SwitchLockTypeSuccess -> callback.onLockTypeSwitchSuccess(it.newType)
+        is SwitchLockTypeBlocked -> callback.onLockTypeSwitchBlocked()
+        is SwitchLockTypeError -> callback.onLockTypeSwitchError(it.error)
+      }
+    }
         .destroy(owner)
   }
 

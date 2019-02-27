@@ -20,36 +20,30 @@ package com.pyamsoft.padlock.settings
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.padlock.settings.ClearDatabasePresenterImpl.ClearDatabaseEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
+import com.pyamsoft.pydroid.core.bus.EventBus
 import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 internal class ClearDatabasePresenterImpl @Inject internal constructor(
   private val interactor: SettingsInteractor,
-  private val enforcer: Enforcer,
   bus: EventBus<ClearDatabaseEvent>
 ) : BasePresenter<ClearDatabaseEvent, ClearDatabasePresenter.Callback>(bus),
     ClearDatabasePresenter {
 
   @CheckResult
   private fun clearDatabase(): Single<Unit> {
-    enforcer.assertNotOnMainThread()
     return interactor.clearDatabase()
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
   }
 
   override fun onBind() {
-    listen()
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-        .flatMapSingle { clearDatabase() }
-        .observeOn(AndroidSchedulers.mainThread())
+    listen().flatMapSingle { clearDatabase() }
+        .subscribeOn(Schedulers.trampoline())
+        .observeOn(Schedulers.trampoline())
         .subscribe { callback.onDatabaseCleared() }
         .destroy(owner)
   }
