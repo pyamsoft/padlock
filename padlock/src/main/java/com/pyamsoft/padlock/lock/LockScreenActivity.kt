@@ -23,6 +23,7 @@ import android.os.Bundle
 import androidx.annotation.CallSuper
 import androidx.annotation.CheckResult
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
@@ -38,7 +39,8 @@ import javax.inject.Inject
 class LockScreenActivity : ActivityBase(),
     LockScreenPresenter.Callback {
 
-  @field:Inject internal lateinit var lockScreen: LockScreenView
+  @field:Inject internal lateinit var toolbar: LockToolbarView
+  @field:Inject internal lateinit var iconView: LockImageView
   @field:Inject internal lateinit var pinScreen: ConfirmPinView
 
   @field:Inject internal lateinit var presenter: LockScreenPresenter
@@ -65,22 +67,61 @@ class LockScreenActivity : ActivityBase(),
         .plusLockComponent()
         .packageName(getLockedPackageName())
         .activityName(getLockedActivityName())
+        .appIcon(getLockedIcon())
         .build()
         .inject(this)
 
-    lockScreen.create()
-
-    lockScreen.onToolbarNavigationClicked { onBackPressed() }
-
-    lockScreen.onMenuItemClicked {
-      when (it.itemId) {
-        R.id.menu_exclude -> it.isChecked = !it.isChecked
-        R.id.menu_lockscreen_info -> LockedStatDialog.newInstance().show(this, "info_dialog")
-        else -> it.isChecked = true
-      }
-    }
+    createComponents(savedInstanceState)
+    layoutComponents(layoutRoot)
 
     presenter.bind(this, this)
+
+    if (savedInstanceState == null) {
+      // TODO presenter fetch ignore time default
+    }
+  }
+
+  private fun createComponents(savedInstanceState: Bundle?) {
+    toolbar.inflate(savedInstanceState)
+    iconView.inflate(savedInstanceState)
+    pinScreen.inflate(savedInstanceState)
+  }
+
+  private fun layoutComponents(layoutRoot: ConstraintLayout) {
+    ConstraintSet().apply {
+      clone(layoutRoot)
+
+      toolbar.also {
+        connect(it.id(), ConstraintSet.TOP, layoutRoot.id, ConstraintSet.TOP)
+        connect(it.id(), ConstraintSet.START, layoutRoot.id, ConstraintSet.START)
+        connect(it.id(), ConstraintSet.END, layoutRoot.id, ConstraintSet.END)
+        constrainWidth(it.id(), ConstraintSet.MATCH_CONSTRAINT)
+      }
+
+      iconView.also {
+        connect(it.id(), ConstraintSet.TOP, toolbar.id(), ConstraintSet.BOTTOM)
+        connect(it.id(), ConstraintSet.START, layoutRoot.id, ConstraintSet.START)
+        connect(it.id(), ConstraintSet.END, layoutRoot.id, ConstraintSet.END)
+        constrainWidth(it.id(), ConstraintSet.MATCH_CONSTRAINT)
+      }
+
+      pinScreen.also {
+        connect(it.id(), ConstraintSet.TOP, iconView.id(), ConstraintSet.BOTTOM)
+        connect(it.id(), ConstraintSet.START, layoutRoot.id, ConstraintSet.START)
+        connect(it.id(), ConstraintSet.END, layoutRoot.id, ConstraintSet.END)
+        connect(it.id(), ConstraintSet.BOTTOM, layoutRoot.id, ConstraintSet.BOTTOM)
+        constrainWidth(it.id(), ConstraintSet.MATCH_CONSTRAINT)
+        constrainHeight(it.id(), ConstraintSet.MATCH_CONSTRAINT)
+      }
+
+      applyTo(layoutRoot)
+    }
+
+  }
+
+  override fun showLockedStats() {
+    LockedStatDialog.newInstance()
+        .show(this, "info_dialog")
   }
 
   override fun onCloseOld() {
@@ -89,11 +130,11 @@ class LockScreenActivity : ActivityBase(),
   }
 
   override fun onDisplayNameLoaded(name: String) {
-    lockScreen.setToolbarTitle(name)
+    toolbar.setName(name)
   }
 
   override fun onDefaultIgnoreTimeLoaded(time: Long) {
-    lockScreen.initIgnoreTimeSelection(time)
+    toolbar.initIgnoreTime(time)
   }
 
   override fun onResume() {
@@ -102,6 +143,8 @@ class LockScreenActivity : ActivityBase(),
   }
 
   override fun onSubmitUnlockAttempt(attempt: String) {
+    val excluded = toolbar.isExcludeChecked()
+    val ignoreTime = toolbar.getSelectedIgnoreTime()
     // TODO gather excluded and timeout and submit
   }
 
@@ -146,7 +189,7 @@ class LockScreenActivity : ActivityBase(),
   override fun onPause() {
     super.onPause()
     if (isFinishing || isChangingConfigurations) {
-      lockScreen.closeToolbar()
+      toolbar.close()
     }
 
     // Clear the current foreground
@@ -161,6 +204,8 @@ class LockScreenActivity : ActivityBase(),
   override fun onDestroy() {
     super.onDestroy()
     pinScreen.teardown()
+    iconView.teardown()
+    toolbar.teardown()
     overridePendingTransition(0, 0)
   }
 
@@ -172,7 +217,8 @@ class LockScreenActivity : ActivityBase(),
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
     pinScreen.saveState(outState)
-    lockScreen.saveState(outState)
+    iconView.saveState(outState)
+    toolbar.saveState(outState)
   }
 
   companion object {

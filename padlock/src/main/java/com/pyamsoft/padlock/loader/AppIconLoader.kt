@@ -23,7 +23,6 @@ import androidx.annotation.DrawableRes
 import com.pyamsoft.padlock.api.packagemanager.PackageActivityManager
 import com.pyamsoft.pydroid.loader.Loader
 import javax.inject.Inject
-import javax.inject.Singleton
 
 class AppIconLoader @Inject internal constructor(
   private val packageActivityManager: PackageActivityManager

@@ -60,6 +60,10 @@ interface LockComponent {
 
     @BindsInstance
     @CheckResult
+    fun appIcon(@Named("locked_app_icon") icon: Int): Builder
+
+    @BindsInstance
+    @CheckResult
     fun activityName(@Named("locked_activity_name") activityName: String): Builder
 
     @CheckResult
