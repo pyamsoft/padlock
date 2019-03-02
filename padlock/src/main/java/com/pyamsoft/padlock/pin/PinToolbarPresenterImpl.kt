@@ -17,27 +17,27 @@
 
 package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.padlock.pin.PinCreateDialogPresenter.Callback
+import com.pyamsoft.padlock.pin.PinToolbarPresenter.Callback
 import com.pyamsoft.padlock.scopes.FragmentScope
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.core.bus.RxBus
 import javax.inject.Inject
 
 @FragmentScope
-internal class PinCreateDialogPresenterImpl @Inject internal constructor(
+internal class PinToolbarPresenterImpl @Inject internal constructor(
 ) : BasePresenter<Unit, Callback>(RxBus.empty()),
-    CreatePinView.Callback,
-    PinCreateDialogPresenter {
+    PinToolbar.Callback,
+    PinToolbarPresenter {
 
   override fun onBind() {
   }
 
-  override fun onSubmit(
-    attempt: String,
-    reConfirmAttempt: String,
-    optionalHint: String
-  ) {
-    callback.onAttemptSubmit(attempt, reConfirmAttempt, optionalHint)
+  override fun onNavClicked() {
+    callback.onDialogClosed()
+  }
+
+  override fun onSubmitClicked() {
+    callback.onAttemptSubmit()
   }
 
   override fun onUnbind() {

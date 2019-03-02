@@ -24,6 +24,16 @@ internal interface LockScreenPresenter : Presenter<Callback> {
 
   fun checkUnlocked()
 
+  fun submit(
+    lockCode: String?,
+    currentAttempt: String,
+    isSystem: Boolean,
+    shouldExclude: Boolean,
+    ignoreTime: Long
+  )
+
+  fun displayHint()
+
   interface Callback {
 
     fun onCloseOld()
@@ -37,6 +47,16 @@ internal interface LockScreenPresenter : Presenter<Callback> {
     fun onSubmitUnlockAttempt(attempt: String)
 
     fun showLockedStats()
+
+    fun onShowLockHint(hint: String)
+
+    fun onSubmitBegin()
+
+    fun onSubmitUnlocked()
+
+    fun onSubmitFailed()
+
+    fun onSubmitLocked()
 
   }
 

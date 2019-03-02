@@ -48,8 +48,8 @@ import com.pyamsoft.padlock.list.info.LockInfoSingletonModule
 import com.pyamsoft.padlock.list.info.LockInfoSingletonProvider
 import com.pyamsoft.padlock.list.modify.LockStateModule
 import com.pyamsoft.padlock.lock.LockComponent
+import com.pyamsoft.padlock.lock.LockScreenPresenterImpl.CloseOldEvent
 import com.pyamsoft.padlock.lock.LockSingletonModule
-import com.pyamsoft.padlock.lock.LockSingletonProvider
 import com.pyamsoft.padlock.main.MainActivity
 import com.pyamsoft.padlock.main.MainComponent
 import com.pyamsoft.padlock.main.MainFragmentComponent
@@ -141,7 +141,7 @@ import javax.inject.Singleton
       PurgeSingletonModule::class, SettingsSingletonModule::class,
       LockInfoSingletonModule::class, LockInfoSingletonProvider::class, LockStateModule::class,
       LockListSingletonModule::class, LockListSingletonProvider::class, LockSingletonModule::class,
-      LockSingletonProvider::class, PinSingletonProvider::class
+      PinSingletonProvider::class
     ]
 )
 interface PadLockComponent {
@@ -288,6 +288,11 @@ interface PadLockComponent {
     @Provides
     @Singleton
     internal fun provideLockTypeBus(): EventBus<SwitchLockTypeEvent> = RxBus.create()
+
+    @JvmStatic
+    @Provides
+    @Singleton
+    internal fun provideCloseBus(): EventBus<CloseOldEvent> = RxBus.create()
 
     @JvmStatic
     @Provides

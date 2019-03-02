@@ -30,6 +30,7 @@ import com.pyamsoft.padlock.pin.ConfirmPinView
 import com.pyamsoft.padlock.pin.PatternConfirmPinView
 import com.pyamsoft.padlock.pin.TextConfirmPinView
 import com.pyamsoft.padlock.scopes.FragmentScope
+import com.pyamsoft.pydroid.ui.app.ToolbarActivityProvider
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module
@@ -56,6 +57,10 @@ interface LockComponent {
 
     @BindsInstance
     @CheckResult
+    fun toolbarActivityProvider(provider: ToolbarActivityProvider): Builder
+
+    @BindsInstance
+    @CheckResult
     fun packageName(@Named("locked_package_name") packageName: String): Builder
 
     @BindsInstance
@@ -65,6 +70,10 @@ interface LockComponent {
     @BindsInstance
     @CheckResult
     fun activityName(@Named("locked_activity_name") activityName: String): Builder
+
+    @BindsInstance
+    @CheckResult
+    fun realName(@Named("locked_real_name") realName: String): Builder
 
     @CheckResult
     fun build(): LockComponent
@@ -97,6 +106,9 @@ interface LockComponent {
 
     @Binds
     internal abstract fun bindCallback(impl: LockScreenPresenterImpl): ConfirmPinView.Callback
+
+    @Binds
+    internal abstract fun bindToolbarCallback(impl: LockScreenPresenterImpl): LockToolbarView.Callback
 
   }
 }

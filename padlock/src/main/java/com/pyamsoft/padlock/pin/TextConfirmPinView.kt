@@ -28,6 +28,10 @@ internal class TextConfirmPinView @Inject internal constructor(
   callback: Callback
 ) : ConfirmPinView, TextPinView<Callback>(owner, parent, callback, true) {
 
+  override fun showHint(hint: String) {
+    setHintText(hint)
+  }
+
   override fun submit() {
     callback.onSubmit(getAttempt())
   }

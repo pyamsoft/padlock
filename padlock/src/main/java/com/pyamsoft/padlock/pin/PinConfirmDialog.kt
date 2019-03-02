@@ -26,20 +26,27 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import androidx.annotation.CheckResult
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.DialogFragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.R.layout
 import com.pyamsoft.pydroid.ui.app.noTitle
 import com.pyamsoft.pydroid.ui.app.requireArguments
 import javax.inject.Inject
 
 class PinConfirmDialog : DialogFragment(),
     ConfirmPinPresenter.Callback,
+    PinToolbarPresenter.Callback,
     PinConfirmDialogPresenter.Callback {
 
+  @field:Inject internal lateinit var toolbar: PinToolbar
   @field:Inject internal lateinit var pinView: ConfirmPinView
+
   @field:Inject internal lateinit var presenter: PinConfirmDialogPresenter
+  @field:Inject internal lateinit var toolbarPresenter: PinToolbarPresenter
   @field:Inject internal lateinit var confirmPresenter: ConfirmPinPresenter
 
   private var finishOnDismiss: Boolean = false
@@ -68,17 +75,7 @@ class PinConfirmDialog : DialogFragment(),
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-    val root = inflater.inflate(R.layout.layout_frame, container, false)
-    val layoutRoot = root.findViewById<ViewGroup>(R.id.layout_frame)
-
-    Injector.obtain<PadLockComponent>(root.context.applicationContext)
-        .plusPinComponent()
-        .owner(viewLifecycleOwner)
-        .parent(layoutRoot)
-        .build()
-        .inject(this)
-
-    return root
+    return inflater.inflate(layout.layout_constraint, container, false)
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -91,18 +88,57 @@ class PinConfirmDialog : DialogFragment(),
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
-    pinView.inflate(savedInstanceState)
 
+    val layoutRoot = view.findViewById<ConstraintLayout>(R.id.layout_constraint)
+    Injector.obtain<PadLockComponent>(view.context.applicationContext)
+        .plusPinComponent()
+        .owner(viewLifecycleOwner)
+        .parent(layoutRoot)
+        .build()
+        .inject(this)
+
+    createComponents(savedInstanceState)
+    layoutComponents(layoutRoot)
+
+    toolbarPresenter.bind(viewLifecycleOwner, this)
     presenter.bind(viewLifecycleOwner, this)
+  }
+
+  private fun createComponents(savedInstanceState: Bundle?) {
+    toolbar.inflate(savedInstanceState)
+    pinView.inflate(savedInstanceState)
+  }
+
+  private fun layoutComponents(layoutRoot: ConstraintLayout) {
+    ConstraintSet().apply {
+      clone(layoutRoot)
+
+      toolbar.also {
+        connect(it.id(), ConstraintSet.TOP, layoutRoot.id, ConstraintSet.TOP)
+        connect(it.id(), ConstraintSet.START, layoutRoot.id, ConstraintSet.START)
+        connect(it.id(), ConstraintSet.END, layoutRoot.id, ConstraintSet.END)
+      }
+
+      pinView.also {
+        connect(it.id(), ConstraintSet.TOP, toolbar.id(), ConstraintSet.BOTTOM)
+        connect(it.id(), ConstraintSet.BOTTOM, layoutRoot.id, ConstraintSet.BOTTOM)
+        connect(it.id(), ConstraintSet.START, layoutRoot.id, ConstraintSet.START)
+        connect(it.id(), ConstraintSet.END, layoutRoot.id, ConstraintSet.END)
+      }
+
+      applyTo(layoutRoot)
+    }
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
     pinView.saveState(outState)
+    toolbar.saveState(outState)
   }
 
   override fun onDestroyView() {
     super.onDestroyView()
+    toolbar.teardown()
     pinView.teardown()
   }
 
@@ -113,8 +149,16 @@ class PinConfirmDialog : DialogFragment(),
     }
   }
 
+  override fun onDialogClosed() {
+    dismiss()
+  }
+
   override fun onAttemptSubmit(attempt: String) {
     confirmPresenter.confirm(attempt)
+  }
+
+  override fun onAttemptSubmit() {
+    pinView.submit()
   }
 
   override fun onConfirmPinBegin() {

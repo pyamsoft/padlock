@@ -29,4 +29,6 @@ internal interface PinView : UiView {
 
   fun clearDisplay()
 
+  fun showErrorMessage(message: String)
+
 }

@@ -15,20 +15,18 @@
  *
  */
 
-package com.pyamsoft.padlock.lock
+package com.pyamsoft.padlock.pin
 
-import com.pyamsoft.padlock.lock.screen.CloseOldEvent
-import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.bus.RxBus
-import dagger.Module
-import dagger.Provides
+import com.pyamsoft.padlock.pin.PinToolbarPresenter.Callback
+import com.pyamsoft.pydroid.arch.Presenter
 
-@Module
-object LockSingletonProvider {
+interface PinToolbarPresenter : Presenter<Callback> {
 
-  private val closeBus = RxBus.create<CloseOldEvent>()
+  interface Callback {
 
-  @JvmStatic
-  @Provides
-  fun provideCloseBus(): EventBus<CloseOldEvent> = closeBus
+    fun onDialogClosed()
+
+    fun onAttemptSubmit()
+
+  }
 }

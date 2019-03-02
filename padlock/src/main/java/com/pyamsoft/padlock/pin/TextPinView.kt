@@ -31,6 +31,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import com.google.android.material.textfield.TextInputLayout
 import com.pyamsoft.padlock.R
+import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import timber.log.Timber
 
@@ -202,6 +203,20 @@ internal abstract class TextPinView<C : Any> protected constructor(
 
   override fun disable() {
     setEnabled(false)
+  }
+
+  override fun showErrorMessage(message: String) {
+    Snackbreak.bindTo(owner)
+        .short(layoutRoot, message)
+        .show()
+  }
+
+  protected fun setHintText(hint: String) {
+    if (isConfirmMode) {
+      showHint.text = hint
+    } else {
+      showHint.text = ""
+    }
   }
 
   companion object {

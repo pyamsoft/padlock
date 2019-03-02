@@ -65,8 +65,10 @@ class LockScreenActivity : ActivityBase(),
 
     Injector.obtain<PadLockComponent>(applicationContext)
         .plusLockComponent()
+        .toolbarActivityProvider(this)
         .packageName(getLockedPackageName())
         .activityName(getLockedActivityName())
+        .realName(getLockedRealName())
         .appIcon(getLockedIcon())
         .build()
         .inject(this)
@@ -142,10 +144,14 @@ class LockScreenActivity : ActivityBase(),
     presenter.checkUnlocked()
   }
 
+  override fun onShowLockHint(hint: String) {
+    pinScreen.showHint(hint)
+  }
+
   override fun onSubmitUnlockAttempt(attempt: String) {
     val excluded = toolbar.isExcludeChecked()
     val ignoreTime = toolbar.getSelectedIgnoreTime()
-    // TODO gather excluded and timeout and submit
+    presenter.submit(getLockedCode(), attempt, getLockedIsSystem(), excluded, ignoreTime)
   }
 
   @CheckResult
@@ -184,6 +190,37 @@ class LockScreenActivity : ActivityBase(),
   override fun onAlreadyUnlocked() {
     Timber.d("${getLockedPackageName()} ${getLockedActivityName()} unlocked, close lock screen")
     finish()
+  }
+
+  override fun onSubmitBegin() {
+    Timber.d("Submit begin")
+    pinScreen.disable()
+  }
+
+  override fun onSubmitUnlocked() {
+    Timber.d(
+        "Unlocked! ${getLockedPackageName()} ${getLockedActivityName()} ${getLockedRealName()}"
+    )
+    pinScreen.clearDisplay()
+    finish()
+  }
+
+  override fun onSubmitLocked() {
+    Timber.e(
+        "Temp Locked ${getLockedPackageName()} ${getLockedActivityName()} ${getLockedRealName()}"
+    )
+    pinScreen.clearDisplay()
+    pinScreen.enable()
+    pinScreen.showErrorMessage("Error: This App is temporarily locked.")
+  }
+
+  override fun onSubmitFailed() {
+    Timber.w(
+        "Failed unlock ${getLockedPackageName()} ${getLockedActivityName()} ${getLockedRealName()}"
+    )
+    pinScreen.clearDisplay()
+    pinScreen.enable()
+    pinScreen.showErrorMessage("Error: Invalid PIN")
   }
 
   override fun onPause() {

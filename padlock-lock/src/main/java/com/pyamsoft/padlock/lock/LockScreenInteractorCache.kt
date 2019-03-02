@@ -17,7 +17,8 @@
 
 package com.pyamsoft.padlock.lock
 
-import com.pyamsoft.padlock.api.lockscreen.LockEntryInteractor
+import com.pyamsoft.padlock.api.lockscreen.LockScreenInteractor
+import com.pyamsoft.padlock.model.LockScreenType
 import com.pyamsoft.pydroid.core.cache.Cache
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Completable
@@ -25,14 +26,13 @@ import io.reactivex.Maybe
 import io.reactivex.Single
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Singleton
 
-internal class LockEntryInteractorCache @Inject internal constructor(
+internal class LockScreenInteractorCache @Inject internal constructor(
   private val enforcer: Enforcer,
   @param:Named("cache_lock_list") private val lockListCache: Cache,
   @param:Named("cache_lock_info") private val lockInfoCache: Cache,
-  @param:Named("interactor_lock_entry") private val impl: LockEntryInteractor
-) : LockEntryInteractor, Cache {
+  @param:Named("interactor_lock_screen") private val impl: LockScreenInteractor
+) : LockScreenInteractor, Cache {
 
   override fun clearCache() {
     clearFailCount()
@@ -79,5 +79,26 @@ internal class LockEntryInteractorCache @Inject internal constructor(
       }
     }
 
-  override fun clearFailCount() = impl.clearFailCount()
+  override fun clearFailCount() {
+    impl.clearFailCount()
+  }
+
+  override fun getDefaultIgnoreTime(): Single<Long> {
+    return impl.getDefaultIgnoreTime()
+  }
+
+  override fun getDisplayName(packageName: String): Single<String> {
+    return impl.getDisplayName(packageName)
+  }
+
+  override fun getLockScreenType(): Single<LockScreenType> {
+    return impl.getLockScreenType()
+  }
+
+  override fun isAlreadyUnlocked(
+    packageName: String,
+    activityName: String
+  ): Single<Boolean> {
+    return impl.isAlreadyUnlocked(packageName, activityName)
+  }
 }

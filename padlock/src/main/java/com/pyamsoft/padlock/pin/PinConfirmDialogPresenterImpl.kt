@@ -17,7 +17,6 @@
 
 package com.pyamsoft.padlock.pin
 
-
 import com.pyamsoft.padlock.pin.PinConfirmDialogPresenter.Callback
 import com.pyamsoft.padlock.scopes.FragmentScope
 import com.pyamsoft.pydroid.arch.BasePresenter
@@ -40,3 +39,4 @@ internal class PinConfirmDialogPresenterImpl @Inject internal constructor(
   override fun onUnbind() {
   }
 }
+

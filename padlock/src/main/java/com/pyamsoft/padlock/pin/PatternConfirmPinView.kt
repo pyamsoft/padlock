@@ -31,6 +31,9 @@ internal class PatternConfirmPinView @Inject internal constructor(
 ) : ConfirmPinView,
     PatternPinView<Callback>(owner, parent, callback, true, normalDotColor) {
 
+  override fun showHint(hint: String) {
+  }
+
   override fun submit() {
     callback.onSubmit(getAttempt())
   }

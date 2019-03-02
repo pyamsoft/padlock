@@ -43,11 +43,11 @@ internal class SettingsInteractorImpl @Inject internal constructor(
   private val masterPinPreference: MasterPinPreferences,
   private val preferences: ClearPreferences,
   private val installListenerPreferences: InstallListenerPreferences,
-  @param:Named("cache_lock_list") private val lockListInteractor: Cache,
-  @param:Named("cache_lock_info") private val lockInfoInteractor: Cache,
-  @param:Named("cache_lock_entry") private val lockEntryInteractor: Cache,
+  @param:Named("cache_lock_list") private val lockListCache: Cache,
+  @param:Named("cache_lock_info") private val lockInfoCache: Cache,
+  @param:Named("cache_lock_screen") private val lockScreenCache: Cache,
   @param:Named("cache_list_state") private val listStateCache: Cache,
-  @param:Named("cache_purge") private val purgeInteractor: Cache,
+  @param:Named("cache_purge") private val purgeCache: Cache,
   private val receiver: ApplicationInstallReceiver,
 
     // Just access these Repo instances for clearAll
@@ -78,35 +78,17 @@ internal class SettingsInteractorImpl @Inject internal constructor(
       return@defer deleteDao.deleteAll()
           .andThen(Completable.fromAction {
             enforcer.assertNotOnMainThread()
-            lockListInteractor.clearCache()
-          })
-          .andThen(Completable.fromAction {
-            enforcer.assertNotOnMainThread()
-            lockInfoInteractor.clearCache()
-          })
-          .andThen(Completable.fromAction {
-            enforcer.assertNotOnMainThread()
-            purgeInteractor.clearCache()
-          })
-          .andThen(Completable.fromAction {
-            enforcer.assertNotOnMainThread()
-            lockEntryInteractor.clearCache()
-          })
-          .andThen(Completable.fromAction {
-            enforcer.assertNotOnMainThread()
             listStateCache.clearCache()
+            lockInfoCache.clearCache()
+            lockScreenCache.clearCache()
+            lockListCache.clearCache()
+            purgeCache.clearCache()
           })
           .andThen(Completable.fromAction {
             enforcer.assertNotOnMainThread()
             lockListRepo.cancel()
-          })
-          .andThen(Completable.fromAction {
-            enforcer.assertNotOnMainThread()
-            purgeListRepo.cancel()
-          })
-          .andThen(Completable.fromAction {
-            enforcer.assertNotOnMainThread()
             lockInfoRepo.cancel()
+            purgeListRepo.cancel()
           })
           .toSingleDefault(Unit)
     }

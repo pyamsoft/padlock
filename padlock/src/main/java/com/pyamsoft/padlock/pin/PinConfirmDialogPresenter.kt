@@ -28,3 +28,4 @@ interface PinConfirmDialogPresenter : Presenter<Callback> {
 
   }
 }
+

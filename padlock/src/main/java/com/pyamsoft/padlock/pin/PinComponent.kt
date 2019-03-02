@@ -78,6 +78,12 @@ interface PinComponent {
     @Binds
     internal abstract fun bindConfirmViewCallback(impl: PinConfirmDialogPresenterImpl): ConfirmPinView.Callback
 
+    @Binds
+    internal abstract fun bindToolbarPresenter(impl: PinToolbarPresenterImpl): PinToolbarPresenter
+
+    @Binds
+    internal abstract fun bindToolbarViewCallback(impl: PinToolbarPresenterImpl): PinToolbar.Callback
+
   }
 
   @Module

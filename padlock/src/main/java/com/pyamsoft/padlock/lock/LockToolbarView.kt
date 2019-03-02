@@ -41,7 +41,7 @@ internal class LockToolbarView @Inject internal constructor(
   callback: Callback
 ) : BaseUiView<Callback>(parent, callback) {
 
-  override val layout: Int = R.layout.toolbar
+  override val layout: Int = R.layout.light_toolbar
 
   private val toolbar by lazyView<Toolbar>(R.id.toolbar)
   private val menuIgnoreOne by lazyMenuItem(R.id.menu_ignore_one)

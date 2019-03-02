@@ -34,6 +34,7 @@ import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.pin.PinConfirmDialog
 import com.pyamsoft.padlock.api.service.ServiceManager
+import com.pyamsoft.padlock.pin.PinCreateDialog
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
@@ -232,8 +233,7 @@ class LockListFragment : Fragment() {
 
     if (fromClick) {
       if (UsagePermissionChecker.hasPermission(requireContext())) {
-        PinConfirmDialog.newInstance(checkOnly = false, finishOnDismiss = false)
-            .show(requireActivity(), PinConfirmDialog.TAG)
+        // TODO Show Pin Dialog for clearing PIN
       }
     }
   }
@@ -243,8 +243,7 @@ class LockListFragment : Fragment() {
 
     if (fromClick) {
       if (UsagePermissionChecker.hasPermission(requireContext())) {
-        PinConfirmDialog.newInstance(checkOnly = false, finishOnDismiss = false)
-            .show(requireActivity(), PinConfirmDialog.TAG)
+        // TODO Show Pin Dialog for creating PIN
       }
     }
   }

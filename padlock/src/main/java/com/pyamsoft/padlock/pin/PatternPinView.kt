@@ -29,6 +29,7 @@ import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.PatternLockView.Dot
 import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.R
+import com.pyamsoft.pydroid.ui.util.Snackbreak
 
 internal abstract class PatternPinView<C : Any> protected constructor(
   owner: LifecycleOwner,
@@ -191,6 +192,12 @@ internal abstract class PatternPinView<C : Any> protected constructor(
 
   override fun disable() {
     setEnabled(false)
+  }
+
+  override fun showErrorMessage(message: String) {
+    Snackbreak.bindTo(owner)
+        .short(layoutRoot, message)
+        .show()
   }
 
   companion object {
