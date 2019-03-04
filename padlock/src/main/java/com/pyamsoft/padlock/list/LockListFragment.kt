@@ -30,10 +30,13 @@ import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.DISAB
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.ENABLED
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PAUSED
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PERMISSION
+import com.pyamsoft.padlock.api.service.ServiceManager
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
+import com.pyamsoft.padlock.pin.ClearPinPresenter
+import com.pyamsoft.padlock.pin.ConfirmPinPresenter
+import com.pyamsoft.padlock.pin.CreatePinPresenter
 import com.pyamsoft.padlock.pin.PinConfirmDialog
-import com.pyamsoft.padlock.api.service.ServiceManager
 import com.pyamsoft.padlock.pin.PinCreateDialog
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.pydroid.core.singleDisposable
@@ -45,14 +48,19 @@ import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
 
-class LockListFragment : Fragment() {
+class LockListFragment : Fragment(),
+    CreatePinPresenter.Callback,
+    ConfirmPinPresenter.Callback,
+    ClearPinPresenter.Callback {
 
   @field:Inject internal lateinit var viewModel: LockListViewModel
   @field:Inject internal lateinit var serviceManager: ServiceManager
   @field:Inject internal lateinit var lockView: LockListView
 
-  private var clearPinDisposable by singleDisposable()
-  private var createPinDisposable by singleDisposable()
+  @field:Inject internal lateinit var createPinPresenter: CreatePinPresenter
+  @field:Inject internal lateinit var confirmPinPresenter: ConfirmPinPresenter
+  @field:Inject internal lateinit var clearPinPresenter: ClearPinPresenter
+
   private var visibilityDisposable by singleDisposable()
   private var databaseChangeDisposable by singleDisposable()
   private var lockEventDisposable by singleDisposable()
@@ -105,24 +113,6 @@ class LockListFragment : Fragment() {
 
     lockView.onRefreshed { checkFabState(false) }
 
-    clearPinDisposable = viewModel.onClearPinEvent {
-      if (it.success) {
-        lockView.onMasterPinClearSuccess()
-      } else {
-        lockView.onMasterPinClearFailure()
-      }
-      serviceManager.startService(false)
-    }
-
-    createPinDisposable = viewModel.onCreatePinEvent {
-      if (it.success) {
-        lockView.onMasterPinCreateSuccess()
-      } else {
-        lockView.onMasterPinCreateFailure()
-      }
-      serviceManager.startService(false)
-    }
-
     visibilityDisposable = viewModel.onSystemVisibilityChanged {
       lockView.onSystemVisibilityChanged(it)
     }
@@ -148,6 +138,9 @@ class LockListFragment : Fragment() {
       Timber.d("Launched from notification, force list refresh")
       populateList(true)
     }
+
+    createPinPresenter.bind(viewLifecycleOwner, this)
+    confirmPinPresenter.bind(viewLifecycleOwner, this)
   }
 
   private fun onFabStateChanged(
@@ -172,8 +165,8 @@ class LockListFragment : Fragment() {
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
-    lockView.commitListState(outState)
     super.onSaveInstanceState(outState)
+    lockView.commitListState(outState)
   }
 
   override fun onStart() {
@@ -212,8 +205,6 @@ class LockListFragment : Fragment() {
     fabStateChangeDisposable.tryDispose()
     databaseChangeDisposable.tryDispose()
     lockEventDisposable.tryDispose()
-    clearPinDisposable.tryDispose()
-    createPinDisposable.tryDispose()
     visibilityDisposable.tryDispose()
   }
 
@@ -233,7 +224,8 @@ class LockListFragment : Fragment() {
 
     if (fromClick) {
       if (UsagePermissionChecker.hasPermission(requireContext())) {
-        // TODO Show Pin Dialog for clearing PIN
+        PinConfirmDialog.newInstance(finishOnDismiss = false)
+            .show(requireActivity(), PinConfirmDialog.TAG)
       }
     }
   }
@@ -243,7 +235,8 @@ class LockListFragment : Fragment() {
 
     if (fromClick) {
       if (UsagePermissionChecker.hasPermission(requireContext())) {
-        // TODO Show Pin Dialog for creating PIN
+        PinCreateDialog.newInstance()
+            .show(requireActivity(), PinCreateDialog.TAG)
       }
     }
   }
@@ -262,6 +255,48 @@ class LockListFragment : Fragment() {
     if (fromClick) {
       serviceManager.startService(true)
     }
+  }
+
+  override fun onConfirmPinBegin() {
+  }
+
+  override fun onConfirmPinSuccess(attempt: String) {
+    Timber.d("Pin confirm success")
+    clearPinPresenter.clear(attempt)
+  }
+
+  override fun onConfirmPinFailure(attempt: String) {
+    Timber.d("Pin confirm failed")
+    lockView.onMasterPinClearFailure()
+  }
+
+  override fun onConfirmPinComplete() {
+  }
+
+  override fun onCreatePinBegin() {
+  }
+
+  override fun onCreatePinSuccess() {
+    Timber.d("Pin create success")
+    lockView.onMasterPinCreateSuccess()
+  }
+
+  override fun onCreatePinFailure() {
+    Timber.d("Pin create failure")
+    lockView.onMasterPinCreateFailure()
+  }
+
+  override fun onCreatePinComplete() {
+  }
+
+  override fun onPinClearSuccess() {
+    Timber.d("Pin clear success")
+    lockView.onMasterPinClearSuccess()
+  }
+
+  override fun onPinClearFailed() {
+    Timber.d("Pin clear failure")
+    lockView.onMasterPinClearFailure()
   }
 
   companion object {

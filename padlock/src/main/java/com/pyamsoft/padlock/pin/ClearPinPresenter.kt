@@ -21,9 +21,7 @@ import com.pyamsoft.pydroid.arch.Presenter
 
 interface ClearPinPresenter : Presenter<ClearPinPresenter.Callback> {
 
-  fun success()
-
-  fun failure()
+  fun clear(attempt: String)
 
   interface Callback {
 

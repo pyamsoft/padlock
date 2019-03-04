@@ -165,11 +165,11 @@ class PinConfirmDialog : DialogFragment(),
     pinView.disable()
   }
 
-  override fun onConfirmPinSuccess() {
+  override fun onConfirmPinSuccess(attempt: String) {
     onPinCallback()
   }
 
-  override fun onConfirmPinFailure() {
+  override fun onConfirmPinFailure(attempt: String) {
     onPinCallback()
   }
 

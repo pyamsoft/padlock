@@ -28,9 +28,9 @@ interface ConfirmPinPresenter : Presenter<ConfirmPinPresenter.Callback> {
 
     fun onConfirmPinBegin()
 
-    fun onConfirmPinSuccess()
+    fun onConfirmPinSuccess(attempt: String)
 
-    fun onConfirmPinFailure()
+    fun onConfirmPinFailure(attempt: String)
 
     fun onConfirmPinComplete()
 

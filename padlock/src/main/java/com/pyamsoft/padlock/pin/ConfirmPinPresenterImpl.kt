@@ -34,21 +34,22 @@ internal class ConfirmPinPresenterImpl @Inject internal constructor(
     ConfirmPinPresenter {
 
   @CheckResult
-  private fun checkPin(attempt: String): Single<Boolean> {
+  private fun checkPin(attempt: String): Single<Pair<String, Boolean>> {
     return interactor.comparePin(attempt)
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
+        .map { attempt to it }
   }
 
   override fun onBind() {
     listen().flatMapSingle { checkPin(it.attempt) }
         .subscribeOn(Schedulers.trampoline())
         .observeOn(Schedulers.trampoline())
-        .subscribe { success ->
+        .subscribe { (attempt, success) ->
           if (success) {
-            callback.onConfirmPinSuccess()
+            callback.onConfirmPinSuccess(attempt)
           } else {
-            callback.onConfirmPinFailure()
+            callback.onConfirmPinFailure(attempt)
           }
         }
         .destroy(owner)

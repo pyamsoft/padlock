@@ -17,44 +17,55 @@
 
 package com.pyamsoft.padlock.pin
 
+import androidx.annotation.CheckResult
+import com.pyamsoft.padlock.api.PinInteractor
 import com.pyamsoft.padlock.pin.ClearPinPresenter.Callback
 import com.pyamsoft.padlock.pin.ClearPinPresenterImpl.ClearPinEvent
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.threads.Enforcer
+import io.reactivex.Single
+import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 internal class ClearPinPresenterImpl @Inject internal constructor(
+  private val enforcer: Enforcer,
+  private val interactor: PinInteractor,
   bus: EventBus<ClearPinEvent>
 ) : BasePresenter<ClearPinEvent, Callback>(bus),
     ClearPinPresenter {
 
+  @CheckResult
+  private fun clearPin(attempt: String): Single<Boolean> {
+    enforcer.assertNotOnMainThread()
+
+    return interactor.clearPin(attempt)
+        .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.io())
+  }
+
   override fun onBind() {
-    listen().subscribe {
-      if (it.success) {
-        callback.onPinClearSuccess()
-      } else {
-        callback.onPinClearFailed()
-      }
-    }
+    listen().flatMapSingle { clearPin(it.attempt) }
+        .subscribeOn(Schedulers.trampoline())
+        .observeOn(Schedulers.trampoline())
+        .subscribe { success ->
+          if (success) {
+            callback.onPinClearSuccess()
+          } else {
+            callback.onPinClearFailed()
+          }
+        }
         .destroy(owner)
   }
 
   override fun onUnbind() {
   }
 
-  override fun success() {
-    clear(true)
+  override fun clear(attempt: String) {
+    publish(ClearPinEvent(attempt))
   }
 
-  override fun failure() {
-    clear(false)
-  }
-
-  private fun clear(success: Boolean) {
-    publish(ClearPinEvent(success))
-  }
-
-  internal data class ClearPinEvent(val success: Boolean)
+  internal data class ClearPinEvent(val attempt: String)
 
 }

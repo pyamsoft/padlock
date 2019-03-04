@@ -21,6 +21,7 @@ import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.pydroid.arch.BaseUiView
 import com.pyamsoft.pydroid.loader.Loaded
@@ -34,10 +35,10 @@ internal class LockImageView @Inject internal constructor(
   parent: ViewGroup
 ) : BaseUiView<Unit>(parent, Unit) {
 
-  override val layout: Int = TODO()
+  override val layout: Int = R.layout.layout_lock_image
 
-  private val layoutRoot by lazyView<ViewGroup>(TODO())
-  private val lockedIcon by lazyView<ImageView>(TODO())
+  private val layoutRoot by lazyView<ViewGroup>(R.id.lock_image_root)
+  private val lockedIcon by lazyView<ImageView>(R.id.lock_image_icon)
 
   private var imageBinder: Loaded? = null
 

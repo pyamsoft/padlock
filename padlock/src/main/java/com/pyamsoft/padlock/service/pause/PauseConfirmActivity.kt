@@ -72,7 +72,7 @@ class PauseConfirmActivity : ActivityBase(), ConfirmPinPresenter.Callback {
   override fun onConfirmPinBegin() {
   }
 
-  override fun onConfirmPinSuccess() {
+  override fun onConfirmPinSuccess(attempt: String) {
     Timber.d("Pin check succeeds!")
     val autoResume = intent.getBooleanExtra(EXTRA_AUTO_RESUME, false)
     Timber.d("Pausing service with auto resume: $autoResume")
@@ -80,7 +80,7 @@ class PauseConfirmActivity : ActivityBase(), ConfirmPinPresenter.Callback {
     finish()
   }
 
-  override fun onConfirmPinFailure() {
+  override fun onConfirmPinFailure(attempt: String) {
   }
 
   override fun onConfirmPinComplete() {
