@@ -17,7 +17,9 @@
 
 package com.pyamsoft.padlock.settings
 
+import android.view.View
 import androidx.annotation.CheckResult
+import androidx.lifecycle.LifecycleOwner
 import androidx.preference.PreferenceScreen
 import com.pyamsoft.padlock.scopes.FragmentScope
 import com.pyamsoft.padlock.settings.SettingsComponent.SettingsModule
@@ -34,6 +36,14 @@ interface SettingsComponent {
 
   @Subcomponent.Builder
   interface Builder {
+
+    @BindsInstance
+    @CheckResult
+    fun owner(owner: LifecycleOwner): Builder
+
+    @BindsInstance
+    @CheckResult
+    fun view(view: View): Builder
 
     @BindsInstance
     @CheckResult

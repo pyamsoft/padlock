@@ -18,15 +18,21 @@
 package com.pyamsoft.padlock.settings
 
 import android.os.Bundle
+import android.view.View
+import androidx.lifecycle.LifecycleOwner
 import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceScreen
 import com.pyamsoft.padlock.R
 import com.pyamsoft.pydroid.ui.arch.PrefUiView
+import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
+import com.pyamsoft.pydroid.ui.util.Snackbreak
 import timber.log.Timber
 import javax.inject.Inject
 
 internal class SettingsView @Inject internal constructor(
+  private val owner: LifecycleOwner,
+  private val view: View,
   preferenceScreen: PreferenceScreen,
   callback: SettingsView.Callback
 ) : PrefUiView<SettingsView.Callback>(preferenceScreen, callback) {
@@ -68,6 +74,21 @@ internal class SettingsView @Inject internal constructor(
   fun changeLockType(newValue: String) {
     Timber.d("Change lock type: $newValue")
     lockType.value = newValue
+  }
+
+  fun showMessage(message: String) {
+    Snackbreak.bindTo(owner)
+        .short(view, message)
+        .show()
+  }
+
+  inline fun promptChangeLockType(crossinline func: () -> Unit) {
+    Snackbreak.bindTo(owner)
+        .long(view, "You must clear the current code before changing type")
+        .setAction("Clear", DebouncedOnClickListener.create {
+          func()
+        })
+        .show()
   }
 
   interface Callback {

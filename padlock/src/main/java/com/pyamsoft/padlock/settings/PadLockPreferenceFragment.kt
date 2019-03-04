@@ -19,19 +19,16 @@ package com.pyamsoft.padlock.settings
 
 import android.app.ActivityManager
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.pin.ClearPinPresenter
+import com.pyamsoft.padlock.pin.ConfirmPinPresenter
+import com.pyamsoft.padlock.pin.PinConfirmDialog
 import com.pyamsoft.pydroid.ui.app.requireToolbarActivity
-import com.pyamsoft.pydroid.ui.app.requireView
 import com.pyamsoft.pydroid.ui.settings.AppSettingsPreferenceFragment
-import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
-import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
@@ -42,11 +39,13 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
     SwitchLockTypePresenter.Callback,
     ClearAllPresenter.Callback,
     ClearDatabasePresenter.Callback,
+    ConfirmPinPresenter.Callback,
     ClearPinPresenter.Callback {
 
   @field:Inject internal lateinit var clearDatabasePresenter: ClearDatabasePresenter
   @field:Inject internal lateinit var clearAllPresenter: ClearAllPresenter
   @field:Inject internal lateinit var clearPinPresenter: ClearPinPresenter
+  @field:Inject internal lateinit var confirmPinPresenter: ConfirmPinPresenter
   @field:Inject internal lateinit var switchLockTypePresenter: SwitchLockTypePresenter
   @field:Inject internal lateinit var presenter: SettingsPresenter
 
@@ -54,27 +53,22 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
 
   override val preferenceXmlResId: Int = R.xml.preferences
 
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View? {
-    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
-        .plusSettingsComponent()
-        .preferenceScreen(preferenceScreen)
-        .build()
-        .inject(this)
-
-    return super.onCreateView(inflater, container, savedInstanceState)
-  }
-
   override fun onViewCreated(
     view: View,
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
+    Injector.obtain<PadLockComponent>(requireContext().applicationContext)
+        .plusSettingsComponent()
+        .owner(viewLifecycleOwner)
+        .view(view)
+        .preferenceScreen(preferenceScreen)
+        .build()
+        .inject(this)
+
     settingsView.inflate(savedInstanceState)
 
+    confirmPinPresenter.bind(viewLifecycleOwner, this)
     switchLockTypePresenter.bind(viewLifecycleOwner, this)
     clearPinPresenter.bind(viewLifecycleOwner, this)
     clearDatabasePresenter.bind(viewLifecycleOwner, this)
@@ -108,12 +102,10 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
   }
 
   override fun onLockTypeSwitchBlocked() {
-    Snackbreak.bindTo(viewLifecycleOwner)
-        .long(requireView(), "You must clear the current code before changing type")
-        .setAction("Okay", DebouncedOnClickListener.create {
-          // TODO Show Pin Confirm dialog for clearing PIN
-        })
-        .show()
+    settingsView.promptChangeLockType {
+      PinConfirmDialog.newInstance(finishOnDismiss = false)
+          .show(requireActivity(), PinConfirmDialog.TAG)
+    }
   }
 
   override fun onLockTypeSwitchSuccess(newType: String) {
@@ -122,9 +114,7 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
   }
 
   override fun onLockTypeSwitchError(throwable: Throwable) {
-    Snackbreak.bindTo(viewLifecycleOwner)
-        .short(requireView(), throwable.localizedMessage)
-        .show()
+    settingsView.showMessage(throwable.message ?: "Failed to switch lock type")
   }
 
   override fun onAllSettingsCleared() {
@@ -134,21 +124,30 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
   }
 
   override fun onDatabaseCleared() {
-    Snackbreak.bindTo(viewLifecycleOwner)
-        .short(requireView(), "Locked application database cleared")
-        .show()
+    settingsView.showMessage("Locked application database cleared")
   }
 
   override fun onPinClearSuccess() {
-    Snackbreak.bindTo(viewLifecycleOwner)
-        .short(requireView(), "You may now change lock type")
-        .show()
+    settingsView.showMessage("You may now change lock type")
   }
 
   override fun onPinClearFailed() {
-    Snackbreak.bindTo(viewLifecycleOwner)
-        .short(requireView(), "Failed to clear master pin")
-        .show()
+    settingsView.showMessage("Failed to clear master pin")
+  }
+
+  override fun onConfirmPinBegin() {
+  }
+
+  override fun onConfirmPinFailure(attempt: String) {
+    Timber.d("Clear old master pin")
+    clearPinPresenter.clear(attempt)
+  }
+
+  override fun onConfirmPinSuccess(attempt: String) {
+    settingsView.showMessage("Failed to clear master pin")
+  }
+
+  override fun onConfirmPinComplete() {
   }
 
   override fun onResume() {

@@ -34,6 +34,8 @@ internal interface LockScreenPresenter : Presenter<Callback> {
 
   fun displayHint()
 
+  fun loadDefaultIgnoreTime()
+
   interface Callback {
 
     fun onCloseOld()

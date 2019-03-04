@@ -56,7 +56,6 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
   override fun onBind() {
     attemptCloseOld()
     loadDisplayName()
-    loadDefaultIgnoreTime()
   }
 
   private fun attemptCloseOld() {
@@ -80,7 +79,7 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
         .destroy(owner)
   }
 
-  private fun loadDefaultIgnoreTime() {
+  override fun loadDefaultIgnoreTime() {
     interactor.getDefaultIgnoreTime()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())

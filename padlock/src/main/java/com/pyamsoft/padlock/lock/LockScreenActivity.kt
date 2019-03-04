@@ -79,7 +79,8 @@ class LockScreenActivity : ActivityBase(),
     presenter.bind(this, this)
 
     if (savedInstanceState == null) {
-      // TODO presenter fetch ignore time default
+      Timber.d("No savedInstanceState, load default ignore time")
+      presenter.loadDefaultIgnoreTime()
     }
   }
 
