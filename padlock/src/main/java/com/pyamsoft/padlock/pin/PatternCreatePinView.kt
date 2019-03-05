@@ -29,7 +29,7 @@ internal class PatternCreatePinView @Inject internal constructor(
   callback: Callback,
   @ColorRes normalDotColor: Int
 ) : CreatePinView,
-    PatternPinView<Callback>(owner, parent, callback, true, normalDotColor) {
+    PatternPinView<Callback>(owner, parent, callback, false, normalDotColor) {
 
   override fun submit() {
     callback.onSubmit(getAttempt(), getReConfirmAttempt(), getOptionalHint())
