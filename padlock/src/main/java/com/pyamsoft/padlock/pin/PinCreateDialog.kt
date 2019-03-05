@@ -69,7 +69,7 @@ class PinCreateDialog : DialogFragment(),
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-    return inflater.inflate(layout.layout_frame, container, false)
+    return inflater.inflate(layout.layout_constraint, container, false)
   }
 
   override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {

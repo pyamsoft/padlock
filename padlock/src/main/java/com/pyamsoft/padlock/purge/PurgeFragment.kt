@@ -43,15 +43,13 @@ class PurgeFragment : Fragment(),
 
   @field:Inject internal lateinit var purgeView: PurgeListView
 
-  private lateinit var layoutRoot: FrameLayout
-
   override fun onCreateView(
     inflater: LayoutInflater,
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
     val root = inflater.inflate(R.layout.layout_frame, container, false)
-    layoutRoot = root.findViewById(R.id.layout_frame)
+    val layoutRoot = root.findViewById<ViewGroup>(R.id.layout_frame)
 
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusPurgeComponent()

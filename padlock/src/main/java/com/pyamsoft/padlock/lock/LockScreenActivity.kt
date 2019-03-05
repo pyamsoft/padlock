@@ -48,8 +48,6 @@ class LockScreenActivity : ActivityBase(),
 
   override val fragmentContainerId: Int = 0
 
-  private lateinit var layoutRoot: ConstraintLayout
-
   @CallSuper
   override fun onCreate(savedInstanceState: Bundle?) {
     if (ThemeInjector.obtain(applicationContext).isDarkTheme()) {
@@ -61,7 +59,7 @@ class LockScreenActivity : ActivityBase(),
 
     super.onCreate(savedInstanceState)
     setContentView(R.layout.layout_constraint)
-    layoutRoot = findViewById(R.id.layout_constraint)
+    val layoutRoot = findViewById<ConstraintLayout>(R.id.layout_constraint)
 
     Injector.obtain<PadLockComponent>(applicationContext)
         .plusLockComponent()
