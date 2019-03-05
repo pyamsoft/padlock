@@ -30,6 +30,7 @@ import com.pyamsoft.padlock.pin.ConfirmPinView
 import com.pyamsoft.padlock.pin.PatternConfirmPinView
 import com.pyamsoft.padlock.pin.TextConfirmPinView
 import com.pyamsoft.padlock.scopes.FragmentScope
+import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.ToolbarActivityProvider
 import dagger.Binds
 import dagger.BindsInstance
@@ -86,6 +87,7 @@ interface LockComponent {
     @JvmStatic
     @CheckResult
     internal fun provideConfirmPinView(
+      imageLoader: ImageLoader,
       owner: LifecycleOwner,
       preferences: LockScreenPreferences,
       parent: ViewGroup,
@@ -93,7 +95,7 @@ interface LockComponent {
     ): ConfirmPinView {
       return when (preferences.getCurrentLockType()) {
         TYPE_PATTERN -> PatternConfirmPinView(owner, parent, callback, R.color.white)
-        TYPE_TEXT -> TextConfirmPinView(owner, parent, callback)
+        TYPE_TEXT -> TextConfirmPinView(imageLoader, owner, parent, callback)
       }
     }
   }

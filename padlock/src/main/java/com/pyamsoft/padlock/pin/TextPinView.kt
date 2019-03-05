@@ -23,19 +23,25 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.EditText
+import android.widget.ImageView
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.annotation.CheckResult
+import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import com.google.android.material.textfield.TextInputLayout
 import com.pyamsoft.padlock.R
+import com.pyamsoft.pydroid.loader.ImageLoader
+import com.pyamsoft.pydroid.loader.Loaded
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
+import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
 
 internal abstract class TextPinView<C : Any> protected constructor(
+  private val imageLoader: ImageLoader,
   owner: LifecycleOwner,
   parent: ViewGroup,
   callback: C,
@@ -45,8 +51,10 @@ internal abstract class TextPinView<C : Any> protected constructor(
   private val attemptLayout by lazyView<TextInputLayout>(R.id.pin_text_attempt)
   private val reConfirmAttemptLayout by lazyView<TextInputLayout>(R.id.pin_text_reconfirm_attempt)
   private val optionalHintLayout by lazyView<TextInputLayout>(R.id.pin_text_optional_hint)
-  private val confirmButton by lazyView<TextInputLayout>(R.id.pin_text_confirm)
+  private val confirmButton by lazyView<ImageView>(R.id.pin_text_confirm)
   private val showHint by lazyView<TextView>(R.id.pin_text_show_hint)
+
+  private var confirmLoaded: Loaded? = null
 
   override val layoutRoot by lazyView<ScrollView>(R.id.pin_text_root)
 
@@ -62,9 +70,17 @@ internal abstract class TextPinView<C : Any> protected constructor(
   ) {
     super.onInflated(view, savedInstanceState)
     showViews()
+    bindIcons()
     bindClicks()
     restoreState(savedInstanceState)
     requireEditText(attemptLayout).requestFocus()
+  }
+
+  private fun bindIcons() {
+    confirmLoaded?.dispose()
+    confirmLoaded = imageLoader.load(R.drawable.ic_check_24dp)
+        .mutate { it.tintWith(ContextCompat.getColor(confirmButton.context, R.color.orange500)) }
+        .into(confirmButton)
   }
 
   @CheckResult
@@ -104,6 +120,9 @@ internal abstract class TextPinView<C : Any> protected constructor(
   }
 
   override fun teardown() {
+    confirmLoaded?.dispose()
+    confirmLoaded = null
+
     confirmButton.setOnDebouncedClickListener(null)
     requireEditText(attemptLayout).setOnEditorActionListener(null)
     requireEditText(reConfirmAttemptLayout).setOnEditorActionListener(null)

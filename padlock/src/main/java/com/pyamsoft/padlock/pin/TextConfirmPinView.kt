@@ -20,13 +20,15 @@ package com.pyamsoft.padlock.pin
 import android.view.ViewGroup
 import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.pin.ConfirmPinView.Callback
+import com.pyamsoft.pydroid.loader.ImageLoader
 import javax.inject.Inject
 
 internal class TextConfirmPinView @Inject internal constructor(
+  imageLoader: ImageLoader,
   owner: LifecycleOwner,
   parent: ViewGroup,
   callback: Callback
-) : ConfirmPinView, TextPinView<Callback>(owner, parent, callback, true) {
+) : ConfirmPinView, TextPinView<Callback>(imageLoader, owner, parent, callback, true) {
 
   override fun showHint(hint: String) {
     setHintText(hint)

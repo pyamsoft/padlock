@@ -20,13 +20,15 @@ package com.pyamsoft.padlock.pin
 import android.view.ViewGroup
 import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.pin.CreatePinView.Callback
+import com.pyamsoft.pydroid.loader.ImageLoader
 import javax.inject.Inject
 
 internal class TextCreatePinView @Inject internal constructor(
+  imageLoader: ImageLoader,
   owner: LifecycleOwner,
   parent: ViewGroup,
   callback: Callback
-) : CreatePinView, TextPinView<Callback>(owner, parent, callback, false) {
+) : CreatePinView, TextPinView<Callback>(imageLoader, owner, parent, callback, false) {
 
   override fun submit() {
     callback.onSubmit(getAttempt(), getReConfirmAttempt(), getOptionalHint())

@@ -31,6 +31,7 @@ import com.pyamsoft.padlock.pin.PinComponent.PinModule
 import com.pyamsoft.padlock.pin.PinComponent.PinProvider
 import com.pyamsoft.padlock.scopes.FragmentScope
 import com.pyamsoft.padlock.service.pause.PauseConfirmActivity
+import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.theme.Theming
 import dagger.Binds
 import dagger.BindsInstance
@@ -93,6 +94,7 @@ interface PinComponent {
     @JvmStatic
     @CheckResult
     internal fun provideConfirmPinView(
+      imageLoader: ImageLoader,
       owner: LifecycleOwner,
       theming: Theming,
       preferences: LockScreenPreferences,
@@ -103,7 +105,7 @@ interface PinComponent {
         TYPE_PATTERN -> PatternConfirmPinView(
             owner, parent, callback, themeColor(theming, parent.context)
         )
-        TYPE_TEXT -> TextConfirmPinView(owner, parent, callback)
+        TYPE_TEXT -> TextConfirmPinView(imageLoader, owner, parent, callback)
       }
     }
 
@@ -111,6 +113,7 @@ interface PinComponent {
     @JvmStatic
     @CheckResult
     internal fun provideCreatePinView(
+      imageLoader: ImageLoader,
       owner: LifecycleOwner,
       theming: Theming,
       preferences: LockScreenPreferences,
@@ -121,7 +124,7 @@ interface PinComponent {
         TYPE_PATTERN -> PatternCreatePinView(
             owner, parent, callback, themeColor(theming, parent.context)
         )
-        TYPE_TEXT -> TextCreatePinView(owner, parent, callback)
+        TYPE_TEXT -> TextCreatePinView(imageLoader, owner, parent, callback)
       }
     }
 
