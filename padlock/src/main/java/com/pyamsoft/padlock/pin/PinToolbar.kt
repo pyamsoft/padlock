@@ -30,6 +30,7 @@ import com.pyamsoft.padlock.pin.PinToolbar.Callback
 import com.pyamsoft.pydroid.arch.BaseUiView
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
+import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -70,6 +71,7 @@ internal class PinToolbar @Inject internal constructor(
     toolbar.setNavigationOnClickListener(DebouncedOnClickListener.create {
       callback.onNavClicked()
     })
+    toolbar.setUpEnabled(true)
 
     toolbar.title = "PIN"
   }
