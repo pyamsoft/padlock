@@ -18,6 +18,7 @@
 package com.pyamsoft.padlock.pin
 
 import android.view.ViewGroup
+import androidx.annotation.CheckResult
 import androidx.annotation.ColorRes
 import androidx.lifecycle.LifecycleOwner
 import com.pyamsoft.padlock.pin.CreatePinView.Callback
@@ -32,7 +33,47 @@ internal class PatternCreatePinView @Inject internal constructor(
     PatternPinView<Callback>(owner, parent, callback, false, normalDotColor) {
 
   override fun submit() {
-    callback.onSubmit(getAttempt(), getReConfirmAttempt(), getOptionalHint())
+    val attempt = getAttempt()
+    if (isRepeating()) {
+      val repeatAttempt = getReConfirmAttempt()
+      submitPinCreate(attempt, repeatAttempt)
+    } else {
+      submitPinReConfirm(attempt)
+    }
+  }
+
+  @CheckResult
+  private fun fail(
+    attempt: String,
+    repeatAttempt: String
+  ): Boolean {
+    val failed = attempt.isBlank() || repeatAttempt.isBlank()
+    if (failed) {
+      callback.onSubmit("this will", "intentionally fail", "try again")
+    }
+
+    return failed
+  }
+
+  private fun submitPinReConfirm(attempt: String) {
+    if (attempt.isBlank()) {
+      showMessage("Please create a PIN code")
+      clearDisplay()
+    } else {
+      commitAndPromptRepeat()
+    }
+  }
+
+  private fun submitPinCreate(
+    attempt: String,
+    repeatAttempt: String
+  ) {
+    // If we don't have an entry yet, fail out
+    if (fail(attempt, repeatAttempt)) {
+      return
+    }
+
+    callback.onSubmit(attempt, repeatAttempt, getOptionalHint())
   }
 
 }

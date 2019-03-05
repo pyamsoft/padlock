@@ -30,6 +30,7 @@ import com.andrognito.patternlockview.PatternLockView.Dot
 import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.R
 import com.pyamsoft.pydroid.ui.util.Snackbreak
+import timber.log.Timber
 
 internal abstract class PatternPinView<C : Any> protected constructor(
   owner: LifecycleOwner,
@@ -43,6 +44,7 @@ internal abstract class PatternPinView<C : Any> protected constructor(
 
   private var lockListener: PatternLockViewListener? = null
 
+  private var isRepeating: Boolean = false
   private var cellPattern = ""
   private var repeatCellPattern = ""
 
@@ -74,31 +76,42 @@ internal abstract class PatternPinView<C : Any> protected constructor(
   }
 
   @CheckResult
-  private fun isRepeating(): Boolean {
-    return cellPattern.isNotBlank()
+  protected fun isRepeating(): Boolean {
+    return isRepeating
   }
 
   private fun restoreState(savedInstanceState: Bundle?) {
     if (savedInstanceState == null) {
       repeatCellPattern = ""
       cellPattern = ""
+      isRepeating = false
     } else {
       repeatCellPattern = savedInstanceState.getString(REPEAT_CELL_PATTERN, "")
       cellPattern = savedInstanceState.getString(CELL_PATTERN, "")
+      isRepeating = savedInstanceState.getBoolean(REPEATING, false)
     }
   }
 
   override fun saveState(outState: Bundle) {
     outState.putString(CELL_PATTERN, cellPattern)
     outState.putString(REPEAT_CELL_PATTERN, repeatCellPattern)
+    outState.putBoolean(REPEATING, isRepeating())
   }
 
   private fun clearPattern() {
     if (isRepeating()) {
+      Timber.d("Clearing REPEAT pattern")
       repeatCellPattern = ""
     } else {
+      Timber.d("Clearing CELL pattern")
       cellPattern = ""
     }
+  }
+
+  protected fun commitAndPromptRepeat() {
+    isRepeating = true
+    promptPatternRepeat()
+    clearDisplay()
   }
 
   private fun setupLockView() {
@@ -117,19 +130,16 @@ internal abstract class PatternPinView<C : Any> protected constructor(
 
         val patternAsString = cellPatternToString(pattern)
         if (isRepeating()) {
+          Timber.d("Entered REPEAT pattern")
           repeatCellPattern = patternAsString
         } else {
+          Timber.d("Entered CELL pattern")
           cellPattern = patternAsString
         }
 
         if (isConfirmMode) {
           // Auto fire submit in confirm mode
           submit()
-        } else {
-          // Move to next step if we need to, else wait for submit
-          if (!isRepeating()) {
-            promptPatternRepeat()
-          }
         }
       }
 
@@ -204,6 +214,7 @@ internal abstract class PatternPinView<C : Any> protected constructor(
 
     private const val REPEAT_CELL_PATTERN = "repeat_cell_pattern"
     private const val CELL_PATTERN = "cell_pattern"
+    private const val REPEATING = "repeating"
     private const val MINIMUM_PATTERN_LENGTH = 4
   }
 
