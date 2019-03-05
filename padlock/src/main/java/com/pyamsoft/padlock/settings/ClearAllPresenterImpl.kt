@@ -24,11 +24,14 @@ import com.pyamsoft.padlock.settings.ClearAllPresenterImpl.ClearAllEvent
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 internal class ClearAllPresenterImpl @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val interactor: SettingsInteractor,
   bus: EventBus<ClearAllEvent>
 ) : BasePresenter<ClearAllEvent, Callback>(bus),
@@ -36,9 +39,15 @@ internal class ClearAllPresenterImpl @Inject internal constructor(
 
   @CheckResult
   private fun clearAll(): Single<Unit> {
-    return interactor.clearDatabase()
+    return Single.defer {
+      enforcer.assertNotOnMainThread()
+
+      return@defer interactor.clearAll()
+          .subscribeOn(Schedulers.io())
+          .observeOn(Schedulers.io())
+    }
         .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
   }
 
   override fun onBind() {
