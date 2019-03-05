@@ -100,6 +100,7 @@ class PinConfirmDialog : DialogFragment(),
     createComponents(savedInstanceState)
     layoutComponents(layoutRoot)
 
+    confirmPresenter.bind(viewLifecycleOwner, this)
     toolbarPresenter.bind(viewLifecycleOwner, this)
     presenter.bind(viewLifecycleOwner, this)
   }

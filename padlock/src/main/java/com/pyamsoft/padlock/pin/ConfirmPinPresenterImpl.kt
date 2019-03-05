@@ -23,11 +23,14 @@ import com.pyamsoft.padlock.pin.ConfirmPinPresenterImpl.CheckPinEvent
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 internal class ConfirmPinPresenterImpl @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val interactor: PinInteractor,
   bus: EventBus<CheckPinEvent>
 ) : BasePresenter<CheckPinEvent, ConfirmPinPresenter.Callback>(bus),
@@ -35,10 +38,16 @@ internal class ConfirmPinPresenterImpl @Inject internal constructor(
 
   @CheckResult
   private fun checkPin(attempt: String): Single<Pair<String, Boolean>> {
-    return interactor.comparePin(attempt)
+    return Single.defer {
+      enforcer.assertNotOnMainThread()
+
+      return@defer interactor.comparePin(attempt)
+          .map { attempt to it }
+          .subscribeOn(Schedulers.io())
+          .observeOn(Schedulers.io())
+    }
         .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-        .map { attempt to it }
+        .observeOn(AndroidSchedulers.mainThread())
   }
 
   override fun onBind() {

@@ -139,6 +139,7 @@ class LockListFragment : Fragment(),
       populateList(true)
     }
 
+    clearPinPresenter.bind(viewLifecycleOwner, this)
     createPinPresenter.bind(viewLifecycleOwner, this)
     confirmPinPresenter.bind(viewLifecycleOwner, this)
   }

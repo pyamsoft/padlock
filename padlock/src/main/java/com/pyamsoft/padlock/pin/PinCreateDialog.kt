@@ -94,6 +94,7 @@ class PinCreateDialog : DialogFragment(),
     layoutComponents(layoutRoot)
 
     presenter.bind(viewLifecycleOwner, this)
+    createPresenter.bind(viewLifecycleOwner, this)
     toolbarPresenter.bind(viewLifecycleOwner, this)
   }
 

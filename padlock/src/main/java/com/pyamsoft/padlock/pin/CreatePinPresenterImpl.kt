@@ -25,6 +25,7 @@ import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
@@ -41,12 +42,17 @@ internal class CreatePinPresenterImpl @Inject internal constructor(
     reEntry: String,
     hint: String
   ): Single<Boolean> {
-    enforcer.assertNotOnMainThread()
-    return interactor.createPin(attempt, reEntry, hint)
+    return Single.defer {
+      enforcer.assertNotOnMainThread()
+
+      return@defer interactor.createPin(attempt, reEntry, hint)
+          .subscribeOn(Schedulers.io())
+          .observeOn(AndroidSchedulers.mainThread())
+          .doOnSubscribe { callback.onCreatePinBegin() }
+          .doAfterTerminate { callback.onCreatePinComplete() }
+    }
         .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-        .doOnSubscribe { callback.onCreatePinBegin() }
-        .doAfterTerminate { callback.onCreatePinComplete() }
+        .observeOn(AndroidSchedulers.mainThread())
   }
 
   override fun onBind() {

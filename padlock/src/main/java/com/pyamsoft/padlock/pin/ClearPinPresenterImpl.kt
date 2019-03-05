@@ -26,6 +26,7 @@ import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
@@ -38,11 +39,15 @@ internal class ClearPinPresenterImpl @Inject internal constructor(
 
   @CheckResult
   private fun clearPin(attempt: String): Single<Boolean> {
-    enforcer.assertNotOnMainThread()
+    return Single.defer {
+      enforcer.assertNotOnMainThread()
 
-    return interactor.clearPin(attempt)
+      return@defer interactor.clearPin(attempt)
+          .subscribeOn(Schedulers.io())
+          .observeOn(Schedulers.io())
+    }
         .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
   }
 
   override fun onBind() {
