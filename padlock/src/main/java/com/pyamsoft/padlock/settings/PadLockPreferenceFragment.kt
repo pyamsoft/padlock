@@ -77,7 +77,7 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
   }
 
   override fun onClearDatabaseRequest() {
-    ConfirmDeleteAllDialog()
+    ConfirmDeleteDatabaseDialog()
         .show(requireActivity(), "confirm_dialog")
   }
 
