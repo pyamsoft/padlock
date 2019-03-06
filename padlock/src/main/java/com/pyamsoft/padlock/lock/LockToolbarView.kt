@@ -61,13 +61,15 @@ internal class LockToolbarView @Inject internal constructor(
 
   @CheckResult
   fun isExcludeChecked(): Boolean {
-    return menuExclude.isChecked
+    val result = menuExclude.isChecked
+    Timber.d("Is Exclude checked: $result")
+    return result
   }
 
   @CheckResult
   fun getSelectedIgnoreTime(): Long {
     val ignoreTimes = getIgnoreTimes()
-    return when {
+    val result = when {
       menuIgnoreOne.isChecked -> ignoreTimes[0]
       menuIgnoreFive.isChecked -> ignoreTimes[1]
       menuIgnoreTen.isChecked -> ignoreTimes[2]
@@ -78,15 +80,26 @@ internal class LockToolbarView @Inject internal constructor(
       menuIgnoreSixty.isChecked -> ignoreTimes[7]
       else -> ignoreTimes[0]
     }
+
+    Timber.d("Selected ignore time: $result")
+    return result
   }
 
   @CheckResult
   private fun getIgnoreTimes(): List<Long> {
-    val stringIgnoreTimes = toolbar.context.resources.getStringArray(R.array.ignore_time_entries)
+    val resources = toolbar.context.resources
+
+    // Some extra list unwrapping and whatnot, but this should be proguarded out
+    // and will help clean up logs
+    val stringIgnoreTimes = arrayOf(*resources.getStringArray(R.array.ignore_time_entries))
     val ignoreTimes = ArrayList<Long>(stringIgnoreTimes.size)
+    Timber.d("String ignore times: $stringIgnoreTimes")
+
     for (i in stringIgnoreTimes.indices) {
       ignoreTimes.add(stringIgnoreTimes[i].toLong())
     }
+
+    Timber.d("Long ignore times: $ignoreTimes")
     return ignoreTimes
   }
 
@@ -124,11 +137,36 @@ internal class LockToolbarView @Inject internal constructor(
       callback.onStatsForNerdsClicked()
       return@setOnMenuItemClickListener true
     }
+
+    // We must manually handle these onClicks because menu items suck.
+    menuExclude.setOnMenuItemClickListener {
+      it.isChecked = !it.isChecked
+      return@setOnMenuItemClickListener true
+    }
+
+    val ignoreTimeMenuItems = getIgnoreTimeMenuItems()
+    for (ignoreTimeMenuItem in ignoreTimeMenuItems) {
+      ignoreTimeMenuItem.setOnMenuItemClickListener { clickedItem ->
+        // If this click action causes a check event, we can fire
+        if (!clickedItem.isChecked) {
+          // Uncheck all the other item boxes
+          ignoreTimeMenuItems
+              .filterNot { it.itemId == clickedItem.itemId }
+              .forEach { it.isChecked = false }
+
+          // Check ourselves
+          clickedItem.isChecked = true
+        }
+        return@setOnMenuItemClickListener true
+      }
+    }
   }
 
   override fun teardown() {
     super.teardown()
     menuStatsForNerds.setOnMenuItemClickListener(null)
+    menuExclude.setOnMenuItemClickListener(null)
+    getIgnoreTimeMenuItems().forEach { it.setOnMenuItemClickListener(null) }
   }
 
   private fun restoreMenuState(state: Bundle) {
@@ -143,9 +181,9 @@ internal class LockToolbarView @Inject internal constructor(
     menuIgnoreSixty.isChecked = state.getBoolean(KEY_IGNORE_TIME_SIXTY, false)
   }
 
-  fun initIgnoreTime(time: Long) {
-    val ignoreTimes = getIgnoreTimes()
-    val menuItems = listOf(
+  @CheckResult
+  private fun getIgnoreTimeMenuItems(): List<MenuItem> {
+    return listOf(
         menuIgnoreOne,
         menuIgnoreFive,
         menuIgnoreTen,
@@ -155,9 +193,19 @@ internal class LockToolbarView @Inject internal constructor(
         menuIgnoreFourtyFive,
         menuIgnoreSixty
     )
+  }
+
+  fun initIgnoreTime(time: Long) {
+    val ignoreTimes = getIgnoreTimes()
+    val menuItems = getIgnoreTimeMenuItems()
 
     for (index in ignoreTimes.indices) {
-      menuItems[index].isChecked = (ignoreTimes[index] == time)
+      val found = ignoreTimes[index]
+      val checked = (found == time)
+      if (checked) {
+        Timber.d("Setting ignore time item checked: $time at $index")
+        menuItems[index].isChecked = true
+      }
     }
   }
 
