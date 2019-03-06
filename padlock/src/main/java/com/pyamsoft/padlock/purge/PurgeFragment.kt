@@ -21,13 +21,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.fragment.app.Fragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.R.layout
 import com.pyamsoft.pydroid.ui.app.requireToolbarActivity
-import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
@@ -41,6 +40,7 @@ class PurgeFragment : Fragment(),
   @field:Inject internal lateinit var purgeSinglePresenter: PurgeSinglePresenter
   @field:Inject internal lateinit var purgeAllPresenter: PurgeAllPresenter
 
+  @field:Inject internal lateinit var toolbarView: PurgeToolbarView
   @field:Inject internal lateinit var purgeView: PurgeListView
 
   override fun onCreateView(
@@ -48,9 +48,16 @@ class PurgeFragment : Fragment(),
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-    val root = inflater.inflate(R.layout.layout_frame, container, false)
-    val layoutRoot = root.findViewById<ViewGroup>(R.id.layout_frame)
+    return inflater.inflate(layout.layout_frame, container, false)
+  }
 
+  override fun onViewCreated(
+    view: View,
+    savedInstanceState: Bundle?
+  ) {
+    super.onViewCreated(view, savedInstanceState)
+
+    val layoutRoot = view.findViewById<ViewGroup>(R.id.layout_frame)
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusPurgeComponent()
         .toolbarActivity(requireToolbarActivity())
@@ -59,14 +66,7 @@ class PurgeFragment : Fragment(),
         .build()
         .inject(this)
 
-    return root
-  }
-
-  override fun onViewCreated(
-    view: View,
-    savedInstanceState: Bundle?
-  ) {
-    super.onViewCreated(view, savedInstanceState)
+    toolbarView.inflate(savedInstanceState)
     purgeView.inflate(savedInstanceState)
 
     presenter.bind(viewLifecycleOwner, this)
@@ -112,6 +112,7 @@ class PurgeFragment : Fragment(),
 
   override fun onDestroyView() {
     super.onDestroyView()
+    toolbarView.teardown()
     purgeView.teardown()
   }
 
@@ -122,24 +123,13 @@ class PurgeFragment : Fragment(),
 
   override fun onPause() {
     super.onPause()
-    if (this::purgeView.isInitialized) {
-      purgeView.storeListPosition()
-    }
+    purgeView.storeListPosition()
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
-    if (this::purgeView.isInitialized) {
-      purgeView.saveState(outState)
-    }
-  }
-
-  override fun onResume() {
-    super.onResume()
-    requireToolbarActivity().withToolbar {
-      it.setTitle(R.string.app_name)
-      it.setUpEnabled(false)
-    }
+    purgeView.saveState(outState)
+    toolbarView.saveState(outState)
   }
 
   companion object {

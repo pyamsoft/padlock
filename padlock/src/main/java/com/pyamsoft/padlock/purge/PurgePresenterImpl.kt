@@ -17,13 +17,12 @@
 
 package com.pyamsoft.padlock.purge
 
-import com.pyamsoft.padlock.R.id
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.scopes.FragmentScope
+import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.core.bus.RxBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
-import com.pyamsoft.pydroid.arch.BasePresenter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
@@ -33,6 +32,7 @@ import javax.inject.Inject
 internal class PurgePresenterImpl @Inject internal constructor(
   private val interactor: PurgeInteractor
 ) : BasePresenter<Unit, PurgePresenter.Callback>(RxBus.empty()),
+    PurgeToolbarView.Callback,
     PurgeListView.Callback,
     PurgePresenter {
 
@@ -49,10 +49,8 @@ internal class PurgePresenterImpl @Inject internal constructor(
     fetchData(true)
   }
 
-  override fun onMenuItemClicked(itemId: Int) {
-    if (itemId == id.menu_purge_all) {
-      callback.onDeleteAllRequest()
-    }
+  override fun onPurgeAllClicked() {
+    callback.onDeleteAllRequest()
   }
 
   override fun onListItemClicked(stalePackage: String) {

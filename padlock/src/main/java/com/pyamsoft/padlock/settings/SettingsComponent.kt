@@ -23,6 +23,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.preference.PreferenceScreen
 import com.pyamsoft.padlock.scopes.FragmentScope
 import com.pyamsoft.padlock.settings.SettingsComponent.SettingsModule
+import com.pyamsoft.pydroid.ui.app.ToolbarActivity
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module
@@ -36,6 +37,10 @@ interface SettingsComponent {
 
   @Subcomponent.Builder
   interface Builder {
+
+    @BindsInstance
+    @CheckResult
+    fun toolbarActivity(toolbarActivity: ToolbarActivity): Builder
 
     @BindsInstance
     @CheckResult

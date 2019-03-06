@@ -30,18 +30,13 @@ import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.helper.tintIcon
 import com.pyamsoft.padlock.purge.PurgeListView.Callback
-import com.pyamsoft.pydroid.ui.app.ToolbarActivity
 import com.pyamsoft.pydroid.arch.BaseUiView
-import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.refreshing
 import javax.inject.Inject
 
 internal class PurgeListView @Inject internal constructor(
-  private val toolbarActivity: ToolbarActivity,
-  private val theming: Theming,
   private val owner: LifecycleOwner,
   parent: ViewGroup,
   callback: Callback
@@ -74,13 +69,6 @@ internal class PurgeListView @Inject internal constructor(
     modelAdapter.clear()
 
     swipeRefresh.setOnRefreshListener(null)
-
-    toolbarActivity.requireToolbar {
-      it.menu.apply {
-        removeGroup(R.id.menu_group_purge_all)
-      }
-      it.setOnMenuItemClickListener(null)
-    }
   }
 
   override fun onInflated(
@@ -90,7 +78,6 @@ internal class PurgeListView @Inject internal constructor(
     super.onInflated(view, savedInstanceState)
     setupRecyclerView()
     setupSwipeRefresh()
-    setupToolbarMenu()
     lastPosition = ListStateUtil.restoreState(TAG, savedInstanceState)
   }
 
@@ -185,18 +172,6 @@ internal class PurgeListView @Inject internal constructor(
     showRecycler()
   }
 
-  private fun setupToolbarMenu() {
-    toolbarActivity.requireToolbar { toolbar ->
-      toolbar.inflateMenu(R.menu.purge_old_menu)
-      toolbar.menu.tintIcon(toolbar.context, theming, R.id.menu_purge_all)
-
-      toolbar.setOnMenuItemClickListener {
-        callback.onMenuItemClicked(it.itemId)
-        return@setOnMenuItemClickListener true
-      }
-    }
-  }
-
   private fun showRecycler() {
     emptyState.visibility = View.GONE
     listView.visibility = View.VISIBLE
@@ -219,8 +194,6 @@ internal class PurgeListView @Inject internal constructor(
   interface Callback {
 
     fun onRefresh(forced: Boolean)
-
-    fun onMenuItemClicked(itemId: Int)
 
     fun onListItemClicked(stalePackage: String)
 

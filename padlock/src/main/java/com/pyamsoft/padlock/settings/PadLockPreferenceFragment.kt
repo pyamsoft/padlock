@@ -29,7 +29,6 @@ import com.pyamsoft.padlock.pin.ConfirmPinPresenter
 import com.pyamsoft.padlock.pin.PinConfirmDialog
 import com.pyamsoft.pydroid.ui.app.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.settings.AppSettingsPreferenceFragment
-import com.pyamsoft.pydroid.ui.util.setUpEnabled
 import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
@@ -49,6 +48,7 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
   @field:Inject internal lateinit var switchLockTypePresenter: SwitchLockTypePresenter
   @field:Inject internal lateinit var presenter: SettingsPresenter
 
+  @field:Inject internal lateinit var toolbarView: SettingsToolbarView
   @field:Inject internal lateinit var settingsView: SettingsView
 
   override val preferenceXmlResId: Int = R.xml.preferences
@@ -60,12 +60,14 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
     super.onViewCreated(view, savedInstanceState)
     Injector.obtain<PadLockComponent>(requireContext().applicationContext)
         .plusSettingsComponent()
+        .toolbarActivity(requireToolbarActivity())
         .owner(viewLifecycleOwner)
         .view(view)
         .preferenceScreen(preferenceScreen)
         .build()
         .inject(this)
 
+    toolbarView.inflate(savedInstanceState)
     settingsView.inflate(savedInstanceState)
 
     confirmPinPresenter.bind(viewLifecycleOwner, this)
@@ -87,11 +89,13 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
 
   override fun onDestroyView() {
     super.onDestroyView()
+    toolbarView.teardown()
     settingsView.teardown()
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
+    toolbarView.saveState(outState)
     settingsView.saveState(outState)
   }
 
@@ -148,14 +152,6 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
   }
 
   override fun onConfirmPinComplete() {
-  }
-
-  override fun onResume() {
-    super.onResume()
-    requireToolbarActivity().withToolbar {
-      it.setTitle(R.string.app_name)
-      it.setUpEnabled(false)
-    }
   }
 
   companion object {
