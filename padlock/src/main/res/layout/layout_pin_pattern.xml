@@ -17,12 +17,19 @@
 
 <merge>
 
+  <!--
+    Make sure the layout_height is NEVER match_parent or else
+    once we show a snackbar in the Pin Dialog, upon dismissing, the snackbar
+    will blank out the view.
+
+    I dunno.
+  -->
   <FrameLayout
       xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto"
       android:id="@+id/pin_pattern_root"
       android:layout_width="match_parent"
-      android:layout_height="match_parent"
+      android:layout_height="wrap_content"
       >
 
     <com.andrognito.patternlockview.PatternLockView
