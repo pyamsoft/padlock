@@ -63,6 +63,7 @@ class LockScreenActivity : ActivityBase(),
 
     Injector.obtain<PadLockComponent>(applicationContext)
         .plusLockComponent()
+        .owner(this)
         .toolbarActivityProvider(this)
         .packageName(getLockedPackageName())
         .activityName(getLockedActivityName())
