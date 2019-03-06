@@ -56,9 +56,8 @@ internal class PatternCreatePinView @Inject internal constructor(
   }
 
   private fun submitPinReConfirm(attempt: String) {
-    if (attempt.isBlank()) {
+    if (attempt.isBlank() || attempt.length < PatternPinView.MINIMUM_PATTERN_LENGTH) {
       showMessage("Please create a PIN code")
-      clearDisplay()
     } else {
       commitAndPromptRepeat()
     }

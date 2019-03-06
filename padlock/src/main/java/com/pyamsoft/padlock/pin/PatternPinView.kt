@@ -20,7 +20,6 @@ package com.pyamsoft.padlock.pin
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import androidx.annotation.CheckResult
 import androidx.annotation.ColorRes
 import androidx.core.content.ContextCompat
@@ -29,7 +28,6 @@ import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.PatternLockView.Dot
 import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.R
-import com.pyamsoft.pydroid.ui.util.Snackbreak
 import timber.log.Timber
 
 internal abstract class PatternPinView<C : Any> protected constructor(
@@ -40,6 +38,7 @@ internal abstract class PatternPinView<C : Any> protected constructor(
   @ColorRes private val normalDotColor: Int
 ) : BasePinView<C>(owner, parent, callback, isConfirmMode) {
 
+  private val layoutRoot by lazyView<ViewGroup>(R.id.pin_pattern_root)
   private val lockView by lazyView<PatternLockView>(R.id.pin_pattern_lock)
 
   private var lockListener: PatternLockViewListener? = null
@@ -48,9 +47,10 @@ internal abstract class PatternPinView<C : Any> protected constructor(
   private var cellPattern = ""
   private var repeatCellPattern = ""
 
-  override val layoutRoot by lazyView<FrameLayout>(R.id.pin_pattern_root)
-
   override val layout: Int = R.layout.layout_pin_pattern
+
+  override val snackbarRoot: View
+    get() = layoutRoot
 
   override fun id(): Int {
     return layoutRoot.id
@@ -204,18 +204,14 @@ internal abstract class PatternPinView<C : Any> protected constructor(
     setEnabled(false)
   }
 
-  override fun showErrorMessage(message: String) {
-    Snackbreak.bindTo(owner)
-        .short(layoutRoot, message)
-        .show()
-  }
-
   companion object {
+
+    // NOTE: Cannot be protected yet because of a Kotlin limitation
+    internal const val MINIMUM_PATTERN_LENGTH = 4
 
     private const val REPEAT_CELL_PATTERN = "repeat_cell_pattern"
     private const val CELL_PATTERN = "cell_pattern"
     private const val REPEATING = "repeating"
-    private const val MINIMUM_PATTERN_LENGTH = 4
   }
 
 }

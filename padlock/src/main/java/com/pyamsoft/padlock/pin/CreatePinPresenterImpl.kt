@@ -47,16 +47,17 @@ internal class CreatePinPresenterImpl @Inject internal constructor(
 
       return@defer interactor.createPin(attempt, reEntry, hint)
           .subscribeOn(Schedulers.io())
-          .observeOn(AndroidSchedulers.mainThread())
-          .doOnSubscribe { callback.onCreatePinBegin() }
-          .doAfterTerminate { callback.onCreatePinComplete() }
+          .observeOn(Schedulers.io())
     }
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
+        .doOnSubscribe { callback.onCreatePinBegin() }
+        .doAfterTerminate { callback.onCreatePinComplete() }
   }
 
   override fun onBind() {
-    listen().flatMapSingle { createPin(it.attempt, it.reEntry, it.hint) }
+    listen()
+        .flatMapSingle { createPin(it.attempt, it.reEntry, it.hint) }
         .subscribeOn(Schedulers.trampoline())
         .observeOn(Schedulers.trampoline())
         .subscribe { success ->

@@ -42,12 +42,12 @@ internal class ConfirmPinPresenterImpl @Inject internal constructor(
       enforcer.assertNotOnMainThread()
 
       return@defer interactor.comparePin(attempt)
-          .map { attempt to it }
           .subscribeOn(Schedulers.io())
           .observeOn(Schedulers.io())
     }
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
+        .map { attempt to it }
   }
 
   override fun onBind() {

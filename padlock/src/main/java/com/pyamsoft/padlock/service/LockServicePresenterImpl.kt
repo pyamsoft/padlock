@@ -96,6 +96,7 @@ internal class LockServicePresenterImpl @Inject internal constructor(
     forced: Boolean
   ): Maybe<ProcessedEventWithClassNamePayload> {
     enforcer.assertNotOnMainThread()
+
     return interactor.processEvent(forced, packageName, className)
         .unsubscribeOn(Schedulers.io())
         .subscribeOn(Schedulers.io())

@@ -35,7 +35,6 @@ import com.google.android.material.textfield.TextInputLayout
 import com.pyamsoft.padlock.R
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.Loaded
-import com.pyamsoft.pydroid.ui.util.Snackbreak
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
 import com.pyamsoft.pydroid.util.tintWith
 import timber.log.Timber
@@ -48,6 +47,7 @@ internal abstract class TextPinView<C : Any> protected constructor(
   isConfirmMode: Boolean
 ) : BasePinView<C>(owner, parent, callback, isConfirmMode) {
 
+  private val layoutRoot by lazyView<ScrollView>(R.id.pin_text_root)
   private val attemptLayout by lazyView<TextInputLayout>(R.id.pin_text_attempt)
   private val reConfirmAttemptLayout by lazyView<TextInputLayout>(R.id.pin_text_reconfirm_attempt)
   private val optionalHintLayout by lazyView<TextInputLayout>(R.id.pin_text_optional_hint)
@@ -56,9 +56,10 @@ internal abstract class TextPinView<C : Any> protected constructor(
 
   private var confirmLoaded: Loaded? = null
 
-  override val layoutRoot by lazyView<ScrollView>(R.id.pin_text_root)
-
   override val layout: Int = R.layout.layout_pin_text
+
+  override val snackbarRoot: View
+    get() = layoutRoot
 
   override fun id(): Int {
     return layoutRoot.id
@@ -222,12 +223,6 @@ internal abstract class TextPinView<C : Any> protected constructor(
 
   override fun disable() {
     setEnabled(false)
-  }
-
-  override fun showErrorMessage(message: String) {
-    Snackbreak.bindTo(owner)
-        .short(layoutRoot, message)
-        .show()
   }
 
   protected fun setHintText(hint: String) {

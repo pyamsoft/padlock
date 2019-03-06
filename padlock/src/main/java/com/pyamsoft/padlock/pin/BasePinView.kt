@@ -17,6 +17,7 @@
 
 package com.pyamsoft.padlock.pin
 
+import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.CheckResult
 import androidx.lifecycle.LifecycleOwner
@@ -30,7 +31,7 @@ internal abstract class BasePinView<C : Any> protected constructor(
   protected val isConfirmMode: Boolean
 ) : BaseUiView<C>(parent, callback), PinView {
 
-  protected abstract val layoutRoot: ViewGroup
+  protected abstract val snackbarRoot: View
 
   @CheckResult
   protected abstract fun getAttempt(): String
@@ -41,11 +42,15 @@ internal abstract class BasePinView<C : Any> protected constructor(
   @CheckResult
   protected abstract fun getOptionalHint(): String
 
-  fun showMessage(message: String) {
+  protected fun showMessage(message: String) {
     clearDisplay()
     Snackbreak.bindTo(owner)
-        .short(layoutRoot, message)
+        .short(snackbarRoot, message)
         .show()
+  }
+
+  final override fun showErrorMessage(message: String) {
+    showMessage(message)
   }
 
 }
