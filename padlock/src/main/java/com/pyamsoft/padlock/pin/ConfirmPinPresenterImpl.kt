@@ -24,6 +24,7 @@ import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
@@ -37,14 +38,17 @@ internal class ConfirmPinPresenterImpl @Inject internal constructor(
   private var confirmDisposable by singleDisposable()
 
   override fun onBind() {
-    listen().subscribe { event ->
-      val (attempt, success) = event
-      if (success) {
-        callback.onConfirmPinSuccess(attempt)
-      } else {
-        callback.onConfirmPinFailure(attempt)
-      }
-    }
+    listen()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { event ->
+          val (attempt, success) = event
+          if (success) {
+            callback.onConfirmPinSuccess(attempt)
+          } else {
+            callback.onConfirmPinFailure(attempt)
+          }
+        }
         .destroy(owner)
   }
 
@@ -56,7 +60,7 @@ internal class ConfirmPinPresenterImpl @Inject internal constructor(
     confirmDisposable = interactor.comparePin(pin)
         .map { pin to it }
         .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe({ publish(CheckPinEvent(it.first, it.second)) }, {
           Timber.e(it, "Error confirming pin")
           callback.onConfirmPinFailure(pin)

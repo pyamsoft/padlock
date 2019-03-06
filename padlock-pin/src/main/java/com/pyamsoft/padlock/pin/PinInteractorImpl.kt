@@ -77,7 +77,7 @@ internal class PinInteractorImpl @Inject internal constructor(
               return@flatMap lockHelper.encode(currentAttempt)
                   .doOnSuccess { encoded ->
                     enforcer.assertNotOnMainThread()
-                    Timber.d("Set master password")
+                    Timber.d("Set master password.")
                     masterPinInteractor.setMasterPin(encoded)
 
                     if (hint.isNotBlank()) {

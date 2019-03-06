@@ -41,13 +41,16 @@ internal class SwitchLockTypePresenterImpl @Inject internal constructor(
   private var lockTypeDisposable by singleDisposable()
 
   override fun onBind() {
-    listen().subscribe {
-      return@subscribe when (it) {
-        is SwitchLockTypeSuccess -> callback.onLockTypeSwitchSuccess(it.newType)
-        is SwitchLockTypeBlocked -> callback.onLockTypeSwitchBlocked()
-        is SwitchLockTypeError -> callback.onLockTypeSwitchError(it.error)
-      }
-    }
+    listen()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe {
+          return@subscribe when (it) {
+            is SwitchLockTypeSuccess -> callback.onLockTypeSwitchSuccess(it.newType)
+            is SwitchLockTypeBlocked -> callback.onLockTypeSwitchBlocked()
+            is SwitchLockTypeError -> callback.onLockTypeSwitchError(it.error)
+          }
+        }
         .destroy(owner)
   }
 

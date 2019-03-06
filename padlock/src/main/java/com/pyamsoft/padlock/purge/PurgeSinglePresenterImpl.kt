@@ -25,6 +25,7 @@ import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
@@ -38,7 +39,10 @@ internal class PurgeSinglePresenterImpl @Inject internal constructor(
   private var purgeDisposable by singleDisposable()
 
   override fun onBind() {
-    listen().subscribe { callback.onSinglePurged(it.stalePackage) }
+    listen()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { callback.onSinglePurged(it.stalePackage) }
         .destroy(owner)
   }
 
@@ -49,7 +53,7 @@ internal class PurgeSinglePresenterImpl @Inject internal constructor(
   override fun purge(stalePackage: String) {
     purgeDisposable = interactor.deleteEntry(stalePackage)
         .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .andThen(Single.just(stalePackage))
         .subscribe({ publish(PurgeSingleEvent(stalePackage)) }, {
           Timber.e(it, "Error attempting purge single: $stalePackage")

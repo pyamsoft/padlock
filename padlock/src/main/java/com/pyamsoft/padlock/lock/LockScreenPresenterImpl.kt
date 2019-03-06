@@ -66,6 +66,8 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
     listen()
         .filter { it.packageName == packageName }
         .filter { it.activityName == activityName }
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe { callback.onCloseOld() }
         .destroy(owner)
   }
@@ -115,8 +117,6 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
     ignoreTime: Long
   ) {
     submitDisposable = interactor.submitPin(packageName, activityName, lockCode, currentAttempt)
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
         .flatMapCompletable { processSubmission(it, lockCode, isSystem, shouldExclude, ignoreTime) }
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())

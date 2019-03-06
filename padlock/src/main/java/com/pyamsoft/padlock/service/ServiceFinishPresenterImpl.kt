@@ -35,7 +35,10 @@ internal class ServiceFinishPresenterImpl @Inject internal constructor(
     ServiceFinishPresenter {
 
   override fun onBind() {
-    listen().subscribe { callback.onServiceFinished() }
+    listen()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { callback.onServiceFinished() }
         .destroy(owner)
 
     interactor.observeServiceState()

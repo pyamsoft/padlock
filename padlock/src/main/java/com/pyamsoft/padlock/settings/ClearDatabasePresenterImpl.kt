@@ -24,6 +24,7 @@ import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
@@ -37,7 +38,10 @@ internal class ClearDatabasePresenterImpl @Inject internal constructor(
   private var clearDisposable by singleDisposable()
 
   override fun onBind() {
-    listen().subscribe { callback.onDatabaseCleared() }
+    listen()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { callback.onDatabaseCleared() }
         .destroy(owner)
   }
 
@@ -48,7 +52,7 @@ internal class ClearDatabasePresenterImpl @Inject internal constructor(
   override fun clear() {
     clearDisposable = interactor.clearAll()
         .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe({ publish(ClearDatabaseEvent) }, {
           Timber.e(it, "Error clearing database")
           callback.onClearDatabaseError(it)

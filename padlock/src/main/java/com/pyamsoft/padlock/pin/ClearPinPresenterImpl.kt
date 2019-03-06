@@ -25,6 +25,7 @@ import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
@@ -38,13 +39,16 @@ internal class ClearPinPresenterImpl @Inject internal constructor(
   private var clearDisposable by singleDisposable()
 
   override fun onBind() {
-    listen().subscribe {
-      if (it.success) {
-        callback.onPinClearSuccess()
-      } else {
-        callback.onPinClearFailed()
-      }
-    }
+    listen()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe {
+          if (it.success) {
+            callback.onPinClearSuccess()
+          } else {
+            callback.onPinClearFailed()
+          }
+        }
         .destroy(owner)
   }
 
@@ -55,7 +59,7 @@ internal class ClearPinPresenterImpl @Inject internal constructor(
   override fun clear(attempt: String) {
     clearDisposable = interactor.clearPin(attempt)
         .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe({ publish(ClearPinEvent(it)) }, {
           Timber.e(it, "Error clearing pin")
           callback.onPinClearFailed()

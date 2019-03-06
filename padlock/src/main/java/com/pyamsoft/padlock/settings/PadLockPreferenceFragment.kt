@@ -143,12 +143,12 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
   }
 
   override fun onConfirmPinFailure(attempt: String) {
-    Timber.d("Clear old master pin")
-    clearPinPresenter.clear(attempt)
+    settingsView.showMessage("Failed to clear master pin")
   }
 
   override fun onConfirmPinSuccess(attempt: String) {
-    settingsView.showMessage("Failed to clear master pin")
+    Timber.d("Clear old master pin")
+    clearPinPresenter.clear(attempt)
   }
 
   override fun onConfirmPinComplete() {

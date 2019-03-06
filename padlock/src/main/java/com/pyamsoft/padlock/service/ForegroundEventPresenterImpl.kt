@@ -22,6 +22,8 @@ import com.pyamsoft.padlock.service.ForegroundEventPresenter.Callback
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 internal class ForegroundEventPresenterImpl @Inject internal constructor(
@@ -30,7 +32,10 @@ internal class ForegroundEventPresenterImpl @Inject internal constructor(
     ForegroundEventPresenter {
 
   override fun onBind() {
-    listen().subscribe { callback.onForegroundEvent(it.packageName, it.className) }
+    listen()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe { callback.onForegroundEvent(it.packageName, it.className) }
         .destroy(owner)
   }
 

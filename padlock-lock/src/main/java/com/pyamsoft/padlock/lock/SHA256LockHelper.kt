@@ -46,7 +46,9 @@ internal class SHA256LockHelper @Inject internal constructor(
   override fun checkSubmissionAttempt(
     attempt: String,
     encodedPin: String
-  ): Single<Boolean> = encode(attempt).map { it == encodedPin }
+  ): Single<Boolean> {
+    return encode(attempt).map { it == encodedPin }
+  }
 
   override fun encode(attempt: String): Single<String> {
     return Completable.fromAction {
