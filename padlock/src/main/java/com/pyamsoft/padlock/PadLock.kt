@@ -24,6 +24,7 @@ import com.pyamsoft.padlock.api.ApplicationInstallReceiver
 import com.pyamsoft.padlock.api.preferences.InstallListenerPreferences
 import com.pyamsoft.pydroid.bootstrap.libraries.OssLibraries
 import com.pyamsoft.pydroid.ui.PYDroid
+import com.pyamsoft.pydroid.ui.theme.ThemeInjector
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.squareup.leakcanary.LeakCanary
 import com.squareup.leakcanary.RefWatcher
@@ -33,6 +34,7 @@ class PadLock : Application(), PYDroid.Instance {
 
   private var pyDroid: PYDroid? = null
   private lateinit var component: PadLockComponent
+  private lateinit var theming: Theming
   private lateinit var refWatcher: RefWatcher
 
   @field:Inject internal lateinit var installListenerPreferences: InstallListenerPreferences
@@ -108,21 +110,23 @@ class PadLock : Application(), PYDroid.Instance {
 
   override fun setPydroid(instance: PYDroid) {
     pyDroid = instance.also {
+      theming = it.modules()
+          .theming()
       component = DaggerPadLockComponent.builder()
           .application(this)
           .enforcer(it.modules().enforcer())
           .imageLoader(it.modules().loaderModule().provideImageLoader())
-          .theming(it.modules().theming())
+          .theming(theming)
           .moshi(it.modules().versionCheckModule().moshi)
           .build()
     }
   }
 
   override fun getSystemService(name: String): Any {
-    if (Injector.name == name) {
-      return component
-    } else {
-      return super.getSystemService(name)
+    when (name) {
+      Injector.name -> return component
+      ThemeInjector.name -> return theming
+      else -> return super.getSystemService(name)
     }
   }
 
