@@ -100,6 +100,12 @@ internal class PurgeListView @Inject internal constructor(
         .show()
   }
 
+  fun showErrorMessage(message: String) {
+    Snackbreak.bindTo(owner)
+        .long(swipeRefresh, message)
+        .show()
+  }
+
   fun onStaleFetchComplete() {
     doneRefreshing()
   }

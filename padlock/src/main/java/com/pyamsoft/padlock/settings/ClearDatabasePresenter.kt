@@ -26,6 +26,8 @@ internal interface ClearDatabasePresenter : Presenter<Callback> {
 
   interface Callback {
 
+    fun onClearDatabaseError(throwable: Throwable)
+
     fun onDatabaseCleared()
 
   }

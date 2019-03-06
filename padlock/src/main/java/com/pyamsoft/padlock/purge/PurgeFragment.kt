@@ -110,6 +110,14 @@ class PurgeFragment : Fragment(),
     purgeView.onStaleFetchComplete()
   }
 
+  override fun onPurgeAllError(throwable: Throwable) {
+    purgeView.showErrorMessage("Unable to purge all entries, please try again later.")
+  }
+
+  override fun onPurgeSingleError(throwable: Throwable) {
+    purgeView.showErrorMessage("Unable to purge entry, please try again later.")
+  }
+
   override fun onDestroyView() {
     super.onDestroyView()
     toolbarView.teardown()

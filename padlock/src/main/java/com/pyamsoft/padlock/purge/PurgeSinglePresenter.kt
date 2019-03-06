@@ -26,6 +26,8 @@ internal interface PurgeSinglePresenter : Presenter<Callback> {
 
   interface Callback {
 
+    fun onPurgeSingleError(throwable: Throwable)
+
     fun onSinglePurged(stalePackage: String)
   }
 }

@@ -17,51 +17,42 @@
 
 package com.pyamsoft.padlock.settings
 
-import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.padlock.settings.ClearDatabasePresenterImpl.ClearDatabaseEvent
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.threads.Enforcer
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import io.reactivex.schedulers.Schedulers
+import timber.log.Timber
 import javax.inject.Inject
 
 internal class ClearDatabasePresenterImpl @Inject internal constructor(
-  private val enforcer: Enforcer,
   private val interactor: SettingsInteractor,
   bus: EventBus<ClearDatabaseEvent>
 ) : BasePresenter<ClearDatabaseEvent, ClearDatabasePresenter.Callback>(bus),
     ClearDatabasePresenter {
 
-  @CheckResult
-  private fun clearDatabase(): Single<Unit> {
-    return Single.defer {
-      enforcer.assertNotOnMainThread()
-
-      return@defer interactor.clearDatabase()
-          .subscribeOn(Schedulers.io())
-          .observeOn(Schedulers.io())
-    }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-  }
+  private var clearDisposable by singleDisposable()
 
   override fun onBind() {
-    listen().flatMapSingle { clearDatabase() }
-        .subscribeOn(Schedulers.trampoline())
-        .observeOn(Schedulers.trampoline())
-        .subscribe { callback.onDatabaseCleared() }
+    listen().subscribe { callback.onDatabaseCleared() }
         .destroy(owner)
   }
 
   override fun onUnbind() {
+    clearDisposable.tryDispose()
   }
 
   override fun clear() {
-    publish(ClearDatabaseEvent)
+    clearDisposable = interactor.clearAll()
+        .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.io())
+        .subscribe({ publish(ClearDatabaseEvent) }, {
+          Timber.e(it, "Error clearing database")
+          callback.onClearDatabaseError(it)
+        })
   }
 
   internal object ClearDatabaseEvent

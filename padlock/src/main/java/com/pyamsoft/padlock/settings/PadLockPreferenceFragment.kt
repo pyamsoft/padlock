@@ -154,6 +154,14 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
   override fun onConfirmPinComplete() {
   }
 
+  override fun onClearAllSettingsError(throwable: Throwable) {
+    settingsView.showMessage("Unable to reset application settings, please try again later.")
+  }
+
+  override fun onClearDatabaseError(throwable: Throwable) {
+    settingsView.showMessage("Unable to reset database, please try again later.")
+  }
+
   companion object {
 
     const val TAG = "PadLockPreferenceFragment"

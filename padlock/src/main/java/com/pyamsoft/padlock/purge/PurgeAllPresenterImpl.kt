@@ -17,54 +17,44 @@
 
 package com.pyamsoft.padlock.purge
 
-import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.purge.PurgeAllPresenterImpl.PurgeAllEvent
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.threads.Enforcer
-import io.reactivex.Completable
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import timber.log.Timber
 import javax.inject.Inject
 
 internal class PurgeAllPresenterImpl @Inject internal constructor(
-  private val enforcer: Enforcer,
   private val interactor: PurgeInteractor,
   bus: EventBus<PurgeAllEvent>
 ) : BasePresenter<PurgeAllEvent, PurgeAllPresenter.Callback>(bus),
     PurgeAllPresenter {
 
-  @CheckResult
-  private fun purgeAll(stalePackages: List<String>): Single<List<String>> {
-    return Completable.defer {
-      enforcer.assertNotOnMainThread()
-
-      return@defer interactor.deleteEntries(stalePackages)
-          .subscribeOn(Schedulers.io())
-          .observeOn(Schedulers.io())
-    }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .andThen(Single.just(stalePackages))
-  }
+  private var purgeDisposable by singleDisposable()
 
   override fun onBind() {
-    listen()
-        .flatMapSingle { purgeAll(it.stalePackages) }
-        .subscribeOn(Schedulers.trampoline())
-        .observeOn(Schedulers.trampoline())
-        .subscribe { callback.onAllPurged(it) }
+    listen().subscribe { callback.onAllPurged(it.stalePackages) }
         .destroy(owner)
   }
 
   override fun onUnbind() {
+    purgeDisposable.tryDispose()
   }
 
   override fun purge(stalePackages: List<String>) {
-    publish(PurgeAllEvent(stalePackages))
+    purgeDisposable = interactor.deleteEntries(stalePackages)
+        .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.io())
+        .andThen(Single.just(stalePackages))
+        .subscribe({ publish(PurgeAllEvent(stalePackages)) }, {
+          Timber.e(it, "Error attempting purge all: $stalePackages")
+          callback.onPurgeAllError(it)
+        })
   }
 
   internal data class PurgeAllEvent(val stalePackages: List<String>)

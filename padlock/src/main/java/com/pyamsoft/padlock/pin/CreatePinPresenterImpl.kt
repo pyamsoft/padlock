@@ -24,7 +24,6 @@ import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
@@ -38,17 +37,13 @@ internal class CreatePinPresenterImpl @Inject internal constructor(
   private var createPinDisposable by singleDisposable()
 
   override fun onBind() {
-    listen()
-        .subscribeOn(Schedulers.trampoline())
-        .observeOn(Schedulers.trampoline())
-        .map { it.success }
-        .subscribe { success ->
-          if (success) {
-            callback.onCreatePinSuccess()
-          } else {
-            callback.onCreatePinFailure()
-          }
-        }
+    listen().subscribe {
+      if (it.success) {
+        callback.onCreatePinSuccess()
+      } else {
+        callback.onCreatePinFailure()
+      }
+    }
         .destroy(owner)
   }
 
@@ -63,7 +58,7 @@ internal class CreatePinPresenterImpl @Inject internal constructor(
   ) {
     createPinDisposable = interactor.createPin(attempt, reEntry, hint)
         .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
+        .observeOn(Schedulers.io())
         .doOnSubscribe { callback.onCreatePinBegin() }
         .doAfterTerminate { callback.onCreatePinComplete() }
         .subscribe({ publish(CreatePinEvent(it)) }, {

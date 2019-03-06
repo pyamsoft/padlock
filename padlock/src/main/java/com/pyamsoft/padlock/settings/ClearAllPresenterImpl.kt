@@ -17,52 +17,43 @@
 
 package com.pyamsoft.padlock.settings
 
-import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.padlock.settings.ClearAllPresenter.Callback
 import com.pyamsoft.padlock.settings.ClearAllPresenterImpl.ClearAllEvent
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.threads.Enforcer
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import io.reactivex.schedulers.Schedulers
+import timber.log.Timber
 import javax.inject.Inject
 
 internal class ClearAllPresenterImpl @Inject internal constructor(
-  private val enforcer: Enforcer,
   private val interactor: SettingsInteractor,
   bus: EventBus<ClearAllEvent>
 ) : BasePresenter<ClearAllEvent, Callback>(bus),
     ClearAllPresenter {
 
-  @CheckResult
-  private fun clearAll(): Single<Unit> {
-    return Single.defer {
-      enforcer.assertNotOnMainThread()
-
-      return@defer interactor.clearAll()
-          .subscribeOn(Schedulers.io())
-          .observeOn(Schedulers.io())
-    }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-  }
+  private var clearDisposable by singleDisposable()
 
   override fun onBind() {
-    listen().flatMapSingle { clearAll() }
-        .subscribeOn(Schedulers.trampoline())
-        .observeOn(Schedulers.trampoline())
-        .subscribe { callback.onAllSettingsCleared() }
+    listen().subscribe { callback.onAllSettingsCleared() }
         .destroy(owner)
   }
 
   override fun onUnbind() {
+    clearDisposable.tryDispose()
   }
 
   override fun clear() {
-    publish(ClearAllEvent)
+    clearDisposable = interactor.clearAll()
+        .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.io())
+        .subscribe({ publish(ClearAllEvent) }, {
+          Timber.e(it, "Error clearing all settings")
+          callback.onClearAllSettingsError(it)
+        })
   }
 
   internal object ClearAllEvent

@@ -26,7 +26,6 @@ import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
-import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.core.tryDispose
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -38,7 +37,6 @@ import javax.inject.Named
 
 @FragmentScope
 internal class LockScreenPresenterImpl @Inject internal constructor(
-  private val enforcer: Enforcer,
   private val interactor: LockScreenInteractor,
   bus: EventBus<CloseOldEvent>,
   @Named("locked_package_name") private val packageName: String,
@@ -64,6 +62,7 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
     // If any old listener is present, they would already be subscribed and receive the event
     publish(CloseOldEvent(packageName, activityName))
 
+    // Now listen for any broadcasts from other presenter instances
     listen()
         .filter { it.packageName == packageName }
         .filter { it.activityName == activityName }
@@ -132,15 +131,14 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
     whitelist: Boolean,
     ignoreTime: Long
   ): Completable {
-    enforcer.assertNotOnMainThread()
-
-    return Completable.defer {
-      if (unlocked) {
-        return@defer postUnlock(lockCode, system, whitelist, ignoreTime)
-      } else {
-        return@defer handleUnlockFailure()
-      }
+    val completable: Completable
+    if (unlocked) {
+      completable = postUnlock(lockCode, system, whitelist, ignoreTime)
+    } else {
+      completable = handleUnlockFailure()
     }
+
+    return completable
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
   }
@@ -152,8 +150,6 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
     whitelist: Boolean,
     ignoreTime: Long
   ): Completable {
-    enforcer.assertNotOnMainThread()
-
     return interactor.postUnlock(
         packageName, activityName, realName,
         lockCode, system, whitelist, ignoreTime
@@ -165,8 +161,6 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
 
   @CheckResult
   private fun handleUnlockFailure(): Completable {
-    enforcer.assertNotOnMainThread()
-
     return interactor.lockEntryOnFail(packageName, activityName)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())

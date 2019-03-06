@@ -17,60 +17,55 @@
 
 package com.pyamsoft.padlock.pin
 
-import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.PinInteractor
 import com.pyamsoft.padlock.pin.ConfirmPinPresenterImpl.CheckPinEvent
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.threads.Enforcer
-import io.reactivex.Single
-import io.reactivex.android.schedulers.AndroidSchedulers
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import io.reactivex.schedulers.Schedulers
+import timber.log.Timber
 import javax.inject.Inject
 
 internal class ConfirmPinPresenterImpl @Inject internal constructor(
-  private val enforcer: Enforcer,
   private val interactor: PinInteractor,
   bus: EventBus<CheckPinEvent>
 ) : BasePresenter<CheckPinEvent, ConfirmPinPresenter.Callback>(bus),
     ConfirmPinPresenter {
 
-  @CheckResult
-  private fun checkPin(attempt: String): Single<Pair<String, Boolean>> {
-    return Single.defer {
-      enforcer.assertNotOnMainThread()
-
-      return@defer interactor.comparePin(attempt)
-          .subscribeOn(Schedulers.io())
-          .observeOn(Schedulers.io())
-    }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .map { attempt to it }
-  }
+  private var confirmDisposable by singleDisposable()
 
   override fun onBind() {
-    listen().flatMapSingle { checkPin(it.attempt) }
-        .subscribeOn(Schedulers.trampoline())
-        .observeOn(Schedulers.trampoline())
-        .subscribe { (attempt, success) ->
-          if (success) {
-            callback.onConfirmPinSuccess(attempt)
-          } else {
-            callback.onConfirmPinFailure(attempt)
-          }
-        }
+    listen().subscribe { event ->
+      val (attempt, success) = event
+      if (success) {
+        callback.onConfirmPinSuccess(attempt)
+      } else {
+        callback.onConfirmPinFailure(attempt)
+      }
+    }
         .destroy(owner)
   }
 
   override fun onUnbind() {
+    confirmDisposable.tryDispose()
   }
 
   override fun confirm(pin: String) {
-    publish(CheckPinEvent(pin))
+    confirmDisposable = interactor.comparePin(pin)
+        .map { pin to it }
+        .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.io())
+        .subscribe({ publish(CheckPinEvent(it.first, it.second)) }, {
+          Timber.e(it, "Error confirming pin")
+          callback.onConfirmPinFailure(pin)
+        })
   }
 
-  internal data class CheckPinEvent(val attempt: String)
+  internal data class CheckPinEvent(
+    val attempt: String,
+    val success: Boolean
+  )
 }
 

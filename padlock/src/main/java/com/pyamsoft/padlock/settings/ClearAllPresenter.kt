@@ -26,6 +26,8 @@ internal interface ClearAllPresenter: Presenter<Callback> {
 
   interface Callback {
 
+    fun onClearAllSettingsError(throwable: Throwable)
+
     fun onAllSettingsCleared()
   }
 }

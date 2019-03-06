@@ -26,7 +26,6 @@ import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.RxBus
 import com.pyamsoft.pydroid.core.singleDisposable
-import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.core.tryDispose
 import io.reactivex.Maybe
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -35,7 +34,6 @@ import timber.log.Timber
 import javax.inject.Inject
 
 internal class LockServicePresenterImpl @Inject internal constructor(
-  private val enforcer: Enforcer,
   private val interactor: LockServiceInteractor
 ) : BasePresenter<Unit, Callback>(RxBus.empty()),
     LockServicePresenter {
@@ -79,9 +77,9 @@ internal class LockServicePresenterImpl @Inject internal constructor(
     interactor.listenForForegroundEvents()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
+        .flatMapMaybe { processEvent(it.packageName, it.className, forced = false) }
         .doOnCancel { Timber.d("Cancelling foreground listener") }
         .doAfterTerminate { callback.onListenForegroundFinished() }
-        .flatMapMaybe { processEvent(it.packageName, it.className, forced = false) }
         .subscribe({ callback.onListenForegroundLock(it.model, it.className, it.icon) }, {
           Timber.e(it, "Error while watching foreground events")
           callback.onListenForegroundError(it)
@@ -95,8 +93,6 @@ internal class LockServicePresenterImpl @Inject internal constructor(
     className: String,
     forced: Boolean
   ): Maybe<ProcessedEventWithClassNamePayload> {
-    enforcer.assertNotOnMainThread()
-
     return interactor.processEvent(forced, packageName, className)
         .unsubscribeOn(Schedulers.io())
         .subscribeOn(Schedulers.io())
