@@ -17,49 +17,31 @@
 
 package com.pyamsoft.padlock.pin
 
-import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.PinInteractor
 import com.pyamsoft.padlock.pin.CreatePinPresenterImpl.CreatePinEvent
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
-import com.pyamsoft.pydroid.core.threads.Enforcer
-import io.reactivex.Single
+import com.pyamsoft.pydroid.core.singleDisposable
+import com.pyamsoft.pydroid.core.tryDispose
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
+import timber.log.Timber
 import javax.inject.Inject
 
 internal class CreatePinPresenterImpl @Inject internal constructor(
-  private val enforcer: Enforcer,
   private val interactor: PinInteractor,
   bus: EventBus<CreatePinEvent>
 ) : BasePresenter<CreatePinEvent, CreatePinPresenter.Callback>(bus),
     CreatePinPresenter {
 
-  @CheckResult
-  private fun createPin(
-    attempt: String,
-    reEntry: String,
-    hint: String
-  ): Single<Boolean> {
-    return Single.defer {
-      enforcer.assertNotOnMainThread()
-
-      return@defer interactor.createPin(attempt, reEntry, hint)
-          .subscribeOn(Schedulers.io())
-          .observeOn(Schedulers.io())
-    }
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .doOnSubscribe { callback.onCreatePinBegin() }
-        .doAfterTerminate { callback.onCreatePinComplete() }
-  }
+  private var createPinDisposable by singleDisposable()
 
   override fun onBind() {
     listen()
-        .flatMapSingle { createPin(it.attempt, it.reEntry, it.hint) }
         .subscribeOn(Schedulers.trampoline())
         .observeOn(Schedulers.trampoline())
+        .map { it.success }
         .subscribe { success ->
           if (success) {
             callback.onCreatePinSuccess()
@@ -71,6 +53,7 @@ internal class CreatePinPresenterImpl @Inject internal constructor(
   }
 
   override fun onUnbind() {
+    createPinDisposable.tryDispose()
   }
 
   override fun create(
@@ -78,12 +61,16 @@ internal class CreatePinPresenterImpl @Inject internal constructor(
     reEntry: String,
     hint: String
   ) {
-    publish(CreatePinEvent(attempt, reEntry, hint))
+    createPinDisposable = interactor.createPin(attempt, reEntry, hint)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .doOnSubscribe { callback.onCreatePinBegin() }
+        .doAfterTerminate { callback.onCreatePinComplete() }
+        .subscribe({ publish(CreatePinEvent(it)) }, {
+          Timber.e(it, "Error creating PIN")
+          callback.onCreatePinFailure()
+        })
   }
 
-  internal data class CreatePinEvent(
-    val attempt: String,
-    val reEntry: String,
-    val hint: String
-  )
+  internal data class CreatePinEvent(val success: Boolean)
 }

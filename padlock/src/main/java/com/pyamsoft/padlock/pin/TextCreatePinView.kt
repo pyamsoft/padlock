@@ -31,7 +31,15 @@ internal class TextCreatePinView @Inject internal constructor(
 ) : CreatePinView, TextPinView<Callback>(imageLoader, owner, parent, callback, false) {
 
   override fun submit() {
-    callback.onSubmit(getAttempt(), getReConfirmAttempt(), getOptionalHint())
+    val attempt = getAttempt()
+    val repeatAttempt = getReConfirmAttempt()
+
+    // The password can be BLANK and be valid, though I don't recommend it.
+    if (attempt != repeatAttempt) {
+      showErrorMessage("PIN codes do not match, please try again.")
+      return
+    }
+    callback.onSubmit(attempt, repeatAttempt, getOptionalHint())
   }
 
 }
