@@ -50,7 +50,7 @@ internal class ClearDatabasePresenterImpl @Inject internal constructor(
   }
 
   override fun clear() {
-    clearDisposable = interactor.clearAll()
+    clearDisposable = interactor.clearDatabase()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe({ publish(ClearDatabaseEvent) }, {
