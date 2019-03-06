@@ -23,11 +23,14 @@ import com.pyamsoft.padlock.purge.PurgeAllPresenterImpl.PurgeAllEvent
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.pydroid.core.threads.Enforcer
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 internal class PurgeAllPresenterImpl @Inject internal constructor(
+  private val enforcer: Enforcer,
   private val interactor: PurgeInteractor,
   bus: EventBus<PurgeAllEvent>
 ) : BasePresenter<PurgeAllEvent, PurgeAllPresenter.Callback>(bus),
@@ -35,14 +38,21 @@ internal class PurgeAllPresenterImpl @Inject internal constructor(
 
   @CheckResult
   private fun purgeAll(stalePackages: List<String>): Single<List<String>> {
-    return interactor.deleteEntries(stalePackages)
+    return Single.defer {
+      enforcer.assertNotOnMainThread()
+
+      return@defer interactor.deleteEntries(stalePackages)
+          .subscribeOn(Schedulers.io())
+          .observeOn(Schedulers.io())
+          .andThen(Single.just(stalePackages))
+    }
         .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-        .andThen(Single.just(stalePackages))
+        .observeOn(AndroidSchedulers.mainThread())
   }
 
   override fun onBind() {
-    listen().flatMapSingle { purgeAll(it.stalePackages) }
+    listen()
+        .flatMapSingle { purgeAll(it.stalePackages) }
         .subscribeOn(Schedulers.trampoline())
         .observeOn(Schedulers.trampoline())
         .subscribe { callback.onAllPurged(it) }

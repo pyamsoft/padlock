@@ -20,19 +20,16 @@ package com.pyamsoft.padlock.service
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PERMISSION
 import com.pyamsoft.padlock.service.PermissionPresenter.Callback
-import com.pyamsoft.pydroid.core.bus.RxBus
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.arch.destroy
+import com.pyamsoft.pydroid.core.bus.RxBus
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 internal class PermissionPresenterImpl @Inject internal constructor(
   private val interactor: LockServiceInteractor
-) : BasePresenter<Unit, Callback>(
-    RxBus.empty()
-),
-    PermissionPresenter {
+) : BasePresenter<Unit, Callback>(RxBus.empty()), PermissionPresenter {
 
   override fun onBind() {
     interactor.observeServiceState()
