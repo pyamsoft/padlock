@@ -59,10 +59,11 @@ class LockScreenActivity : ActivityBase(),
 
     super.onCreate(savedInstanceState)
     setContentView(R.layout.layout_constraint)
-    val layoutRoot = findViewById<ConstraintLayout>(R.id.layout_constraint)
 
+    val layoutRoot = findViewById<ConstraintLayout>(R.id.layout_constraint)
     Injector.obtain<PadLockComponent>(applicationContext)
         .plusLockComponent()
+        .parent(layoutRoot)
         .owner(this)
         .toolbarActivityProvider(this)
         .packageName(getLockedPackageName())
@@ -151,6 +152,7 @@ class LockScreenActivity : ActivityBase(),
   override fun onSubmitUnlockAttempt(attempt: String) {
     val excluded = toolbar.isExcludeChecked()
     val ignoreTime = toolbar.getSelectedIgnoreTime()
+    Timber.d("Submitting unlock attempt")
     presenter.submit(getLockedCode(), attempt, getLockedIsSystem(), excluded, ignoreTime)
   }
 
@@ -221,6 +223,12 @@ class LockScreenActivity : ActivityBase(),
     pinScreen.clearDisplay()
     pinScreen.enable()
     pinScreen.showErrorMessage("Error: Invalid PIN")
+  }
+
+  override fun onSubmitError(throwable: Throwable) {
+    pinScreen.clearDisplay()
+    pinScreen.enable()
+    pinScreen.showErrorMessage("Something went wrong during PIN submission, please try again")
   }
 
   override fun onPause() {

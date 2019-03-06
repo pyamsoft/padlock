@@ -22,9 +22,9 @@ import com.pyamsoft.padlock.api.MasterPinInteractor
 import com.pyamsoft.padlock.api.database.EntryInsertDao
 import com.pyamsoft.padlock.api.database.EntryQueryDao
 import com.pyamsoft.padlock.api.database.EntryUpdateDao
-import com.pyamsoft.padlock.api.lockscreen.LockScreenInteractor
 import com.pyamsoft.padlock.api.lockscreen.LockHelper
 import com.pyamsoft.padlock.api.lockscreen.LockPassed
+import com.pyamsoft.padlock.api.lockscreen.LockScreenInteractor
 import com.pyamsoft.padlock.api.packagemanager.PackageLabelManager
 import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
@@ -73,7 +73,7 @@ internal class LockScreenInteractorImpl @Inject internal constructor(
           enforcer.assertNotOnMainThread()
           val lockUntilTime = model.lockUntilTime()
           return@flatMap masterPinInteractor.getMasterPin()
-              .map {
+              .map { masterPinOptional ->
                 Timber.d("Attempt unlock: %s %s", packageName, activityName)
                 Timber.d("Check entry is not locked: %d", lockUntilTime)
                 if (System.currentTimeMillis() < lockUntilTime) {
@@ -82,19 +82,20 @@ internal class LockScreenInteractorImpl @Inject internal constructor(
                 }
 
                 return@map when (lockCode) {
-                  null -> it
+                  null -> masterPinOptional
                   else -> lockCode.asOptional()
                 }
               }
         }
-        .flatMap {
+        .flatMap { pinOptional ->
           enforcer.assertNotOnMainThread()
-          return@flatMap when (it) {
-            is Present -> lockHelper.checkSubmissionAttempt(
-                currentAttempt,
-                it.value
-            )
-            else -> Single.just(false)
+
+          if (pinOptional is Present) {
+            Timber.d("Check submission attempt")
+            return@flatMap lockHelper.checkSubmissionAttempt(currentAttempt, pinOptional.value)
+          } else {
+            Timber.e("No pin available, always fail")
+            return@flatMap Single.just(false)
           }
         }
   }
@@ -107,6 +108,7 @@ internal class LockScreenInteractorImpl @Inject internal constructor(
     lockCode: String?,
     isSystem: Boolean
   ): Completable {
+    enforcer.assertNotOnMainThread()
     Timber.d("Whitelist entry for %s %s (real %s)", packageName, activityName, realName)
     return insertDao.insert(packageName, realName, lockCode, 0, 0, isSystem, true)
   }
@@ -155,10 +157,10 @@ internal class LockScreenInteractorImpl @Inject internal constructor(
     }
   }
 
-  override fun lockEntryOnFail(
+  override fun lockOnFailure(
     packageName: String,
     activityName: String
-  ): Maybe<Long> {
+  ): Single<Boolean> {
     return Single.fromCallable {
       enforcer.assertNotOnMainThread()
       val failId: String = getFailId(packageName, activityName)
@@ -166,49 +168,52 @@ internal class LockScreenInteractorImpl @Inject internal constructor(
       failCount[failId] = newFailCount
       return@fromCallable newFailCount
     }
-        .filter { it > DEFAULT_MAX_FAIL_COUNT }
-        .flatMap {
+        .flatMap { count ->
           enforcer.assertNotOnMainThread()
           return@flatMap getTimeoutPeriodMinutesInMillis()
+              .map { count to it }
         }
-        .filter { it > 0 }
-        .flatMap {
+        .flatMap { (count, timeoutInMillis) ->
           enforcer.assertNotOnMainThread()
-          return@flatMap lockEntry(it, packageName, activityName)
+          return@flatMap lockEntry(count, timeoutInMillis, packageName, activityName)
         }
   }
 
   @CheckResult
-  private fun getTimeoutPeriodMinutesInMillis(): Maybe<Long> {
-    return Maybe.fromCallable {
+  private fun getTimeoutPeriodMinutesInMillis(): Single<Long> {
+    return Single.fromCallable {
       enforcer.assertNotOnMainThread()
       return@fromCallable preferences.getTimeoutPeriod()
     }
-        .map {
-          TimeUnit.MINUTES.toMillis(it)
-        }
-        .doOnSuccess {
-          Timber.d("Current timeout period: $it")
-        }
+        .map { TimeUnit.MINUTES.toMillis(it) }
+        .doOnSuccess { Timber.d("Current timeout period: $it") }
   }
 
   @CheckResult
   private fun lockEntry(
+    currentFailCount: Int,
     timeOutMinutesInMillis: Long,
     packageName: String,
     activityName: String
-  ): Maybe<Long> {
-    return Maybe.defer {
+  ): Single<Boolean> {
+    return Single.defer {
       enforcer.assertNotOnMainThread()
-      val currentTime = System.currentTimeMillis()
-      val newLockUntilTime = currentTime + timeOutMinutesInMillis
-      Timber.d(
-          "Lock %s %s until %d (%d)", packageName, activityName, newLockUntilTime,
-          timeOutMinutesInMillis
-      )
 
-      return@defer updateDao.updateLockUntilTime(packageName, activityName, newLockUntilTime)
-          .andThen(Maybe.just(newLockUntilTime))
+      val shouldTimeOut = timeOutMinutesInMillis > 0
+      val tooManyFailures = currentFailCount > DEFAULT_MAX_FAIL_COUNT
+      val shouldLock = shouldTimeOut && tooManyFailures
+
+      if (shouldLock) {
+        val currentTime = System.currentTimeMillis()
+        val newLockUntilTime = currentTime + timeOutMinutesInMillis
+        Timber.d(
+            "Lock $packageName $activityName until $newLockUntilTime ($timeOutMinutesInMillis)"
+        )
+        return@defer updateDao.updateLockUntilTime(packageName, activityName, newLockUntilTime)
+            .andThen(Single.just(System.currentTimeMillis() < newLockUntilTime))
+      } else {
+        return@defer Single.just(false)
+      }
     }
   }
 
@@ -216,9 +221,10 @@ internal class LockScreenInteractorImpl @Inject internal constructor(
     return masterPinInteractor.getHint()
         .map {
           enforcer.assertNotOnMainThread()
-          return@map when (it) {
-            is Present -> it.value
-            else -> ""
+          if (it is Present) {
+            return@map it.value
+          } else {
+            return@map ""
           }
         }
   }
@@ -272,19 +278,16 @@ internal class LockScreenInteractorImpl @Inject internal constructor(
           .andThen(whitelistObservable)
     }
         .andThen(Completable.fromAction {
+          enforcer.assertNotOnMainThread()
           failCount[getFailId(packageName, activityName)] = 0
         })
         .andThen(Completable.fromAction {
+          enforcer.assertNotOnMainThread()
           lockPassed.add(packageName, activityName)
         })
         .doOnComplete {
           if (whitelist) {
-            lockWhitelistedBus.publish(
-                LockWhitelistedEvent(
-                    packageName,
-                    activityName
-                )
-            )
+            lockWhitelistedBus.publish(LockWhitelistedEvent(packageName, activityName))
           }
         }
   }
@@ -315,9 +318,15 @@ internal class LockScreenInteractorImpl @Inject internal constructor(
   override fun isAlreadyUnlocked(
     packageName: String,
     activityName: String
-  ): Single<Boolean> = Single.fromCallable {
-    enforcer.assertNotOnMainThread()
-    return@fromCallable lockPassed.check(packageName, activityName)
+  ): Maybe<Unit> {
+    return Maybe.defer<Unit> {
+      enforcer.assertNotOnMainThread()
+      if (lockPassed.check(packageName, activityName)) {
+        return@defer Maybe.just(Unit)
+      } else {
+        return@defer Maybe.empty()
+      }
+    }
   }
 
   companion object {

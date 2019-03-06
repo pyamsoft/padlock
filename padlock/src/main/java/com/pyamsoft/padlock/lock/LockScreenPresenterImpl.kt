@@ -106,7 +106,7 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
     alreadyUnlockedDisposable = interactor.isAlreadyUnlocked(packageName, activityName)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(Consumer { callback.onAlreadyUnlocked() })
+        .subscribe { callback.onAlreadyUnlocked() }
   }
 
   override fun submit(
@@ -121,7 +121,10 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .doOnSubscribe { callback.onSubmitBegin() }
-        .subscribe()
+        .subscribe({ Timber.d("Submit processing...") }, {
+          Timber.e(it, "Error submitting unlock attempt")
+          callback.onSubmitError(it)
+        })
   }
 
   private fun processSubmission(
@@ -131,6 +134,7 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
     whitelist: Boolean,
     ignoreTime: Long
   ): Completable {
+    Timber.d("Processing submission. Unlocked: $unlocked")
     val completable: Completable
     if (unlocked) {
       completable = postUnlock(lockCode, system, whitelist, ignoreTime)
@@ -156,16 +160,17 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
     )
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
+        .doOnError { Timber.e(it, "Error on postUnlock") }
         .doOnComplete { callback.onSubmitUnlocked() }
   }
 
   @CheckResult
   private fun handleUnlockFailure(): Completable {
-    return interactor.lockEntryOnFail(packageName, activityName)
+    return interactor.lockOnFailure(packageName, activityName)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .doOnSuccess { lockoutAtTime ->
-          val lock = System.currentTimeMillis() < lockoutAtTime
+        .doOnError { Timber.e(it, "Error on handleUnlockFailure") }
+        .doOnSuccess { lock ->
           if (lock) {
             callback.onSubmitLocked()
           } else {

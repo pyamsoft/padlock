@@ -43,17 +43,21 @@ internal class LockScreenInteractorCache @Inject internal constructor(
     activityName: String,
     lockCode: String?,
     currentAttempt: String
-  ): Single<Boolean> = Single.defer {
-    enforcer.assertNotOnMainThread()
-    return@defer impl.submitPin(packageName, activityName, lockCode, currentAttempt)
+  ): Single<Boolean> {
+    return Single.defer {
+      enforcer.assertNotOnMainThread()
+      return@defer impl.submitPin(packageName, activityName, lockCode, currentAttempt)
+    }
   }
 
-  override fun lockEntryOnFail(
+  override fun lockOnFailure(
     packageName: String,
     activityName: String
-  ): Maybe<Long> = Maybe.defer {
-    enforcer.assertNotOnMainThread()
-    return@defer impl.lockEntryOnFail(packageName, activityName)
+  ): Single<Boolean> {
+    return Single.defer {
+      enforcer.assertNotOnMainThread()
+      return@defer impl.lockOnFailure(packageName, activityName)
+    }
   }
 
   override fun getHint(): Single<String> = impl.getHint()
@@ -66,18 +70,21 @@ internal class LockScreenInteractorCache @Inject internal constructor(
     isSystem: Boolean,
     whitelist: Boolean,
     ignoreTime: Long
-  ): Completable =
-    impl.postUnlock(
-        packageName, activityName, realName, lockCode, isSystem, whitelist,
-        ignoreTime
-    ).doOnComplete {
-      enforcer.assertNotOnMainThread()
-      if (whitelist) {
-        // Clear caches so that views update when we return to them
-        lockListCache.clearCache()
-        lockInfoCache.clearCache()
-      }
-    }
+  ): Completable {
+    return impl.postUnlock(
+        packageName, activityName, realName,
+        lockCode, isSystem, whitelist, ignoreTime
+    )
+        .doOnComplete {
+          enforcer.assertNotOnMainThread()
+
+          if (whitelist) {
+            // Clear caches so that views update when we return to them
+            lockListCache.clearCache()
+            lockInfoCache.clearCache()
+          }
+        }
+  }
 
   override fun clearFailCount() {
     impl.clearFailCount()
@@ -98,7 +105,7 @@ internal class LockScreenInteractorCache @Inject internal constructor(
   override fun isAlreadyUnlocked(
     packageName: String,
     activityName: String
-  ): Single<Boolean> {
+  ): Maybe<Unit> {
     return impl.isAlreadyUnlocked(packageName, activityName)
   }
 }

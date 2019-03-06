@@ -60,6 +60,8 @@ internal interface LockScreenPresenter : Presenter<Callback> {
 
     fun onSubmitLocked()
 
+    fun onSubmitError(throwable: Throwable)
+
   }
 
 }

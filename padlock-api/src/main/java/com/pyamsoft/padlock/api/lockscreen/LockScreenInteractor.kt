@@ -34,10 +34,10 @@ interface LockScreenInteractor {
   ): Single<Boolean>
 
   @CheckResult
-  fun lockEntryOnFail(
+  fun lockOnFailure(
     packageName: String,
     activityName: String
-  ): Maybe<Long>
+  ): Single<Boolean>
 
   @CheckResult
   fun getHint(): Single<String>
@@ -68,5 +68,5 @@ interface LockScreenInteractor {
   fun isAlreadyUnlocked(
     packageName: String,
     activityName: String
-  ): Single<Boolean>
+  ): Maybe<Unit>
 }
