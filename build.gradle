@@ -39,7 +39,7 @@ buildscript {
     core = "1.0.1"
     room = "2.0.0"
 
-    pydroid = "19.0.2"
+    pydroid = "19.0.3-SNAPSHOT"
     leakCanary = "1.6.3"
     dagger = "2.21"
     patternLock = "1.0.0"
