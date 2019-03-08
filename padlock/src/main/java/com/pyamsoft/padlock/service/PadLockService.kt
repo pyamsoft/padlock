@@ -37,14 +37,14 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat
 import com.pyamsoft.padlock.api.service.JobSchedulerCompat.JobType.SERVICE_TEMP_PAUSE
 import com.pyamsoft.padlock.api.service.ServiceManager
-import com.pyamsoft.padlock.lock.LockScreenActivity
-import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.api.service.ServiceManager.Commands
 import com.pyamsoft.padlock.api.service.ServiceManager.Commands.PAUSE
 import com.pyamsoft.padlock.api.service.ServiceManager.Commands.START
 import com.pyamsoft.padlock.api.service.ServiceManager.Commands.TEMP_PAUSE
 import com.pyamsoft.padlock.api.service.ServiceManager.Commands.USER_PAUSE
 import com.pyamsoft.padlock.api.service.ServiceManager.Commands.USER_TEMP_PAUSE
+import com.pyamsoft.padlock.lock.LockScreenActivity
+import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.service.pause.PauseConfirmActivity
 import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
 import com.pyamsoft.pydroid.util.fakeBind
@@ -281,7 +281,7 @@ class PadLockService : Service(),
         .setPriority(NotificationCompat.PRIORITY_LOW)
         .setContentTitle("PadLock paused")
         .setContentText(text)
-        .setContentIntent(serviceManager.startIntent())
+        .setContentIntent(serviceManager.fireStartIntent())
 
     notificationManager.notify(PAUSED_ID, pausedNotificationBuilder.build())
   }
@@ -317,21 +317,20 @@ class PadLockService : Service(),
     }
 
     notificationBuilder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-        .setContentIntent(serviceManager.mainActivityIntent(false))
+        .setContentIntent(serviceManager.fireMainActivityIntent(false))
         .setColor(ContextCompat.getColor(applicationContext, R.color.blue500))
         .setSmallIcon(R.drawable.ic_padlock_notification)
         .setPriority(NotificationCompat.PRIORITY_MIN)
-        .setContentTitle(getString(R.string.app_name))
-        .setContentText("PadLock service is monitoring applications")
+        .setContentText("${getString(R.string.app_name)} is monitoring applications")
         .addAction(
             R.drawable.ic_padlock_notification,
             "Pause",
-            serviceManager.userPauseIntent()
+            serviceManager.fireUserPauseIntent()
         )
         .addAction(
             R.drawable.ic_padlock_notification,
             "Pause $TEMP_PAUSE_AMOUNT Minutes",
-            serviceManager.tempPauseIntent()
+            serviceManager.fireTempPauseIntent()
         )
   }
 

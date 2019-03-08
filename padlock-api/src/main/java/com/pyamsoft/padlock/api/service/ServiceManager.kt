@@ -25,16 +25,16 @@ interface ServiceManager {
   fun startService(restart: Boolean)
 
   @CheckResult
-  fun mainActivityIntent(forceRefreshOnOpen: Boolean): PendingIntent
+  fun fireMainActivityIntent(forceRefreshOnOpen: Boolean): PendingIntent
 
   @CheckResult
-  fun startIntent(): PendingIntent
+  fun fireStartIntent(): PendingIntent
 
   @CheckResult
-  fun userPauseIntent(): PendingIntent
+  fun fireUserPauseIntent(): PendingIntent
 
   @CheckResult
-  fun tempPauseIntent(): PendingIntent
+  fun fireTempPauseIntent(): PendingIntent
 
   companion object {
 

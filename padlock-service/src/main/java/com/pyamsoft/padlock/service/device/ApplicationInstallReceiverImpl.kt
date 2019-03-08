@@ -142,7 +142,7 @@ internal class ApplicationInstallReceiverImpl @Inject internal constructor(
           setContentTitle("Lock New Application")
           setSmallIcon(notificationIcon)
           setContentText("Click to lock the newly installed application: $name")
-          setContentIntent(serviceManager.mainActivityIntent(true))
+          setContentIntent(serviceManager.fireMainActivityIntent(true))
           setAutoCancel(true)
           color = ContextCompat.getColor(context, notificationColor)
           priority = NotificationCompat.PRIORITY_LOW

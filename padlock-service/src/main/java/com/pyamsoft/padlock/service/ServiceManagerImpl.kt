@@ -154,7 +154,7 @@ internal class ServiceManagerImpl @Inject internal constructor(
     }
   }
 
-  override fun mainActivityIntent(forceRefreshOnOpen: Boolean): PendingIntent {
+  override fun fireMainActivityIntent(forceRefreshOnOpen: Boolean): PendingIntent {
     val intent = mainActivity(forceRefreshOnOpen)
     return PendingIntent.getActivity(
         appContext, REQUEST_CODE_MAIN_ACTIVITY, intent, PendingIntent.FLAG_ONE_SHOT
@@ -168,21 +168,21 @@ internal class ServiceManagerImpl @Inject internal constructor(
     }
   }
 
-  override fun startIntent(): PendingIntent {
+  override fun fireStartIntent(): PendingIntent {
     val intent = service(START)
     return PendingIntent.getService(
         appContext, REQUEST_CODE_SERVICE_START, intent, PendingIntent.FLAG_UPDATE_CURRENT
     )
   }
 
-  override fun userPauseIntent(): PendingIntent {
+  override fun fireUserPauseIntent(): PendingIntent {
     val intent = service(USER_PAUSE)
     return PendingIntent.getService(
         appContext, REQUEST_CODE_SERVICE_USER_PAUSE, intent, PendingIntent.FLAG_UPDATE_CURRENT
     )
   }
 
-  override fun tempPauseIntent(): PendingIntent {
+  override fun fireTempPauseIntent(): PendingIntent {
     val intent = service(USER_TEMP_PAUSE)
     return PendingIntent.getService(
         appContext, REQUEST_CODE_SERVICE_USER_TEMP_PAUSE, intent, PendingIntent.FLAG_UPDATE_CURRENT
