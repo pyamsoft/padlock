@@ -280,6 +280,9 @@ class LockListFragment : Fragment(),
   override fun onCreatePinSuccess() {
     Timber.d("Pin create success")
     lockView.onMasterPinCreateSuccess()
+
+    // Attempt start service
+    serviceManager.startService(false)
   }
 
   override fun onCreatePinFailure() {
