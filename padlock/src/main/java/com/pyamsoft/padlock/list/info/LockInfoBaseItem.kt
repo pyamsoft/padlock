@@ -15,16 +15,16 @@
  *
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.list.info
 
+import androidx.recyclerview.widget.RecyclerView
+import com.mikepenz.fastadapter.items.ModelAbstractItem
+import com.pyamsoft.padlock.list.FilterableItem
 import com.pyamsoft.padlock.model.list.ActivityEntry
 
-interface LockInfoGroupView {
-
-  fun bind(
-    model: ActivityEntry.Group,
-    packageName: String
-  )
-
-  fun unbind()
-}
+abstract class LockInfoBaseItem<
+    M : ActivityEntry,
+    I : LockInfoBaseItem<M, I, VH>,
+    VH : RecyclerView.ViewHolder>
+protected constructor(entry: M) : ModelAbstractItem<M, I, VH>(entry),
+    FilterableItem<I, VH>

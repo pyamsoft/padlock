@@ -15,7 +15,7 @@
  *
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.list.info
 
 import android.app.Dialog
 import android.os.Bundle

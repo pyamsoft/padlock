@@ -15,7 +15,7 @@
  *
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.list.info
 
 import android.graphics.drawable.ColorDrawable
 import android.view.View

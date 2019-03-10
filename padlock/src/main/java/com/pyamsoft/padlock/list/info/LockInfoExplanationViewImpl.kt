@@ -15,7 +15,7 @@
  *
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.list.info
 
 import android.graphics.drawable.Drawable
 import android.view.LayoutInflater

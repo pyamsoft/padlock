@@ -15,7 +15,7 @@
  *
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.list.info
 
 import android.app.Dialog
 import android.os.Bundle
@@ -55,10 +55,14 @@ class LockInfoDialog : DialogFragment() {
     container: ViewGroup?,
     savedInstanceState: Bundle?
   ): View? {
-    val appPackageName = requireArguments().getString(ARG_APP_PACKAGE_NAME, "")
-    val appName = requireArguments().getString(ARG_APP_NAME, "")
-    val appIcon = requireArguments().getInt(ARG_APP_ICON, 0)
-    val appIsSystem = requireArguments().getBoolean(ARG_APP_SYSTEM, false)
+    val appPackageName = requireArguments().getString(
+        ARG_APP_PACKAGE_NAME, "")
+    val appName = requireArguments().getString(
+        ARG_APP_NAME, "")
+    val appIcon = requireArguments().getInt(
+        ARG_APP_ICON, 0)
+    val appIsSystem = requireArguments().getBoolean(
+        ARG_APP_SYSTEM, false)
     require(appPackageName.isNotBlank())
     require(appName.isNotBlank())
     val listStateTag = TAG + appPackageName
@@ -102,7 +106,8 @@ class LockInfoDialog : DialogFragment() {
 
     lockView.onToolbarMenuItemClicked {
       if (it == R.id.menu_explain_lock_type) {
-        LockInfoExplanationDialog().show(requireActivity(), "lock_info_explain")
+        LockInfoExplanationDialog()
+            .show(requireActivity(), "lock_info_explain")
       }
     }
 
@@ -172,7 +177,8 @@ class LockInfoDialog : DialogFragment() {
     @CheckResult
     @JvmStatic
     fun newInstance(appEntry: AppEntry): LockInfoDialog {
-      return LockInfoDialog().apply {
+      return LockInfoDialog()
+          .apply {
         arguments = Bundle().apply {
           putString(ARG_APP_PACKAGE_NAME, appEntry.packageName)
           putString(ARG_APP_NAME, appEntry.name)

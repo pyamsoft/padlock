@@ -15,11 +15,12 @@
  *
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.list.info
 
 import android.view.View
 import androidx.annotation.CheckResult
-import com.pyamsoft.padlock.list.LockInfoItemComponent.LockInfoModule
+import com.pyamsoft.padlock.list.info.LockInfoItem.ViewHolder
+import com.pyamsoft.padlock.list.info.LockInfoItemComponent.LockInfoModule
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module
@@ -28,7 +29,7 @@ import dagger.Subcomponent
 @Subcomponent(modules = [LockInfoModule::class])
 interface LockInfoItemComponent {
 
-  fun inject(holder: LockInfoItem.ViewHolder)
+  fun inject(holder: ViewHolder)
 
   fun inject(holder: LockInfoGroup.ViewHolder)
 

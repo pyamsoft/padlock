@@ -15,7 +15,7 @@
  *
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.list.info
 
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -36,6 +36,7 @@ import com.mikepenz.fastadapter.adapters.ModelAdapter
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.databinding.DialogLockInfoBinding
 import com.pyamsoft.padlock.helper.ListStateUtil
+import com.pyamsoft.padlock.list.FilterListDelegate
 import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.pydroid.loader.ImageLoader

@@ -37,9 +37,9 @@ import com.pyamsoft.padlock.base.BaseModule
 import com.pyamsoft.padlock.base.BaseProvider
 import com.pyamsoft.padlock.base.database.DatabaseProvider
 import com.pyamsoft.padlock.helper.ListStateUtil
-import com.pyamsoft.padlock.list.LockInfoComponent
-import com.pyamsoft.padlock.list.LockInfoExplainComponent
-import com.pyamsoft.padlock.list.LockInfoItemComponent
+import com.pyamsoft.padlock.list.info.LockInfoComponent
+import com.pyamsoft.padlock.list.info.LockInfoExplainComponent
+import com.pyamsoft.padlock.list.info.LockInfoItemComponent
 import com.pyamsoft.padlock.list.LockListComponent
 import com.pyamsoft.padlock.list.LockListItemComponent
 import com.pyamsoft.padlock.list.LockListSingletonModule

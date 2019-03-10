@@ -15,7 +15,7 @@
  *
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.list.info
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.LockInfoInteractor

@@ -15,7 +15,7 @@
  *
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.list.info
 
 import com.pyamsoft.padlock.uicommon.ShimBaseScreen
 

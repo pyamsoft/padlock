@@ -31,6 +31,7 @@ import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.ENABL
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PAUSED
 import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.PERMISSION
 import com.pyamsoft.padlock.api.service.ServiceManager
+import com.pyamsoft.padlock.list.info.LockInfoDialog
 import com.pyamsoft.padlock.model.list.AppEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.pin.ClearPinPresenter

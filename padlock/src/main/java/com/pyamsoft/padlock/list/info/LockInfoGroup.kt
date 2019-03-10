@@ -15,35 +15,33 @@
  *
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.list.info
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.list.info.LockInfoEvent
-import com.pyamsoft.padlock.model.LockState
+import com.pyamsoft.padlock.list.info.LockInfoGroup.ViewHolder
 import com.pyamsoft.padlock.model.list.ActivityEntry
-import com.pyamsoft.pydroid.core.bus.Publisher
-import timber.log.Timber
+import com.pyamsoft.padlock.model.list.ActivityEntry.Group
 import javax.inject.Inject
 
-class LockInfoItem internal constructor(
-  entry: ActivityEntry.Item,
-  private val system: Boolean
-) : LockInfoBaseItem<ActivityEntry.Item, LockInfoItem, LockInfoItem.ViewHolder>(entry) {
+class LockInfoGroup internal constructor(
+  private val packageName: String,
+  entry: ActivityEntry.Group
+) : LockInfoBaseItem<Group, LockInfoGroup, ViewHolder>(entry) {
 
-  override fun getType(): Int = R.id.adapter_lock_info
+  override fun getType(): Int = R.id.adapter_lock_group
 
-  override fun getLayoutRes(): Int = R.layout.adapter_item_lockinfo
+  override fun getLayoutRes(): Int = R.layout.adapter_item_lockinfo_group
 
   override fun bindView(
     holder: ViewHolder,
     payloads: List<Any>
   ) {
     super.bindView(holder, payloads)
-    holder.bind(model, system)
+    holder.bind(model, packageName)
   }
 
   override fun unbindView(holder: ViewHolder) {
@@ -52,18 +50,15 @@ class LockInfoItem internal constructor(
   }
 
   override fun filterAgainst(query: String): Boolean {
-    val name = model.name.toLowerCase()
-        .trim { it <= ' ' }
-    Timber.d("Filter predicate: '%s' against %s", query, name)
-    return name.contains(query)
+    return true
   }
 
-  override fun getViewHolder(view: View): ViewHolder = ViewHolder(view)
+  override fun getViewHolder(view: View): ViewHolder =
+    ViewHolder(view)
 
   class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    @field:Inject internal lateinit var publisher: Publisher<LockInfoEvent>
-    @field:Inject internal lateinit var view: LockInfoItemView
+    @field:Inject internal lateinit var view: LockInfoGroupView
 
     init {
       Injector.obtain<PadLockComponent>(itemView.context.applicationContext)
@@ -73,27 +68,16 @@ class LockInfoItem internal constructor(
           .inject(this)
     }
 
-    private fun processModifyDatabaseEntry(
-      model: ActivityEntry.Item,
-      system: Boolean,
-      newLockState: LockState
-    ) {
-      publisher.publish(LockInfoEvent.from(model, newLockState, null, system))
-    }
-
     fun bind(
-      model: ActivityEntry.Item,
-      system: Boolean
+      model: ActivityEntry.Group,
+      packageName: String
     ) {
-      view.bind(model, system)
-
-      view.onSwitchChanged {
-        processModifyDatabaseEntry(model, system, it)
-      }
+      view.bind(model, packageName)
     }
 
     fun unbind() {
       view.unbind()
     }
+
   }
 }

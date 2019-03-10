@@ -15,13 +15,13 @@
  *
  */
 
-package com.pyamsoft.padlock.list
+package com.pyamsoft.padlock.list.info
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.annotation.CheckResult
 import androidx.lifecycle.LifecycleOwner
-import com.pyamsoft.padlock.list.LockInfoExplainComponent.LockInfoExplainModule
+import com.pyamsoft.padlock.list.info.LockInfoExplainComponent.LockInfoExplainModule
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Module
