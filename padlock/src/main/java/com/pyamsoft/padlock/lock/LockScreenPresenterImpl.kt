@@ -43,7 +43,6 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
   @Named("locked_activity_name") private val activityName: String,
   @Named("locked_real_name") private val realName: String
 ) : BasePresenter<CloseOldEvent, LockScreenPresenter.Callback>(bus),
-    LockToolbarView.Callback,
     ConfirmPinView.Callback,
     LockScreenPresenter {
 
@@ -96,10 +95,6 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
 
   override fun onSubmit(attempt: String) {
     callback.onSubmitUnlockAttempt(attempt)
-  }
-
-  override fun onStatsForNerdsClicked() {
-    callback.showLockedStats()
   }
 
   override fun checkUnlocked() {

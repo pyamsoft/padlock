@@ -32,7 +32,6 @@ import com.pyamsoft.padlock.pin.ConfirmPinView
 import com.pyamsoft.padlock.service.ForegroundEventPresenter
 import com.pyamsoft.pydroid.ui.app.ActivityBase
 import com.pyamsoft.pydroid.ui.theme.ThemeInjector
-import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -120,11 +119,6 @@ class LockScreenActivity : ActivityBase(),
       applyTo(layoutRoot)
     }
 
-  }
-
-  override fun showLockedStats() {
-    LockedStatDialog.newInstance()
-        .show(this, "info_dialog")
   }
 
   override fun onCloseOld() {

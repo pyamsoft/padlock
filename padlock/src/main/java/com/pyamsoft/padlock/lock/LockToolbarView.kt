@@ -26,7 +26,6 @@ import androidx.annotation.IdRes
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.lock.LockToolbarView.Callback
 import com.pyamsoft.pydroid.arch.BaseUiView
 import com.pyamsoft.pydroid.ui.app.ToolbarActivityProvider
 import com.pyamsoft.pydroid.ui.theme.Theming
@@ -37,9 +36,8 @@ import kotlin.LazyThreadSafetyMode.NONE
 internal class LockToolbarView @Inject internal constructor(
   private val theming: Theming,
   private val toolbarActivityProvider: ToolbarActivityProvider,
-  parent: ViewGroup,
-  callback: Callback
-) : BaseUiView<Callback>(parent, callback) {
+  parent: ViewGroup
+) : BaseUiView<Unit>(parent, Unit) {
 
   override val layout: Int = R.layout.light_toolbar
 
@@ -53,7 +51,6 @@ internal class LockToolbarView @Inject internal constructor(
   private val menuIgnoreFourtyFive by lazyMenuItem(R.id.menu_ignore_fourtyfive)
   private val menuIgnoreSixty by lazyMenuItem(R.id.menu_ignore_sixty)
   private val menuExclude by lazyMenuItem(R.id.menu_exclude)
-  private val menuStatsForNerds by lazyMenuItem(R.id.menu_lockscreen_info)
 
   override fun id(): Int {
     return toolbar.id
@@ -133,11 +130,6 @@ internal class LockToolbarView @Inject internal constructor(
   }
 
   private fun bindClicks() {
-    menuStatsForNerds.setOnMenuItemClickListener {
-      callback.onStatsForNerdsClicked()
-      return@setOnMenuItemClickListener true
-    }
-
     // We must manually handle these onClicks because menu items suck.
     menuExclude.setOnMenuItemClickListener {
       it.isChecked = !it.isChecked
@@ -164,7 +156,6 @@ internal class LockToolbarView @Inject internal constructor(
 
   override fun teardown() {
     super.teardown()
-    menuStatsForNerds.setOnMenuItemClickListener(null)
     menuExclude.setOnMenuItemClickListener(null)
     getIgnoreTimeMenuItems().forEach { it.setOnMenuItemClickListener(null) }
   }
@@ -248,12 +239,6 @@ internal class LockToolbarView @Inject internal constructor(
     private const val KEY_IGNORE_TIME_FOURTYFIVE = "KEY_IGNORE_TIME_FOURTYFIVE"
     private const val KEY_IGNORE_TIME_SIXTY = "KEY_IGNORE_TIME_SIXTY"
     private const val KEY_EXCLUDE = "KEY_EXCLUDE"
-  }
-
-  interface Callback {
-
-    fun onStatsForNerdsClicked()
-
   }
 }
 

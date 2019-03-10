@@ -109,9 +109,6 @@ interface LockComponent {
     @Binds
     internal abstract fun bindCallback(impl: LockScreenPresenterImpl): ConfirmPinView.Callback
 
-    @Binds
-    internal abstract fun bindToolbarCallback(impl: LockScreenPresenterImpl): LockToolbarView.Callback
-
   }
 }
 

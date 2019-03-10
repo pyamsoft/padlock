@@ -48,8 +48,6 @@ internal interface LockScreenPresenter : Presenter<Callback> {
 
     fun onSubmitUnlockAttempt(attempt: String)
 
-    fun showLockedStats()
-
     fun onShowLockHint(hint: String)
 
     fun onSubmitBegin()
