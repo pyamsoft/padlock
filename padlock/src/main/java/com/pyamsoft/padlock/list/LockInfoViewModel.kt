@@ -15,10 +15,11 @@
  *
  */
 
-package com.pyamsoft.padlock.list.info
+package com.pyamsoft.padlock.list
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.LockInfoInteractor
+import com.pyamsoft.padlock.list.info.LockInfoEvent
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider

@@ -29,7 +29,6 @@ import androidx.fragment.app.DialogFragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.list.info.LockInfoViewModel
 import com.pyamsoft.padlock.loader.AppIconLoader
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.AppEntry
