@@ -19,7 +19,6 @@ package com.pyamsoft.padlock.list.info
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.LockInfoInteractor
-import com.pyamsoft.padlock.list.info.LockInfoEvent
 import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
@@ -65,12 +64,14 @@ class LockInfoViewModel @Inject internal constructor(
   ): Disposable {
     val whitelistDisposable = lockWhitelistedBus.listen()
         .filter { it.packageName == packageName }
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe { onWhitelist(it) }
 
     val errorDisposable = bus.listen()
         .flatMapSingle { modifyDatabaseEntry(it) }
-        .subscribeOn(Schedulers.trampoline())
-        .observeOn(Schedulers.trampoline())
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .doOnError {
           Timber.e(it, "Error occurred modifying database entry")
           onError(it)

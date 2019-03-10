@@ -15,7 +15,7 @@
  *
  */
 
-package com.pyamsoft.padlock.list.modify
+package com.pyamsoft.padlock.list
 
 import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.LockStateModifyInteractor

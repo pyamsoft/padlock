@@ -17,8 +17,11 @@
 
 package com.pyamsoft.padlock.list
 
+import com.pyamsoft.padlock.api.LockInfoInteractor
 import com.pyamsoft.padlock.api.LockListInteractor
-import com.pyamsoft.pydroid.core.bus.EventBus
+import com.pyamsoft.padlock.api.LockStateModifyInteractor
+import com.pyamsoft.padlock.list.info.LockInfoInteractorDb
+import com.pyamsoft.padlock.list.info.LockInfoInteractorImpl
 import com.pyamsoft.pydroid.core.cache.Cache
 import dagger.Binds
 import dagger.Module
@@ -28,13 +31,27 @@ import javax.inject.Named
 abstract class LockListSingletonModule {
 
   @Binds
-  internal abstract fun provideInteractor(impl: LockListInteractorImpl): LockListInteractor
+  internal abstract fun provideListInteractor(impl: LockListInteractorImpl): LockListInteractor
 
   @Binds
   @Named("cache_lock_list")
-  internal abstract fun provideCache(impl: LockListInteractorImpl): Cache
+  internal abstract fun provideListCache(impl: LockListInteractorImpl): Cache
 
   @Binds
   @Named("interactor_lock_list")
-  internal abstract fun provideInteractorDb(impl: LockListInteractorDb): LockListInteractor
+  internal abstract fun provideListInteractorDb(impl: LockListInteractorDb): LockListInteractor
+
+  @Binds
+  internal abstract fun provideStateInteractor(impl: LockStateModifyInteractorImpl): LockStateModifyInteractor
+
+  @Binds
+  internal abstract fun provideInfoInteractor(impl: LockInfoInteractorImpl): LockInfoInteractor
+
+  @Binds
+  @Named("cache_lock_info")
+  internal abstract fun provideInfoCache(impl: LockInfoInteractorImpl): Cache
+
+  @Binds
+  @Named("interactor_lock_info")
+  internal abstract fun provideInfoInteractorDb(impl: LockInfoInteractorDb): LockInfoInteractor
 }
