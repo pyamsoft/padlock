@@ -60,10 +60,22 @@ interface PurgeComponent {
     internal abstract fun bindPresenter(impl: PurgePresenterImpl): PurgePresenter
 
     @Binds
-    internal abstract fun bindListViewCallback(impl: PurgePresenterImpl): PurgeListView.Callback
+    internal abstract fun bindListPresenter(impl: PurgeListPresenterImpl): PurgeListPresenter
 
     @Binds
-    internal abstract fun bindToolbarViewCallback(impl: PurgePresenterImpl): PurgeToolbarView.Callback
+    internal abstract fun bindListViewCallback(impl: PurgeListPresenterImpl): PurgeListView.Callback
+
+    @Binds
+    internal abstract fun bindToolbarPresenter(impl: PurgeToolbarPresenterImpl): PurgeToolbarPresenter
+
+    @Binds
+    internal abstract fun bindToolbarViewCallback(impl: PurgeToolbarPresenterImpl): PurgeToolbarView.Callback
+
+    @Binds
+    internal abstract fun bindToolbarComponent(impl: PurgeToolbarUiComponentImpl): PurgeToolbarUiComponent
+
+    @Binds
+    internal abstract fun bindComponent(impl: PurgeUiComponentImpl): PurgeUiComponent
 
   }
 }

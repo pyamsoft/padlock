@@ -17,24 +17,28 @@
 
 package com.pyamsoft.padlock.purge
 
-import com.pyamsoft.padlock.purge.PurgePresenter.Callback
-import com.pyamsoft.pydroid.arch.Presenter
+import com.pyamsoft.padlock.scopes.FragmentScope
+import com.pyamsoft.pydroid.arch.BasePresenter
+import com.pyamsoft.pydroid.core.bus.RxBus
+import javax.inject.Inject
 
-internal interface PurgePresenter : Presenter<Callback> {
+@FragmentScope
+internal class PurgeListPresenterImpl @Inject internal constructor(
+) : BasePresenter<Unit, PurgeListPresenter.Callback>(RxBus.empty()),
+    PurgeListView.Callback,
+    PurgeListPresenter {
 
-  fun fetchData(forced: Boolean)
-
-  interface Callback {
-
-    fun onFetchStaleBegin()
-
-    fun onFetchStaleSuccess(data: List<String>)
-
-    fun onFetchStaleError(throwable: Throwable)
-
-    fun onFetchStaleComplete()
-
+  override fun onBind() {
   }
 
-}
+  override fun onUnbind() {
+  }
 
+  override fun onRefresh(forced: Boolean) {
+    callback.onRefreshRequest(forced)
+  }
+
+  override fun onListItemClicked(stalePackage: String) {
+    callback.onDeleteRequest(stalePackage)
+  }
+}

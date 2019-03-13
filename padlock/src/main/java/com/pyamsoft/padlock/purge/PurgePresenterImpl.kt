@@ -18,9 +18,13 @@
 package com.pyamsoft.padlock.purge
 
 import com.pyamsoft.padlock.api.PurgeInteractor
-import com.pyamsoft.padlock.scopes.FragmentScope
+import com.pyamsoft.padlock.purge.PurgePresenterImpl.PurgeEvent
+import com.pyamsoft.padlock.purge.PurgePresenterImpl.PurgeEvent.Begin
+import com.pyamsoft.padlock.purge.PurgePresenterImpl.PurgeEvent.Complete
+import com.pyamsoft.padlock.purge.PurgePresenterImpl.PurgeEvent.Error
+import com.pyamsoft.padlock.purge.PurgePresenterImpl.PurgeEvent.Success
 import com.pyamsoft.pydroid.arch.BasePresenter
-import com.pyamsoft.pydroid.core.bus.RxBus
+import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -28,44 +32,53 @@ import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
 
-@FragmentScope
 internal class PurgePresenterImpl @Inject internal constructor(
-  private val interactor: PurgeInteractor
-) : BasePresenter<Unit, PurgePresenter.Callback>(RxBus.empty()),
-    PurgeToolbarView.Callback,
-    PurgeListView.Callback,
+  private val interactor: PurgeInteractor,
+  bus: EventBus<PurgeEvent>
+) : BasePresenter<PurgeEvent, PurgePresenter.Callback>(bus),
     PurgePresenter {
 
   private var fetchDisposable by singleDisposable()
 
   override fun onBind() {
+    listen()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe {
+          return@subscribe when (it) {
+            is Begin -> callback.onFetchStaleBegin()
+            is Success -> callback.onFetchStaleSuccess(it.data)
+            is Error -> callback.onFetchStaleError(it.throwable)
+            is Complete -> callback.onFetchStaleComplete()
+          }
+        }
+        .destroy()
   }
 
   override fun onUnbind() {
     fetchDisposable.tryDispose()
   }
 
-  override fun onRefresh(forced: Boolean) {
-    fetchData(true)
-  }
-
-  override fun onPurgeAllClicked() {
-    callback.onDeleteAllRequest()
-  }
-
-  override fun onListItemClicked(stalePackage: String) {
-    callback.onDeleteRequest(stalePackage)
-  }
-
   override fun fetchData(forced: Boolean) {
     fetchDisposable = interactor.fetchStalePackageNames(forced)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .doAfterTerminate { callback.onFetchStaleComplete() }
-        .doOnSubscribe { callback.onFetchStaleBegin() }
-        .subscribe({ callback.onFetchStaleSuccess(it) }, {
+        .doAfterTerminate { publish(Complete) }
+        .doOnSubscribe { publish(Begin) }
+        .subscribe({ publish(Success(it)) }, {
           Timber.e(it, "Error fetching stale applications")
-          callback.onFetchStaleError(it)
+          publish(Error(it))
         })
+  }
+
+  internal sealed class PurgeEvent {
+
+    object Begin : PurgeEvent()
+
+    data class Success(val data: List<String>) : PurgeEvent()
+
+    data class Error(val throwable: Throwable) : PurgeEvent()
+
+    object Complete : PurgeEvent()
   }
 }

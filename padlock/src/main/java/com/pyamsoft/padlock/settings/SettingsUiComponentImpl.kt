@@ -54,7 +54,7 @@ internal class SettingsUiComponentImpl @Inject internal constructor(
       switchLockTypePresenter.unbind()
       clearAllPresenter.unbind()
       clearDatabasePresenter.unbind()
-      clearDatabasePresenter.unbind()
+      clearPinPresenter.unbind()
       presenter.unbind()
     }
 
@@ -63,7 +63,7 @@ internal class SettingsUiComponentImpl @Inject internal constructor(
     switchLockTypePresenter.bind(this)
     clearAllPresenter.bind(this)
     clearDatabasePresenter.bind(this)
-    clearDatabasePresenter.bind(this)
+    clearPinPresenter.bind(this)
     presenter.bind(this)
   }
 
@@ -80,9 +80,7 @@ internal class SettingsUiComponentImpl @Inject internal constructor(
   }
 
   override fun onLockTypeSwitchBlocked() {
-    settingsView.promptChangeLockType {
-      callback.showClearDatabaseConfirmationDialog()
-    }
+    settingsView.promptChangeLockType { callback.onRequestPinChange() }
   }
 
   override fun onLockTypeSwitchSuccess(newType: String) {

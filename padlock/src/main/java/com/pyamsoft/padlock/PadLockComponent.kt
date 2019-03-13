@@ -70,6 +70,7 @@ import com.pyamsoft.padlock.purge.PurgeAllPresenterImpl
 import com.pyamsoft.padlock.purge.PurgeAllPresenterImpl.PurgeAllEvent
 import com.pyamsoft.padlock.purge.PurgeComponent
 import com.pyamsoft.padlock.purge.PurgeItemComponent
+import com.pyamsoft.padlock.purge.PurgePresenterImpl.PurgeEvent
 import com.pyamsoft.padlock.purge.PurgeSingleItemDialog
 import com.pyamsoft.padlock.purge.PurgeSinglePresenter
 import com.pyamsoft.padlock.purge.PurgeSinglePresenterImpl
@@ -233,8 +234,15 @@ interface PadLockComponent {
     @JvmStatic
     @Provides
     @Singleton
+    internal fun providePurgeEventBus(): EventBus<PurgeEvent> = RxBus.create()
+
+    @Deprecated("fix scope")
+    @JvmStatic
+    @Provides
+    @Singleton
     internal fun provideLockInfoBus(): EventBus<LockInfoEvent> = RxBus.create()
 
+    @Deprecated("fix scope")
     @JvmStatic
     @Provides
     @Singleton
@@ -340,6 +348,7 @@ interface PadLockComponent {
 
     @JvmStatic
     @Provides
+    @Singleton
     @Named("repo_purge_list")
     internal fun providePurgeRepo(
       context: Context,

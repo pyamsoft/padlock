@@ -17,24 +17,16 @@
 
 package com.pyamsoft.padlock.purge
 
-import com.pyamsoft.padlock.purge.PurgePresenter.Callback
-import com.pyamsoft.pydroid.arch.Presenter
+import com.pyamsoft.pydroid.arch.UiComponent
 
-internal interface PurgePresenter : Presenter<Callback> {
-
-  fun fetchData(forced: Boolean)
+internal interface PurgeToolbarUiComponent : UiComponent<PurgeToolbarUiComponent.Callback> {
 
   interface Callback {
 
-    fun onFetchStaleBegin()
+    fun showPurgeAllConfirmation(stalePackages: List<String>)
 
-    fun onFetchStaleSuccess(data: List<String>)
-
-    fun onFetchStaleError(throwable: Throwable)
-
-    fun onFetchStaleComplete()
+    fun onPurgeErrorOccurred(throwable: Throwable)
 
   }
 
 }
-

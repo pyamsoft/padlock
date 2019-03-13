@@ -28,20 +28,14 @@ import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.R.layout
 import com.pyamsoft.pydroid.ui.app.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.util.show
-import timber.log.Timber
 import javax.inject.Inject
 
 class PurgeFragment : Fragment(),
-    PurgeAllPresenter.Callback,
-    PurgeSinglePresenter.Callback,
-    PurgePresenter.Callback {
+    PurgeUiComponent.Callback,
+    PurgeToolbarUiComponent.Callback {
 
-  @field:Inject internal lateinit var presenter: PurgePresenter
-  @field:Inject internal lateinit var purgeSinglePresenter: PurgeSinglePresenter
-  @field:Inject internal lateinit var purgeAllPresenter: PurgeAllPresenter
-
-  @field:Inject internal lateinit var toolbarView: PurgeToolbarView
-  @field:Inject internal lateinit var purgeView: PurgeListView
+  @field:Inject internal lateinit var toolbarComponent: PurgeToolbarUiComponent
+  @field:Inject internal lateinit var component: PurgeUiComponent
 
   override fun onCreateView(
     inflater: LayoutInflater,
@@ -66,82 +60,38 @@ class PurgeFragment : Fragment(),
         .build()
         .inject(this)
 
-    purgeView.inflate(savedInstanceState)
-    toolbarView.inflate(savedInstanceState)
-
-    presenter.bind(this)
-    purgeSinglePresenter.bind(this)
-    purgeAllPresenter.bind(this)
+    component.bind(viewLifecycleOwner, savedInstanceState, this)
+    toolbarComponent.bind(viewLifecycleOwner, savedInstanceState, this)
   }
 
-  override fun onSinglePurged(stalePackage: String) {
-    Timber.d("Purged stale: $stalePackage")
-    presenter.fetchData(true)
+  override fun onPurgeErrorOccurred(throwable: Throwable) {
+    component.showError(throwable)
   }
 
-  override fun onAllPurged(stalePackages: List<String>) {
-    Timber.d("Purged all stale: $stalePackages")
-    presenter.fetchData(true)
-  }
-
-  override fun onDeleteAllRequest() {
-    PurgeAllDialog.newInstance(purgeView.currentListData())
+  override fun showPurgeAllConfirmation(stalePackages: List<String>) {
+    PurgeAllDialog.newInstance(stalePackages)
         .show(requireActivity(), "purge_all")
   }
 
-  override fun onDeleteRequest(stalePackage: String) {
+  override fun showPurgeSingleConfirmation(stalePackage: String) {
     PurgeSingleItemDialog.newInstance(stalePackage)
         .show(requireActivity(), "purge_single")
   }
 
-  override fun onFetchStaleBegin() {
-    purgeView.onStaleFetchBegin()
-  }
-
-  override fun onFetchStaleSuccess(data: List<String>) {
-    purgeView.onStaleFetchSuccess(data)
-  }
-
-  override fun onFetchStaleError(throwable: Throwable) {
-    purgeView.onStaleFetchError { presenter.fetchData(true) }
-  }
-
-  override fun onFetchStaleComplete() {
-    purgeView.onStaleFetchComplete()
-  }
-
-  override fun onPurgeAllError(throwable: Throwable) {
-    purgeView.showErrorMessage("Unable to purge all entries, please try again later.")
-  }
-
-  override fun onPurgeSingleError(throwable: Throwable) {
-    purgeView.showErrorMessage("Unable to purge entry, please try again later.")
-  }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    toolbarView.teardown()
-    purgeView.teardown()
-
-    presenter.unbind()
-    purgeSinglePresenter.unbind()
-    purgeAllPresenter.unbind()
-  }
-
   override fun onStart() {
     super.onStart()
-    presenter.fetchData(false)
+    component.refresh(false)
   }
 
   override fun onPause() {
     super.onPause()
-    purgeView.storeListPosition()
+    component.saveListPosition()
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
-    purgeView.saveState(outState)
-    toolbarView.saveState(outState)
+    component.saveState(outState)
+    toolbarComponent.saveState(outState)
   }
 
   companion object {
