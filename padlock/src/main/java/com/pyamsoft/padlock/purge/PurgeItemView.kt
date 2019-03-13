@@ -30,18 +30,15 @@ internal class PurgeItemView @Inject internal constructor(
 
   override val layout: Int = R.layout.adapter_item_purge
 
-  private val layoutRoot by lazyView<FrameLayout>(R.id.item_purge_root)
-  private val itemName by lazyView<TextView>(R.id.item_purge_name)
+  override val layoutRoot by lazyView<FrameLayout>(R.id.item_purge_root)
 
-  override fun id(): Int {
-    return layoutRoot.id
-  }
+  private val itemName by lazyView<TextView>(R.id.item_purge_name)
 
   fun bind(model: String) {
     itemName.text = model
   }
 
-  override fun teardown() {
+  override fun onTeardown() {
     unbind()
   }
 

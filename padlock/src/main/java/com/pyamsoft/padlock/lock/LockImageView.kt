@@ -35,16 +35,13 @@ internal class LockImageView @Inject internal constructor(
   parent: ViewGroup
 ) : BaseUiView<Unit>(parent, Unit) {
 
-  override val layout: Int = R.layout.layout_lock_image
-
-  private val layoutRoot by lazyView<ViewGroup>(R.id.lock_image_root)
   private val lockedIcon by lazyView<ImageView>(R.id.lock_image_icon)
 
   private var imageBinder: Loaded? = null
 
-  override fun id(): Int {
-    return layoutRoot.id
-  }
+  override val layout: Int = R.layout.layout_lock_image
+
+  override val layoutRoot by lazyView<ViewGroup>(R.id.lock_image_root)
 
   override fun onInflated(
     view: View,
@@ -65,8 +62,7 @@ internal class LockImageView @Inject internal constructor(
         .into(lockedIcon)
   }
 
-  override fun teardown() {
-    super.teardown()
+  override fun onTeardown() {
     clearBinder()
   }
 }

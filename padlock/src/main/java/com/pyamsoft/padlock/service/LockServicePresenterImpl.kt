@@ -23,7 +23,6 @@ import com.pyamsoft.padlock.model.db.PadLockDbModels
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.service.LockServicePresenter.Callback
 import com.pyamsoft.pydroid.arch.BasePresenter
-import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.RxBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
@@ -84,7 +83,7 @@ internal class LockServicePresenterImpl @Inject internal constructor(
           Timber.e(it, "Error while watching foreground events")
           callback.onListenForegroundError(it)
         })
-        .destroy(owner)
+        .destroy()
   }
 
   @CheckResult

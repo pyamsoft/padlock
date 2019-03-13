@@ -47,17 +47,14 @@ internal class PurgeListView @Inject internal constructor(
 
   private var lastPosition: Int = 0
 
-  private val swipeRefresh by lazyView<SwipeRefreshLayout>(R.id.swipe_refresh)
   private val emptyState by lazyView<TextView>(R.id.swipe_refresh_empty)
   private val listView by lazyView<RecyclerView>(R.id.swipe_refresh_list)
 
+  override val layoutRoot by lazyView<SwipeRefreshLayout>(R.id.swipe_refresh)
+
   override val layout: Int = R.layout.layout_swipe_refresh
 
-  override fun id(): Int {
-    return swipeRefresh.id
-  }
-
-  override fun teardown() {
+  override fun onTeardown() {
     listView.apply {
       decoration?.also { removeItemDecoration(it) }
       decoration = null
@@ -68,7 +65,7 @@ internal class PurgeListView @Inject internal constructor(
 
     modelAdapter.clear()
 
-    swipeRefresh.setOnRefreshListener(null)
+    layoutRoot.setOnRefreshListener(null)
   }
 
   override fun onInflated(
@@ -95,14 +92,14 @@ internal class PurgeListView @Inject internal constructor(
 
   fun onStaleFetchError(onRetry: () -> Unit) {
     Snackbreak.bindTo(owner)
-        .long(swipeRefresh, "Failed to load outdated application list")
+        .long(layoutRoot, "Failed to load outdated application list")
         .setAction("Retry") { onRetry() }
         .show()
   }
 
   fun showErrorMessage(message: String) {
     Snackbreak.bindTo(owner)
-        .long(swipeRefresh, message)
+        .long(layoutRoot, message)
         .show()
   }
 
@@ -110,8 +107,7 @@ internal class PurgeListView @Inject internal constructor(
     doneRefreshing()
   }
 
-  override fun saveState(outState: Bundle) {
-    super.saveState(outState)
+  override fun onSaveState(outState: Bundle) {
     saveListPosition(outState)
   }
 
@@ -129,7 +125,7 @@ internal class PurgeListView @Inject internal constructor(
   }
 
   private fun setupSwipeRefresh() {
-    swipeRefresh.apply {
+    layoutRoot.apply {
       setColorSchemeResources(R.color.blue500, R.color.blue700)
 
       setOnRefreshListener {
@@ -139,17 +135,17 @@ internal class PurgeListView @Inject internal constructor(
   }
 
   private fun startRefreshing() {
-    swipeRefresh.refreshing(true)
+    layoutRoot.refreshing(true)
   }
 
   private fun doneRefreshing() {
-    swipeRefresh.refreshing(false)
+    layoutRoot.refreshing(false)
     lastPosition = ListStateUtil.restorePosition(lastPosition, listView)
     decideListState()
   }
 
   private fun setupRecyclerView() {
-    val context = swipeRefresh.context
+    val context = layoutRoot.context
     val itemDecoration = DividerItemDecoration(context, DividerItemDecoration.VERTICAL)
     decoration?.also { listView.removeItemDecoration(it) }
     decoration = itemDecoration

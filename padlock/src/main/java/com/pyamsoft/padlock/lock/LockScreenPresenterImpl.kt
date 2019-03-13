@@ -23,7 +23,6 @@ import com.pyamsoft.padlock.lock.LockScreenPresenterImpl.CloseOldEvent
 import com.pyamsoft.padlock.pin.ConfirmPinView
 import com.pyamsoft.padlock.scopes.FragmentScope
 import com.pyamsoft.pydroid.arch.BasePresenter
-import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
@@ -68,7 +67,7 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe { callback.onCloseOld() }
-        .destroy(owner)
+        .destroy()
   }
 
   private fun loadDisplayName() {
@@ -76,7 +75,7 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(Consumer { callback.onDisplayNameLoaded(it) })
-        .destroy(owner)
+        .destroy()
   }
 
   override fun loadDefaultIgnoreTime() {
@@ -84,7 +83,7 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(Consumer { callback.onDefaultIgnoreTimeLoaded(it) })
-        .destroy(owner)
+        .destroy()
   }
 
   override fun onUnbind() {

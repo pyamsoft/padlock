@@ -20,7 +20,6 @@ package com.pyamsoft.padlock.pin
 import com.pyamsoft.padlock.api.PinInteractor
 import com.pyamsoft.padlock.pin.CreatePinPresenterImpl.CreatePinEvent
 import com.pyamsoft.pydroid.arch.BasePresenter
-import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
@@ -48,7 +47,7 @@ internal class CreatePinPresenterImpl @Inject internal constructor(
             callback.onCreatePinFailure()
           }
         }
-        .destroy(owner)
+        .destroy()
   }
 
   override fun onUnbind() {

@@ -38,10 +38,12 @@ import com.pyamsoft.padlock.base.BaseProvider
 import com.pyamsoft.padlock.base.database.DatabaseProvider
 import com.pyamsoft.padlock.helper.ListStateUtil
 import com.pyamsoft.padlock.list.LockListComponent
+import com.pyamsoft.padlock.list.LockListEvent
 import com.pyamsoft.padlock.list.LockListItemComponent
 import com.pyamsoft.padlock.list.LockListSingletonModule
 import com.pyamsoft.padlock.list.LockListSingletonProvider
 import com.pyamsoft.padlock.list.info.LockInfoComponent
+import com.pyamsoft.padlock.list.info.LockInfoEvent
 import com.pyamsoft.padlock.list.info.LockInfoExplainComponent
 import com.pyamsoft.padlock.list.info.LockInfoItemComponent
 import com.pyamsoft.padlock.lock.LockComponent
@@ -133,10 +135,14 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-      PadLockProvider::class, PadLockModule::class, BaseModule::class, BaseProvider::class,
-      DatabaseProvider::class, PinSingletonModule::class, ServiceSingletonModule::class,
-      PurgeSingletonModule::class, SettingsSingletonModule::class, LockListSingletonModule::class,
-      LockListSingletonProvider::class, LockSingletonModule::class, PinSingletonProvider::class
+      PadLockProvider::class, PadLockModule::class,
+      BaseModule::class, BaseProvider::class, DatabaseProvider::class,
+      PinSingletonModule::class, PinSingletonProvider::class,
+      ServiceSingletonModule::class,
+      LockSingletonModule::class,
+      PurgeSingletonModule::class,
+      SettingsSingletonModule::class,
+      LockListSingletonModule::class, LockListSingletonProvider::class
     ]
 )
 interface PadLockComponent {
@@ -223,6 +229,16 @@ interface PadLockComponent {
 
   @Module
   object PadLockProvider {
+
+    @JvmStatic
+    @Provides
+    @Singleton
+    internal fun provideLockInfoBus(): EventBus<LockInfoEvent> = RxBus.create()
+
+    @JvmStatic
+    @Provides
+    @Singleton
+    internal fun provideLockListBus(): EventBus<LockListEvent> = RxBus.create()
 
     @JvmStatic
     @Provides

@@ -28,6 +28,7 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.model.list.AppEntry
+import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Publisher
 import com.pyamsoft.pydroid.util.fakeBind
 import com.pyamsoft.pydroid.util.fakeUnbind
@@ -72,7 +73,7 @@ class LockListItem internal constructor(
     private val lifecycle = LifecycleRegistry(this)
 
     @field:Inject internal lateinit var view: LockListItemView
-    @field:Inject internal lateinit var publisher: Publisher<LockListEvent>
+    @field:Inject internal lateinit var publisher: EventBus<LockListEvent>
 
     init {
       Injector.obtain<PadLockComponent>(itemView.context.applicationContext)

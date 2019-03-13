@@ -26,6 +26,7 @@ import com.pyamsoft.padlock.list.info.LockInfoItem.ViewHolder
 import com.pyamsoft.padlock.model.LockState
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.ActivityEntry.Item
+import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Publisher
 import timber.log.Timber
 import javax.inject.Inject
@@ -64,7 +65,7 @@ class LockInfoItem internal constructor(
 
   class ViewHolder internal constructor(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    @field:Inject internal lateinit var publisher: Publisher<LockInfoEvent>
+    @field:Inject internal lateinit var publisher: EventBus<LockInfoEvent>
     @field:Inject internal lateinit var view: LockInfoItemView
 
     init {

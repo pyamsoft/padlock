@@ -66,12 +66,12 @@ class PurgeFragment : Fragment(),
         .build()
         .inject(this)
 
-    toolbarView.inflate(savedInstanceState)
     purgeView.inflate(savedInstanceState)
+    toolbarView.inflate(savedInstanceState)
 
-    presenter.bind(viewLifecycleOwner, this)
-    purgeSinglePresenter.bind(viewLifecycleOwner, this)
-    purgeAllPresenter.bind(viewLifecycleOwner, this)
+    presenter.bind(this)
+    purgeSinglePresenter.bind(this)
+    purgeAllPresenter.bind(this)
   }
 
   override fun onSinglePurged(stalePackage: String) {
@@ -122,6 +122,10 @@ class PurgeFragment : Fragment(),
     super.onDestroyView()
     toolbarView.teardown()
     purgeView.teardown()
+
+    presenter.unbind()
+    purgeSinglePresenter.unbind()
+    purgeAllPresenter.unbind()
   }
 
   override fun onStart() {

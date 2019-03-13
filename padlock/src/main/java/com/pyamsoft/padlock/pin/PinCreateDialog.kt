@@ -93,9 +93,9 @@ class PinCreateDialog : DialogFragment(),
     createComponents(savedInstanceState)
     layoutComponents(layoutRoot)
 
-    presenter.bind(viewLifecycleOwner, this)
-    createPresenter.bind(viewLifecycleOwner, this)
-    toolbarPresenter.bind(viewLifecycleOwner, this)
+    presenter.bind(this)
+    createPresenter.bind(this)
+    toolbarPresenter.bind(this)
   }
 
   private fun createComponents(savedInstanceState: Bundle?) {
@@ -134,6 +134,10 @@ class PinCreateDialog : DialogFragment(),
     super.onDestroyView()
     toolbar.teardown()
     pinView.teardown()
+
+    presenter.unbind()
+    createPresenter.unbind()
+    toolbarPresenter.unbind()
   }
 
   override fun onAttemptSubmit(

@@ -31,6 +31,7 @@ import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.model.list.LockListUpdatePayload
 import com.pyamsoft.padlock.model.pin.CreatePinEvent
 import com.pyamsoft.padlock.pin.ClearPinPresenterImpl.ClearPinEvent
+import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.core.tryDispose
@@ -46,7 +47,7 @@ class LockListViewModel @Inject internal constructor(
   private val enforcer: Enforcer,
   private val lockListInteractor: LockListInteractor,
   private val serviceInteractor: LockServiceInteractor,
-  private val lockListBus: Listener<LockListEvent>,
+  private val lockListBus: EventBus<LockListEvent>,
   private val lockWhitelistedBus: Listener<LockWhitelistedEvent>,
   private val createPinBus: Listener<CreatePinEvent>,
   private val listDiffProvider: ListDiffProvider<AppEntry>

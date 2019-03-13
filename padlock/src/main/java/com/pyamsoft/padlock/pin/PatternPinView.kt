@@ -38,7 +38,6 @@ internal abstract class PatternPinView<C : Any> protected constructor(
   @ColorRes private val normalDotColor: Int
 ) : BasePinView<C>(owner, parent, callback, isConfirmMode) {
 
-  private val layoutRoot by lazyView<ViewGroup>(R.id.pin_pattern_root)
   private val lockView by lazyView<PatternLockView>(R.id.pin_pattern_lock)
 
   private var lockListener: PatternLockViewListener? = null
@@ -49,15 +48,12 @@ internal abstract class PatternPinView<C : Any> protected constructor(
 
   override val layout: Int = R.layout.layout_pin_pattern
 
+  override val layoutRoot by lazyView<ViewGroup>(R.id.pin_pattern_root)
+
   override val snackbarRoot: View
     get() = layoutRoot
 
-  override fun id(): Int {
-    return layoutRoot.id
-  }
-
-  override fun teardown() {
-    super.teardown()
+  override fun onTeardown() {
     lockListener?.also { lockView.removePatternLockListener(it) }
     lockListener = null
   }
@@ -92,7 +88,7 @@ internal abstract class PatternPinView<C : Any> protected constructor(
     }
   }
 
-  override fun saveState(outState: Bundle) {
+  override fun onSaveState(outState: Bundle) {
     outState.putString(CELL_PATTERN, cellPattern)
     outState.putString(REPEAT_CELL_PATTERN, repeatCellPattern)
     outState.putBoolean(REPEATING, isRepeating())

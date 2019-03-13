@@ -20,7 +20,6 @@ package com.pyamsoft.padlock.settings
 import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.padlock.settings.ClearDatabasePresenterImpl.ClearDatabaseEvent
 import com.pyamsoft.pydroid.arch.BasePresenter
-import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
@@ -42,7 +41,7 @@ internal class ClearDatabasePresenterImpl @Inject internal constructor(
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe { callback.onDatabaseCleared() }
-        .destroy(owner)
+        .destroy()
   }
 
   override fun onUnbind() {

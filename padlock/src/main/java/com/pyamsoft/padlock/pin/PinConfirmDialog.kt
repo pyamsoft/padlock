@@ -100,9 +100,9 @@ class PinConfirmDialog : DialogFragment(),
     createComponents(savedInstanceState)
     layoutComponents(layoutRoot)
 
-    confirmPresenter.bind(viewLifecycleOwner, this)
-    toolbarPresenter.bind(viewLifecycleOwner, this)
-    presenter.bind(viewLifecycleOwner, this)
+    confirmPresenter.bind(this)
+    toolbarPresenter.bind(this)
+    presenter.bind(this)
   }
 
   private fun createComponents(savedInstanceState: Bundle?) {
@@ -141,6 +141,10 @@ class PinConfirmDialog : DialogFragment(),
     super.onDestroyView()
     toolbar.teardown()
     pinView.teardown()
+
+    confirmPresenter.unbind()
+    toolbarPresenter.unbind()
+    presenter.unbind()
   }
 
   override fun onDismiss(dialog: DialogInterface?) {

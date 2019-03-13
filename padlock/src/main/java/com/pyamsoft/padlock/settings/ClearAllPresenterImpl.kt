@@ -21,7 +21,6 @@ import com.pyamsoft.padlock.api.SettingsInteractor
 import com.pyamsoft.padlock.settings.ClearAllPresenter.Callback
 import com.pyamsoft.padlock.settings.ClearAllPresenterImpl.ClearAllEvent
 import com.pyamsoft.pydroid.arch.BasePresenter
-import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
@@ -43,7 +42,7 @@ internal class ClearAllPresenterImpl @Inject internal constructor(
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe { callback.onAllSettingsCleared() }
-        .destroy(owner)
+        .destroy()
   }
 
   override fun onUnbind() {

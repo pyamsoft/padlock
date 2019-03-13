@@ -32,19 +32,13 @@ import com.pyamsoft.pydroid.ui.theme.ThemeInjector
 import com.pyamsoft.pydroid.ui.util.show
 import timber.log.Timber
 import javax.inject.Inject
-import kotlin.LazyThreadSafetyMode.NONE
 
 class PauseConfirmActivity : ActivityBase(), ConfirmPinPresenter.Callback {
 
   @field:Inject internal lateinit var confirmPinPresenter: ConfirmPinPresenter
   @field:Inject internal lateinit var actionPresenter: ServiceActionPresenter
 
-  override val fragmentContainerId: Int
-    get() = layoutRoot.id
-
-  private val layoutRoot by lazy(NONE) {
-    findViewById<ConstraintLayout>(R.id.layout_constraint)
-  }
+  override val fragmentContainerId: Int = 0
 
   override fun onCreate(savedInstanceState: Bundle?) {
     overridePendingTransition(0, 0)
@@ -56,6 +50,7 @@ class PauseConfirmActivity : ActivityBase(), ConfirmPinPresenter.Callback {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.layout_constraint)
 
+    val layoutRoot = findViewById<ConstraintLayout>(R.id.layout_constraint)
     Injector.obtain<PadLockComponent>(application)
         .plusPinComponent()
         .owner(this)
@@ -63,7 +58,7 @@ class PauseConfirmActivity : ActivityBase(), ConfirmPinPresenter.Callback {
         .build()
         .inject(this)
 
-    confirmPinPresenter.bind(this, this)
+    confirmPinPresenter.bind(this)
 
     PinConfirmDialog.newInstance(true)
         .show(this, PinConfirmDialog.TAG)
@@ -100,6 +95,7 @@ class PauseConfirmActivity : ActivityBase(), ConfirmPinPresenter.Callback {
   override fun onDestroy() {
     super.onDestroy()
     overridePendingTransition(0, 0)
+    confirmPinPresenter.unbind()
   }
 
   companion object {
@@ -114,9 +110,7 @@ class PauseConfirmActivity : ActivityBase(), ConfirmPinPresenter.Callback {
       val appContext = context.applicationContext
       val intent = Intent(appContext, PauseConfirmActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        putExtra(
-            EXTRA_AUTO_RESUME, autoResume
-        )
+        putExtra(EXTRA_AUTO_RESUME, autoResume)
       }
       appContext.startActivity(intent)
     }

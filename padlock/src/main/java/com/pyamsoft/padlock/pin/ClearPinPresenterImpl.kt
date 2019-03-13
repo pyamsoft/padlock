@@ -21,7 +21,6 @@ import com.pyamsoft.padlock.api.PinInteractor
 import com.pyamsoft.padlock.pin.ClearPinPresenter.Callback
 import com.pyamsoft.padlock.pin.ClearPinPresenterImpl.ClearPinEvent
 import com.pyamsoft.pydroid.arch.BasePresenter
-import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
@@ -49,7 +48,7 @@ internal class ClearPinPresenterImpl @Inject internal constructor(
             callback.onPinClearFailed()
           }
         }
-        .destroy(owner)
+        .destroy()
   }
 
   override fun onUnbind() {

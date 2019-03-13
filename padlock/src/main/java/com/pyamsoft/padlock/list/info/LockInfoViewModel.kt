@@ -23,6 +23,7 @@ import com.pyamsoft.padlock.model.LockWhitelistedEvent
 import com.pyamsoft.padlock.model.list.ActivityEntry
 import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.model.list.LockInfoUpdatePayload
+import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.bus.Listener
 import com.pyamsoft.pydroid.core.threads.Enforcer
 import com.pyamsoft.pydroid.core.tryDispose
@@ -37,7 +38,7 @@ import javax.inject.Named
 class LockInfoViewModel @Inject internal constructor(
   private val enforcer: Enforcer,
   private val lockWhitelistedBus: Listener<LockWhitelistedEvent>,
-  private val bus: Listener<LockInfoEvent>,
+  private val bus: EventBus<LockInfoEvent>,
   private val interactor: LockInfoInteractor,
   @param:Named("package_name") private val packageName: String,
   private val listDiffProvider: ListDiffProvider<ActivityEntry>

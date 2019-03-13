@@ -20,7 +20,6 @@ package com.pyamsoft.padlock.purge
 import com.pyamsoft.padlock.api.PurgeInteractor
 import com.pyamsoft.padlock.purge.PurgeAllPresenterImpl.PurgeAllEvent
 import com.pyamsoft.pydroid.arch.BasePresenter
-import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
@@ -43,7 +42,7 @@ internal class PurgeAllPresenterImpl @Inject internal constructor(
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe { callback.onAllPurged(it.stalePackages) }
-        .destroy(owner)
+        .destroy()
   }
 
   override fun onUnbind() {

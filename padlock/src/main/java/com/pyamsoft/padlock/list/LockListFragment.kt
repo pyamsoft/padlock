@@ -140,9 +140,9 @@ class LockListFragment : Fragment(),
       populateList(true)
     }
 
-    clearPinPresenter.bind(viewLifecycleOwner, this)
-    createPinPresenter.bind(viewLifecycleOwner, this)
-    confirmPinPresenter.bind(viewLifecycleOwner, this)
+    clearPinPresenter.bind(this)
+    createPinPresenter.bind(this)
+    confirmPinPresenter.bind(this)
   }
 
   private fun onFabStateChanged(
@@ -208,6 +208,11 @@ class LockListFragment : Fragment(),
     databaseChangeDisposable.tryDispose()
     lockEventDisposable.tryDispose()
     visibilityDisposable.tryDispose()
+
+
+    clearPinPresenter.unbind()
+    createPinPresenter.unbind()
+    confirmPinPresenter.unbind()
   }
 
   private fun checkFabState(fromClick: Boolean) {

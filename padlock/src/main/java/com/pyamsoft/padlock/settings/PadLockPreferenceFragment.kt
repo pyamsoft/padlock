@@ -70,12 +70,12 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
     toolbarView.inflate(savedInstanceState)
     settingsView.inflate(savedInstanceState)
 
-    confirmPinPresenter.bind(viewLifecycleOwner, this)
-    switchLockTypePresenter.bind(viewLifecycleOwner, this)
-    clearPinPresenter.bind(viewLifecycleOwner, this)
-    clearDatabasePresenter.bind(viewLifecycleOwner, this)
-    clearAllPresenter.bind(viewLifecycleOwner, this)
-    presenter.bind(viewLifecycleOwner, this)
+    confirmPinPresenter.bind(this)
+    switchLockTypePresenter.bind(this)
+    clearPinPresenter.bind(this)
+    clearDatabasePresenter.bind(this)
+    clearAllPresenter.bind(this)
+    presenter.bind(this)
   }
 
   override fun onClearDatabaseRequest() {
@@ -91,6 +91,13 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
     super.onDestroyView()
     toolbarView.teardown()
     settingsView.teardown()
+
+    confirmPinPresenter.unbind()
+    switchLockTypePresenter.unbind()
+    clearPinPresenter.unbind()
+    clearDatabasePresenter.unbind()
+    clearAllPresenter.unbind()
+    presenter.unbind()
   }
 
   override fun onSaveInstanceState(outState: Bundle) {

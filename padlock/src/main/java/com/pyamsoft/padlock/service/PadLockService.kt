@@ -27,9 +27,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLock
 import com.pyamsoft.padlock.PadLockComponent
@@ -47,15 +44,12 @@ import com.pyamsoft.padlock.lock.LockScreenActivity
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
 import com.pyamsoft.padlock.service.pause.PauseConfirmActivity
 import com.pyamsoft.padlock.uicommon.UsageAccessRequestDelegate
-import com.pyamsoft.pydroid.util.fakeBind
-import com.pyamsoft.pydroid.util.fakeUnbind
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
 class PadLockService : Service(),
-    LifecycleOwner,
     LockServicePresenter.Callback,
     ServiceActionPresenter.Callback,
     ServiceFinishPresenter.Callback,
@@ -67,8 +61,6 @@ class PadLockService : Service(),
   private val notificationManager by lazy(NONE) {
     requireNotNull(application.getSystemService<NotificationManager>())
   }
-  private val screenStateLifecycle = ScreenStateLifecycle()
-  private val registry = LifecycleRegistry(this)
 
   private lateinit var notificationBuilder: NotificationCompat.Builder
 
@@ -85,10 +77,6 @@ class PadLockService : Service(),
   @field:Inject internal lateinit var pausePresenter: ServicePausePresenter
   @field:Inject internal lateinit var startPresenter: ServiceStartPresenter
 
-  override fun getLifecycle(): Lifecycle {
-    return registry
-  }
-
   override fun onBind(ignore: Intent?): IBinder? {
     throw AssertionError("Service is not bound")
   }
@@ -100,22 +88,21 @@ class PadLockService : Service(),
 
     setupNotifications()
 
-    presenter.bind(this, this)
-    screenStatePresenter.bind(this, this)
-    actionPresenter.bind(this, this)
-    finishPresenter.bind(this, this)
-    permissionPresenter.bind(this, this)
-
-    registry.fakeBind()
+    presenter.bind(this)
+    screenStatePresenter.bind(this)
+    actionPresenter.bind(this)
+    finishPresenter.bind(this)
+    permissionPresenter.bind(this)
   }
 
   override fun onScreenOn() {
-    screenStateLifecycle.screenOn()
-    beginWatchingForLockedApplications()
+    foregroundEventPresenter.bind(this)
+    recheckPresenter.bind(this)
   }
 
   override fun onScreenOff() {
-    screenStateLifecycle.screenOff()
+    foregroundEventPresenter.unbind()
+    recheckPresenter.unbind()
   }
 
   override fun onPermissionLost() {
@@ -135,11 +122,6 @@ class PadLockService : Service(),
     className: String
   ) {
     presenter.clearForeground(packageName, className)
-  }
-
-  private fun beginWatchingForLockedApplications() {
-    foregroundEventPresenter.bind(screenStateLifecycle, this)
-    recheckPresenter.bind(screenStateLifecycle, this)
   }
 
   override fun onRecheckRequired(
@@ -172,8 +154,14 @@ class PadLockService : Service(),
 
     notificationManager.cancel(NOTIFICATION_ID)
 
-    screenStateLifecycle.destroy()
-    registry.fakeUnbind()
+    presenter.unbind()
+    screenStatePresenter.unbind()
+    actionPresenter.unbind()
+    finishPresenter.unbind()
+    permissionPresenter.unbind()
+
+    foregroundEventPresenter.unbind()
+    recheckPresenter.unbind()
 
     PadLock.getRefWatcher(this)
         .watch(this)

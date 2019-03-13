@@ -22,7 +22,6 @@ import com.pyamsoft.padlock.api.service.LockServiceInteractor.ServiceState.DISAB
 import com.pyamsoft.padlock.service.ServiceFinishPresenter.Callback
 import com.pyamsoft.padlock.service.ServiceFinishPresenterImpl.ServiceFinishEvent
 import com.pyamsoft.pydroid.arch.BasePresenter
-import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
@@ -39,14 +38,14 @@ internal class ServiceFinishPresenterImpl @Inject internal constructor(
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe { callback.onServiceFinished() }
-        .destroy(owner)
+        .destroy()
 
     interactor.observeServiceState()
         .filter { it == DISABLED }
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe { callback.onServiceFinished() }
-        .destroy(owner)
+        .destroy()
   }
 
   override fun onUnbind() {

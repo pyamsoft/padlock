@@ -41,9 +41,10 @@ internal class SettingsView @Inject internal constructor(
   private val installListener by lazyPref<Preference>(R.string.install_listener_key)
   private val clearDb by lazyPref<Preference>(R.string.clear_db_key)
 
-  override fun inflate(savedInstanceState: Bundle?) {
-    super.inflate(savedInstanceState)
-
+  override fun onInflated(
+    preferenceScreen: PreferenceScreen,
+    savedInstanceState: Bundle?
+  ) {
     lockType.setOnPreferenceChangeListener { _, value ->
       if (value is String) {
         callback.onSwitchLockTypeChanged(value)
@@ -64,8 +65,7 @@ internal class SettingsView @Inject internal constructor(
     }
   }
 
-  override fun teardown() {
-    super.teardown()
+  override fun onTeardown() {
     lockType.onPreferenceChangeListener = null
     installListener.onPreferenceClickListener = null
     clearDb.onPreferenceClickListener = null
@@ -85,9 +85,7 @@ internal class SettingsView @Inject internal constructor(
   inline fun promptChangeLockType(crossinline func: () -> Unit) {
     Snackbreak.bindTo(owner)
         .long(view, "You must clear the current code before changing type")
-        .setAction("Clear", DebouncedOnClickListener.create {
-          func()
-        })
+        .setAction("Clear", DebouncedOnClickListener.create { func() })
         .show()
   }
 

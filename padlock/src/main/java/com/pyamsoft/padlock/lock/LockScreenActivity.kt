@@ -47,7 +47,6 @@ class LockScreenActivity : ActivityBase(),
 
   override val fragmentContainerId: Int = 0
 
-  @CallSuper
   override fun onCreate(savedInstanceState: Bundle?) {
     if (ThemeInjector.obtain(applicationContext).isDarkTheme()) {
       setTheme(R.style.Theme_PadLock_Dark_Lock)
@@ -75,7 +74,7 @@ class LockScreenActivity : ActivityBase(),
     createComponents(savedInstanceState)
     layoutComponents(layoutRoot)
 
-    presenter.bind(this, this)
+    presenter.bind(this)
 
     if (savedInstanceState == null) {
       Timber.d("No savedInstanceState, load default ignore time")
@@ -245,6 +244,8 @@ class LockScreenActivity : ActivityBase(),
     pinScreen.teardown()
     iconView.teardown()
     toolbar.teardown()
+
+    presenter.unbind()
     overridePendingTransition(0, 0)
   }
 

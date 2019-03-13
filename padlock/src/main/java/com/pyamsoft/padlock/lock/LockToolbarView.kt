@@ -41,7 +41,8 @@ internal class LockToolbarView @Inject internal constructor(
 
   override val layout: Int = R.layout.light_toolbar
 
-  private val toolbar by lazyView<Toolbar>(R.id.toolbar)
+  override val layoutRoot by lazyView<Toolbar>(R.id.toolbar)
+
   private val menuIgnoreOne by lazyMenuItem(R.id.menu_ignore_one)
   private val menuIgnoreFive by lazyMenuItem(R.id.menu_ignore_five)
   private val menuIgnoreTen by lazyMenuItem(R.id.menu_ignore_ten)
@@ -51,10 +52,6 @@ internal class LockToolbarView @Inject internal constructor(
   private val menuIgnoreFourtyFive by lazyMenuItem(R.id.menu_ignore_fourtyfive)
   private val menuIgnoreSixty by lazyMenuItem(R.id.menu_ignore_sixty)
   private val menuExclude by lazyMenuItem(R.id.menu_exclude)
-
-  override fun id(): Int {
-    return toolbar.id
-  }
 
   @CheckResult
   fun isExcludeChecked(): Boolean {
@@ -84,7 +81,7 @@ internal class LockToolbarView @Inject internal constructor(
 
   @CheckResult
   private fun getIgnoreTimes(): List<Long> {
-    val resources = toolbar.context.resources
+    val resources = layoutRoot.context.resources
 
     // Some extra list unwrapping and whatnot, but this should be proguarded out
     // and will help clean up logs
@@ -117,13 +114,13 @@ internal class LockToolbarView @Inject internal constructor(
     } else {
       theme = R.style.ThemeOverlay_PadLock_Light_Lock
     }
-    toolbar.popupTheme = theme
-    ViewCompat.setElevation(toolbar, 0f)
-    toolbarActivityProvider.setToolbar(toolbar)
+    layoutRoot.popupTheme = theme
+    ViewCompat.setElevation(layoutRoot, 0f)
+    toolbarActivityProvider.setToolbar(layoutRoot)
   }
 
   private fun inflateMenu(savedInstanceState: Bundle?) {
-    toolbar.inflateMenu(R.menu.lockscreen_menu)
+    layoutRoot.inflateMenu(R.menu.lockscreen_menu)
     if (savedInstanceState != null) {
       restoreMenuState(savedInstanceState)
     }
@@ -154,8 +151,7 @@ internal class LockToolbarView @Inject internal constructor(
     }
   }
 
-  override fun teardown() {
-    super.teardown()
+  override fun onTeardown() {
     menuExclude.setOnMenuItemClickListener(null)
     getIgnoreTimeMenuItems().forEach { it.setOnMenuItemClickListener(null) }
   }
@@ -200,8 +196,7 @@ internal class LockToolbarView @Inject internal constructor(
     }
   }
 
-  override fun saveState(outState: Bundle) {
-    super.saveState(outState)
+  override fun onSaveState(outState: Bundle) {
     outState.putBoolean(KEY_EXCLUDE, menuExclude.isChecked)
     outState.putBoolean(KEY_IGNORE_TIME_ONE, menuIgnoreOne.isChecked)
     outState.putBoolean(KEY_IGNORE_TIME_FIVE, menuIgnoreFive.isChecked)
@@ -215,17 +210,17 @@ internal class LockToolbarView @Inject internal constructor(
 
   @CheckResult
   private fun lazyMenuItem(@IdRes id: Int): Lazy<MenuItem> {
-    return lazy(NONE) { toolbar.menu.findItem(id) }
+    return lazy(NONE) { layoutRoot.menu.findItem(id) }
   }
 
   fun setName(name: String) {
-    toolbar.title = name
+    layoutRoot.title = name
   }
 
   fun close() {
     Timber.d("A leak is reported, but this should dismiss the window, and clear the leak")
-    toolbar.menu.close()
-    toolbar.dismissPopupMenus()
+    layoutRoot.menu.close()
+    layoutRoot.dismissPopupMenus()
   }
 
   companion object {

@@ -18,9 +18,8 @@
 package com.pyamsoft.padlock.service
 
 import com.pyamsoft.padlock.api.service.LockServiceInteractor
-import com.pyamsoft.pydroid.core.bus.RxBus
 import com.pyamsoft.pydroid.arch.BasePresenter
-import com.pyamsoft.pydroid.arch.destroy
+import com.pyamsoft.pydroid.core.bus.RxBus
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
@@ -41,7 +40,7 @@ internal class ScreenStatePresenterImpl @Inject internal constructor(
             callback.onScreenOff()
           }
         }
-        .destroy(owner)
+        .destroy()
   }
 
   override fun onUnbind() {

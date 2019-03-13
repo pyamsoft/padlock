@@ -42,12 +42,9 @@ internal class PinToolbar @Inject internal constructor(
 
   override val layout: Int = R.layout.dark_toolbar
 
-  private val toolbar by lazyView<Toolbar>(R.id.toolbar)
-  private val submitItem by lazyMenuItem(R.id.menu_submit_pin)
+  override val layoutRoot by lazyView<Toolbar>(R.id.toolbar)
 
-  override fun id(): Int {
-    return toolbar.id
-  }
+  private val submitItem by lazyMenuItem(R.id.menu_submit_pin)
 
   override fun onInflated(
     view: View,
@@ -65,19 +62,19 @@ internal class PinToolbar @Inject internal constructor(
     } else {
       theme = R.style.ThemeOverlay_PadLock_Light_Lock
     }
-    toolbar.popupTheme = theme
-    ViewCompat.setElevation(toolbar, 0f)
+    layoutRoot.popupTheme = theme
+    ViewCompat.setElevation(layoutRoot, 0f)
 
-    toolbar.setNavigationOnClickListener(DebouncedOnClickListener.create {
+    layoutRoot.setNavigationOnClickListener(DebouncedOnClickListener.create {
       callback.onNavClicked()
     })
-    toolbar.setUpEnabled(true)
+    layoutRoot.setUpEnabled(true)
 
-    toolbar.title = "PIN"
+    layoutRoot.title = "PIN"
   }
 
   private fun inflateMenu() {
-    toolbar.inflateMenu(R.menu.pin_menu)
+    layoutRoot.inflateMenu(R.menu.pin_menu)
 
     submitItem.setOnMenuItemClickListener {
       callback.onSubmitClicked()
@@ -85,15 +82,14 @@ internal class PinToolbar @Inject internal constructor(
     }
   }
 
-  override fun teardown() {
-    super.teardown()
-    toolbar.setNavigationOnClickListener(null)
+  override fun onTeardown() {
+    layoutRoot.setNavigationOnClickListener(null)
     submitItem.setOnMenuItemClickListener(null)
   }
 
   @CheckResult
   private fun lazyMenuItem(@IdRes id: Int): Lazy<MenuItem> {
-    return lazy(NONE) { toolbar.menu.findItem(id) }
+    return lazy(NONE) { layoutRoot.menu.findItem(id) }
   }
 
   interface Callback {

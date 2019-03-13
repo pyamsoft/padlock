@@ -28,9 +28,7 @@ import javax.inject.Inject
 
 class PurgeItem internal constructor(
   packageName: String
-) : ModelAbstractItem<String, PurgeItem, PurgeItem.ViewHolder>(
-    packageName
-) {
+) : ModelAbstractItem<String, PurgeItem, PurgeItem.ViewHolder>(packageName) {
 
   override fun getType(): Int = R.id.adapter_purge
 

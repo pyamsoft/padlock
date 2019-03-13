@@ -23,7 +23,6 @@ import com.pyamsoft.padlock.settings.SwitchLockTypePresenterImpl.SwitchLockTypeE
 import com.pyamsoft.padlock.settings.SwitchLockTypePresenterImpl.SwitchLockTypeEvent.SwitchLockTypeError
 import com.pyamsoft.padlock.settings.SwitchLockTypePresenterImpl.SwitchLockTypeEvent.SwitchLockTypeSuccess
 import com.pyamsoft.pydroid.arch.BasePresenter
-import com.pyamsoft.pydroid.arch.destroy
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
@@ -51,7 +50,7 @@ internal class SwitchLockTypePresenterImpl @Inject internal constructor(
             is SwitchLockTypeError -> callback.onLockTypeSwitchError(it.error)
           }
         }
-        .destroy(owner)
+        .destroy()
   }
 
   override fun onUnbind() {

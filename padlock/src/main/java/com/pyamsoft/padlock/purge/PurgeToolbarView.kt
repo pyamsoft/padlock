@@ -38,11 +38,9 @@ internal class PurgeToolbarView @Inject internal constructor(
   }
 
   override fun teardown() {
-    toolbarActivity.requireToolbar {
-      it.menu.apply {
-        removeGroup(R.id.menu_group_purge_all)
-      }
-      it.setOnMenuItemClickListener(null)
+    toolbarActivity.requireToolbar { toolbar ->
+      toolbar.menu.removeGroup(R.id.menu_group_purge_all)
+      toolbar.setOnMenuItemClickListener(null)
     }
   }
 
