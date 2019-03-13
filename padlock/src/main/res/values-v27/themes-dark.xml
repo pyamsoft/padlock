@@ -23,19 +23,19 @@
   <style name="Theme.PadLock.Dark.Normal" parent="@style/Base.Theme.PadLock.Dark.Normal">
     <item name="android:statusBarColor">@color/black</item>
     <item name="android:windowLightStatusBar">false</item>
-    <item name="android:windowLightNavigationBar">true</item>
+    <item name="android:windowLightNavigationBar">false</item>
   </style>
 
   <!-- Lock Screen Theme -->
   <style name="Theme.PadLock.Dark.Lock" parent="@style/Base.Theme.PadLock.Dark.Lock">
     <item name="android:statusBarColor">@color/blue700</item>
     <item name="android:windowLightStatusBar">false</item>
-    <item name="android:windowLightNavigationBar">true</item>
+    <item name="android:windowLightNavigationBar">false</item>
   </style>
 
   <style name="Theme.PadLock.Dark.Transparent" parent="@style/Base.Theme.PadLock.Dark.Transparent">
     <item name="android:windowLightStatusBar">false</item>
-    <item name="android:windowLightNavigationBar">true</item>
+    <item name="android:windowLightNavigationBar">false</item>
   </style>
 
 </resources>
