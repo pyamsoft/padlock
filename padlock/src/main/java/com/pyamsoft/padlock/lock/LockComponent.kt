@@ -29,7 +29,7 @@ import com.pyamsoft.padlock.model.LockScreenType.TYPE_TEXT
 import com.pyamsoft.padlock.pin.ConfirmPinView
 import com.pyamsoft.padlock.pin.pattern.PatternConfirmPinView
 import com.pyamsoft.padlock.pin.text.TextConfirmPinView
-import com.pyamsoft.padlock.scopes.FragmentScope
+import com.pyamsoft.padlock.scopes.ActivityScope
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.ToolbarActivityProvider
 import dagger.Binds
@@ -39,7 +39,7 @@ import dagger.Provides
 import dagger.Subcomponent
 import javax.inject.Named
 
-@FragmentScope
+@ActivityScope
 @Subcomponent(modules = [LockProvider::class, LockModule::class])
 interface LockComponent {
 

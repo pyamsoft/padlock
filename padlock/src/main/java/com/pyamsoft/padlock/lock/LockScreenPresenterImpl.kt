@@ -21,7 +21,7 @@ import androidx.annotation.CheckResult
 import com.pyamsoft.padlock.api.lockscreen.LockScreenInteractor
 import com.pyamsoft.padlock.lock.LockScreenPresenterImpl.CloseOldEvent
 import com.pyamsoft.padlock.pin.ConfirmPinView
-import com.pyamsoft.padlock.scopes.FragmentScope
+import com.pyamsoft.padlock.scopes.ActivityScope
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
@@ -33,7 +33,7 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Named
 
-@FragmentScope
+@ActivityScope
 internal class LockScreenPresenterImpl @Inject internal constructor(
   private val interactor: LockScreenInteractor,
   bus: EventBus<CloseOldEvent>,
