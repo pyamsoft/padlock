@@ -78,14 +78,6 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
         .destroy()
   }
 
-  override fun loadDefaultIgnoreTime() {
-    interactor.getDefaultIgnoreTime()
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(Consumer { callback.onDefaultIgnoreTimeLoaded(it) })
-        .destroy()
-  }
-
   override fun onUnbind() {
     submitDisposable.tryDispose()
     alreadyUnlockedDisposable.tryDispose()

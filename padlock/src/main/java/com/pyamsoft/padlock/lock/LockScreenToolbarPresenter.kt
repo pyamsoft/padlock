@@ -17,44 +17,14 @@
 
 package com.pyamsoft.padlock.lock
 
-import com.pyamsoft.padlock.lock.LockScreenPresenter.Callback
+import com.pyamsoft.padlock.lock.LockScreenToolbarPresenter.Callback
 import com.pyamsoft.pydroid.arch.Presenter
 
-internal interface LockScreenPresenter : Presenter<Callback> {
-
-  fun checkUnlocked()
-
-  fun submit(
-    lockCode: String?,
-    currentAttempt: String,
-    isSystem: Boolean,
-    shouldExclude: Boolean,
-    ignoreTime: Long
-  )
-
-  fun displayHint()
+internal interface LockScreenToolbarPresenter : Presenter<Callback> {
 
   interface Callback {
 
-    fun onCloseOld()
-
-    fun onDisplayNameLoaded(name: String)
-
-    fun onAlreadyUnlocked()
-
-    fun onSubmitUnlockAttempt(attempt: String)
-
-    fun onShowLockHint(hint: String)
-
-    fun onSubmitBegin()
-
-    fun onSubmitUnlocked()
-
-    fun onSubmitFailed()
-
-    fun onSubmitLocked()
-
-    fun onSubmitError(throwable: Throwable)
+    fun onDefaultIgnoreTimeLoaded(time: Long)
 
   }
 

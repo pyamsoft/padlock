@@ -36,12 +36,14 @@ import timber.log.Timber
 import javax.inject.Inject
 
 class LockScreenActivity : ActivityBase(),
-    LockScreenPresenter.Callback {
+    LockScreenPresenter.Callback,
+    LockScreenToolbarPresenter.Callback {
 
   @field:Inject internal lateinit var toolbar: LockToolbarView
   @field:Inject internal lateinit var iconView: LockImageView
   @field:Inject internal lateinit var pinScreen: ConfirmPinView
 
+  @field:Inject internal lateinit var toolbarPresenter: LockScreenToolbarPresenter
   @field:Inject internal lateinit var presenter: LockScreenPresenter
   @field:Inject internal lateinit var foregroundPresenter: ForegroundEventPresenter
 
@@ -75,11 +77,7 @@ class LockScreenActivity : ActivityBase(),
     layoutComponents(layoutRoot)
 
     presenter.bind(this)
-
-    if (savedInstanceState == null) {
-      Timber.d("No savedInstanceState, load default ignore time")
-      presenter.loadDefaultIgnoreTime()
-    }
+    toolbarPresenter.bind(this)
   }
 
   private fun createComponents(savedInstanceState: Bundle?) {

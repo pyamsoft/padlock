@@ -53,6 +53,8 @@ internal class LockToolbarView @Inject internal constructor(
   private val menuIgnoreSixty by lazyMenuItem(R.id.menu_ignore_sixty)
   private val menuExclude by lazyMenuItem(R.id.menu_exclude)
 
+  private var isSavedInstanceStateLoaded: Boolean = false
+
   @CheckResult
   fun isExcludeChecked(): Boolean {
     val result = menuExclude.isChecked
@@ -101,7 +103,7 @@ internal class LockToolbarView @Inject internal constructor(
     view: View,
     savedInstanceState: Bundle?
   ) {
-    super.onInflated(view, savedInstanceState)
+    isSavedInstanceStateLoaded = (savedInstanceState != null)
     setupToolbar()
     inflateMenu(savedInstanceState)
     bindClicks()
@@ -183,6 +185,11 @@ internal class LockToolbarView @Inject internal constructor(
   }
 
   fun initIgnoreTime(time: Long) {
+    if (isSavedInstanceStateLoaded) {
+      Timber.w("Ignore load time init since we are restored from savedInstanceState")
+      return
+    }
+
     val ignoreTimes = getIgnoreTimes()
     val menuItems = getIgnoreTimeMenuItems()
 
