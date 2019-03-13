@@ -19,6 +19,9 @@ package com.pyamsoft.padlock.pin
 
 import com.pyamsoft.padlock.api.PinInteractor
 import com.pyamsoft.padlock.pin.CreatePinPresenterImpl.CreatePinEvent
+import com.pyamsoft.padlock.pin.CreatePinPresenterImpl.CreatePinEvent.Begin
+import com.pyamsoft.padlock.pin.CreatePinPresenterImpl.CreatePinEvent.Complete
+import com.pyamsoft.padlock.pin.CreatePinPresenterImpl.CreatePinEvent.Created
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.core.bus.EventBus
 import com.pyamsoft.pydroid.core.singleDisposable
@@ -41,13 +44,21 @@ internal class CreatePinPresenterImpl @Inject internal constructor(
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe {
-          if (it.success) {
-            callback.onCreatePinSuccess()
-          } else {
-            callback.onCreatePinFailure()
+          return@subscribe when (it) {
+            is Begin -> callback.onCreatePinBegin()
+            is Created -> handleCreated(it)
+            is Complete -> callback.onCreatePinComplete()
           }
         }
         .destroy()
+  }
+
+  private fun handleCreated(created: Created) {
+    if (created.success) {
+      callback.onCreatePinSuccess()
+    } else {
+      callback.onCreatePinFailure()
+    }
   }
 
   override fun onUnbind() {
@@ -62,13 +73,20 @@ internal class CreatePinPresenterImpl @Inject internal constructor(
     createPinDisposable = interactor.createPin(attempt, reEntry, hint)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .doOnSubscribe { callback.onCreatePinBegin() }
-        .doAfterTerminate { callback.onCreatePinComplete() }
-        .subscribe({ publish(CreatePinEvent(it)) }, {
+        .doOnSubscribe { publish(Begin) }
+        .doAfterTerminate { publish(Complete) }
+        .subscribe({ publish(Created(it)) }, {
           Timber.e(it, "Error creating PIN")
           callback.onCreatePinFailure()
         })
   }
 
-  internal data class CreatePinEvent(val success: Boolean)
+  internal sealed class CreatePinEvent {
+
+    object Begin : CreatePinEvent()
+
+    data class Created(val success: Boolean) : CreatePinEvent()
+
+    object Complete : CreatePinEvent()
+  }
 }
