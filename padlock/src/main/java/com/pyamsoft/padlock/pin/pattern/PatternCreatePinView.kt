@@ -15,12 +15,13 @@
  *
  */
 
-package com.pyamsoft.padlock.pin
+package com.pyamsoft.padlock.pin.pattern
 
 import android.view.ViewGroup
 import androidx.annotation.CheckResult
 import androidx.annotation.ColorRes
 import androidx.lifecycle.LifecycleOwner
+import com.pyamsoft.padlock.pin.CreatePinView
 import com.pyamsoft.padlock.pin.CreatePinView.Callback
 import javax.inject.Inject
 
@@ -56,7 +57,7 @@ internal class PatternCreatePinView @Inject internal constructor(
   }
 
   private fun submitPinReConfirm(attempt: String) {
-    if (attempt.isBlank() || attempt.length < PatternPinView.MINIMUM_PATTERN_LENGTH) {
+    if (attempt.isBlank() || attempt.length < MINIMUM_PATTERN_LENGTH) {
       showMessage("Please create a PIN code")
     } else {
       commitAndPromptRepeat()

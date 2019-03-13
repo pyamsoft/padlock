@@ -37,8 +37,8 @@ import com.pyamsoft.padlock.model.list.ListDiffProvider
 import com.pyamsoft.padlock.pin.ClearPinPresenter
 import com.pyamsoft.padlock.pin.ConfirmPinPresenter
 import com.pyamsoft.padlock.pin.CreatePinPresenter
-import com.pyamsoft.padlock.pin.PinConfirmDialog
-import com.pyamsoft.padlock.pin.PinCreateDialog
+import com.pyamsoft.padlock.pin.confirm.PinConfirmDialog
+import com.pyamsoft.padlock.pin.create.PinCreateDialog
 import com.pyamsoft.padlock.service.device.UsagePermissionChecker
 import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose

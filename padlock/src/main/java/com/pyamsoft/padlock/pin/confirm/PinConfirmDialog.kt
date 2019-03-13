@@ -15,15 +15,16 @@
  *
  */
 
-package com.pyamsoft.padlock.pin
+package com.pyamsoft.padlock.pin.confirm
 
 import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager.LayoutParams
+import android.view.ViewGroup.LayoutParams
 import androidx.annotation.CheckResult
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.DialogFragment
@@ -31,19 +32,26 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.R.layout
+import com.pyamsoft.padlock.pin.toolbar.PinToolbarUiComponent
+import com.pyamsoft.padlock.pin.toolbar.PinToolbarUiComponent.Callback
 import com.pyamsoft.pydroid.ui.app.noTitle
+import com.pyamsoft.pydroid.ui.app.requireArguments
 import javax.inject.Inject
 
-class PinCreateDialog : DialogFragment(),
-    PinToolbarUiComponent.Callback,
-    PinCreateUiComponent.Callback {
+class PinConfirmDialog : DialogFragment(),
+    Callback,
+    PinConfirmUiComponent.Callback {
 
   @field:Inject internal lateinit var toolbarComponent: PinToolbarUiComponent
-  @field:Inject internal lateinit var component: PinCreateUiComponent
+  @field:Inject internal lateinit var component: PinConfirmUiComponent
+
+  private var finishOnDismiss: Boolean = false
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     isCancelable = true
+    finishOnDismiss = requireArguments().getBoolean(
+        FINISH_ON_DISMISS, false)
   }
 
   override fun onResume() {
@@ -76,11 +84,13 @@ class PinCreateDialog : DialogFragment(),
     savedInstanceState: Bundle?
   ) {
     super.onViewCreated(view, savedInstanceState)
+
     val layoutRoot = view.findViewById<ConstraintLayout>(R.id.layout_constraint)
     Injector.obtain<PadLockComponent>(view.context.applicationContext)
         .plusPinComponent()
         .owner(viewLifecycleOwner)
         .parent(layoutRoot)
+        .finishOnDismiss(finishOnDismiss)
         .build()
         .inject(this)
 
@@ -93,29 +103,40 @@ class PinCreateDialog : DialogFragment(),
 
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
-    toolbarComponent.saveState(outState)
     component.saveState(outState)
+    toolbarComponent.saveState(outState)
   }
 
-  override fun onAttemptSubmit() {
-    component.submit()
+  override fun onDismiss(dialog: DialogInterface?) {
+    super.onDismiss(dialog)
+    if (finishOnDismiss) {
+      activity?.finish()
+    }
   }
 
   override fun onClose() {
     dismiss()
   }
 
+  override fun onAttemptSubmit() {
+    component.submit()
+  }
+
   companion object {
 
-    @CheckResult
+    const val TAG = "PinConfirmDialog"
+    private const val FINISH_ON_DISMISS = "finish_dismiss"
+
     @JvmStatic
-    fun newInstance(): DialogFragment {
-      return PinCreateDialog().apply {
+    @CheckResult
+    fun newInstance(finishOnDismiss: Boolean): PinConfirmDialog {
+      return PinConfirmDialog()
+          .apply {
         arguments = Bundle().apply {
+          putBoolean(FINISH_ON_DISMISS, finishOnDismiss)
         }
       }
     }
-
-    const val TAG = "PinCreateDialog"
   }
 }
+

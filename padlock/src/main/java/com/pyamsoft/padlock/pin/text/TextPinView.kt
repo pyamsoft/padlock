@@ -15,7 +15,7 @@
  *
  */
 
-package com.pyamsoft.padlock.pin
+package com.pyamsoft.padlock.pin.text
 
 import android.os.Bundle
 import android.view.KeyEvent
@@ -33,6 +33,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.LifecycleOwner
 import com.google.android.material.textfield.TextInputLayout
 import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.pin.BasePinView
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.loader.Loaded
 import com.pyamsoft.pydroid.ui.util.setOnDebouncedClickListener
@@ -103,9 +104,12 @@ internal abstract class TextPinView<C : Any> protected constructor(
       return
     }
 
-    val attempt = requireNotNull(state.getString(CODE_DISPLAY, ""))
-    val reEntry = requireNotNull(state.getString(CODE_REENTRY_DISPLAY, ""))
-    val hint = requireNotNull(state.getString(HINT_DISPLAY, ""))
+    val attempt = requireNotNull(state.getString(
+        CODE_DISPLAY, ""))
+    val reEntry = requireNotNull(state.getString(
+        CODE_REENTRY_DISPLAY, ""))
+    val hint = requireNotNull(state.getString(
+        HINT_DISPLAY, ""))
 
     if (attempt.isBlank() && reEntry.isBlank() && hint.isBlank()) {
       clearDisplay()

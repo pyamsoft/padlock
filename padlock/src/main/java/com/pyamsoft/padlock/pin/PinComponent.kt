@@ -29,6 +29,25 @@ import com.pyamsoft.padlock.model.LockScreenType.TYPE_PATTERN
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_TEXT
 import com.pyamsoft.padlock.pin.PinComponent.PinModule
 import com.pyamsoft.padlock.pin.PinComponent.PinProvider
+import com.pyamsoft.padlock.pin.confirm.PinConfirmDialog
+import com.pyamsoft.padlock.pin.confirm.PinConfirmDialogPresenter
+import com.pyamsoft.padlock.pin.confirm.PinConfirmDialogPresenterImpl
+import com.pyamsoft.padlock.pin.confirm.PinConfirmUiComponent
+import com.pyamsoft.padlock.pin.confirm.PinConfirmUiComponentImpl
+import com.pyamsoft.padlock.pin.create.PinCreateDialog
+import com.pyamsoft.padlock.pin.create.PinCreateDialogPresenter
+import com.pyamsoft.padlock.pin.create.PinCreateDialogPresenterImpl
+import com.pyamsoft.padlock.pin.create.PinCreateUiComponent
+import com.pyamsoft.padlock.pin.create.PinCreateUiComponentImpl
+import com.pyamsoft.padlock.pin.pattern.PatternConfirmPinView
+import com.pyamsoft.padlock.pin.pattern.PatternCreatePinView
+import com.pyamsoft.padlock.pin.text.TextConfirmPinView
+import com.pyamsoft.padlock.pin.text.TextCreatePinView
+import com.pyamsoft.padlock.pin.toolbar.PinToolbar
+import com.pyamsoft.padlock.pin.toolbar.PinToolbarPresenter
+import com.pyamsoft.padlock.pin.toolbar.PinToolbarPresenterImpl
+import com.pyamsoft.padlock.pin.toolbar.PinToolbarUiComponent
+import com.pyamsoft.padlock.pin.toolbar.PinToolbarUiComponentImpl
 import com.pyamsoft.padlock.scopes.FragmentScope
 import com.pyamsoft.padlock.service.pause.PauseConfirmActivity
 import com.pyamsoft.pydroid.loader.ImageLoader
@@ -38,6 +57,7 @@ import dagger.BindsInstance
 import dagger.Module
 import dagger.Provides
 import dagger.Subcomponent
+import javax.inject.Named
 
 @FragmentScope
 @Subcomponent(modules = [PinModule::class, PinProvider::class])
@@ -59,6 +79,10 @@ interface PinComponent {
     @BindsInstance
     @CheckResult
     fun parent(parent: ViewGroup): Builder
+
+    @BindsInstance
+    @CheckResult
+    fun finishOnDismiss(@Named("finish_on_dismiss") finishOnDismiss: Boolean): Builder
 
     @CheckResult
     fun build(): PinComponent
@@ -91,6 +115,9 @@ interface PinComponent {
     @Binds
     internal abstract fun bindPinCreateComponent(impl: PinCreateUiComponentImpl): PinCreateUiComponent
 
+    @Binds
+    internal abstract fun bindPinConfirmComponent(impl: PinConfirmUiComponentImpl): PinConfirmUiComponent
+
   }
 
   @Module
@@ -111,7 +138,9 @@ interface PinComponent {
         TYPE_PATTERN -> PatternConfirmPinView(
             owner, parent, callback, themeColor(theming, parent.context)
         )
-        TYPE_TEXT -> TextConfirmPinView(imageLoader, owner, parent, callback)
+        TYPE_TEXT -> TextConfirmPinView(
+            imageLoader, owner, parent, callback
+        )
       }
     }
 
@@ -130,7 +159,9 @@ interface PinComponent {
         TYPE_PATTERN -> PatternCreatePinView(
             owner, parent, callback, themeColor(theming, parent.context)
         )
-        TYPE_TEXT -> TextCreatePinView(imageLoader, owner, parent, callback)
+        TYPE_TEXT -> TextCreatePinView(
+            imageLoader, owner, parent, callback
+        )
       }
     }
 

@@ -15,27 +15,25 @@
  *
  */
 
-package com.pyamsoft.padlock.pin
+package com.pyamsoft.padlock.pin.create
 
-import android.view.ViewGroup
-import androidx.annotation.ColorRes
-import androidx.lifecycle.LifecycleOwner
-import com.pyamsoft.padlock.pin.ConfirmPinView.Callback
-import javax.inject.Inject
+import androidx.constraintlayout.widget.ConstraintLayout
+import com.pyamsoft.padlock.pin.create.PinCreateUiComponent.Callback
+import com.pyamsoft.pydroid.arch.UiComponent
 
-internal class PatternConfirmPinView @Inject internal constructor(
-  owner: LifecycleOwner,
-  parent: ViewGroup,
-  callback: Callback,
-  @ColorRes normalDotColor: Int
-) : ConfirmPinView,
-    PatternPinView<Callback>(owner, parent, callback, true, normalDotColor) {
+internal interface PinCreateUiComponent : UiComponent<Callback> {
 
-  override fun showHint(hint: String) {
-  }
+  fun layout(
+    constraintLayout: ConstraintLayout,
+    aboveId: Int
+  )
 
-  override fun submit() {
-    callback.onSubmit(getAttempt())
+  fun submit()
+
+  interface Callback {
+
+    fun onClose()
+
   }
 
 }

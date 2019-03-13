@@ -15,13 +15,13 @@
  *
  */
 
-package com.pyamsoft.padlock.pin
+package com.pyamsoft.padlock.pin.toolbar
 
 import android.os.Bundle
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.LifecycleOwner
-import com.pyamsoft.padlock.pin.PinToolbarUiComponent.Callback
+import com.pyamsoft.padlock.pin.toolbar.PinToolbarUiComponent.Callback
 import com.pyamsoft.pydroid.arch.BaseUiComponent
 import com.pyamsoft.pydroid.arch.doOnDestroy
 import javax.inject.Inject

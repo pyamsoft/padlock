@@ -15,7 +15,7 @@
  *
  */
 
-package com.pyamsoft.padlock.pin
+package com.pyamsoft.padlock.pin.pattern
 
 import android.os.Bundle
 import android.view.View
@@ -28,6 +28,7 @@ import com.andrognito.patternlockview.PatternLockView
 import com.andrognito.patternlockview.PatternLockView.Dot
 import com.andrognito.patternlockview.listener.PatternLockViewListener
 import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.pin.BasePinView
 import timber.log.Timber
 
 internal abstract class PatternPinView<C : Any> protected constructor(
@@ -82,15 +83,19 @@ internal abstract class PatternPinView<C : Any> protected constructor(
       cellPattern = ""
       isRepeating = false
     } else {
-      repeatCellPattern = savedInstanceState.getString(REPEAT_CELL_PATTERN, "")
-      cellPattern = savedInstanceState.getString(CELL_PATTERN, "")
-      isRepeating = savedInstanceState.getBoolean(REPEATING, false)
+      repeatCellPattern = savedInstanceState.getString(
+          REPEAT_CELL_PATTERN, "")
+      cellPattern = savedInstanceState.getString(
+          CELL_PATTERN, "")
+      isRepeating = savedInstanceState.getBoolean(
+          REPEATING, false)
     }
   }
 
   override fun onSaveState(outState: Bundle) {
     outState.putString(CELL_PATTERN, cellPattern)
-    outState.putString(REPEAT_CELL_PATTERN, repeatCellPattern)
+    outState.putString(
+        REPEAT_CELL_PATTERN, repeatCellPattern)
     outState.putBoolean(REPEATING, isRepeating())
   }
 

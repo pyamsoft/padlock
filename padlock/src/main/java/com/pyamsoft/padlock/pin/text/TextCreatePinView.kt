@@ -15,27 +15,32 @@
  *
  */
 
-package com.pyamsoft.padlock.pin
+package com.pyamsoft.padlock.pin.text
 
 import android.view.ViewGroup
 import androidx.lifecycle.LifecycleOwner
-import com.pyamsoft.padlock.pin.ConfirmPinView.Callback
+import com.pyamsoft.padlock.pin.CreatePinView
+import com.pyamsoft.padlock.pin.CreatePinView.Callback
 import com.pyamsoft.pydroid.loader.ImageLoader
 import javax.inject.Inject
 
-internal class TextConfirmPinView @Inject internal constructor(
+internal class TextCreatePinView @Inject internal constructor(
   imageLoader: ImageLoader,
   owner: LifecycleOwner,
   parent: ViewGroup,
   callback: Callback
-) : ConfirmPinView, TextPinView<Callback>(imageLoader, owner, parent, callback, true) {
-
-  override fun showHint(hint: String) {
-    setHintText(hint)
-  }
+) : CreatePinView, TextPinView<Callback>(imageLoader, owner, parent, callback, false) {
 
   override fun submit() {
-    callback.onSubmit(getAttempt())
+    val attempt = getAttempt()
+    val repeatAttempt = getReConfirmAttempt()
+
+    // The password can be BLANK and be valid, though I don't recommend it.
+    if (attempt != repeatAttempt) {
+      showErrorMessage("PIN codes do not match, please try again.")
+      return
+    }
+    callback.onSubmit(attempt, repeatAttempt, getOptionalHint())
   }
 
 }

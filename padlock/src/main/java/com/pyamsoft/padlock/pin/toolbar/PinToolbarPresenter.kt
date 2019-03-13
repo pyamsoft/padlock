@@ -15,17 +15,18 @@
  *
  */
 
-package com.pyamsoft.padlock.pin
+package com.pyamsoft.padlock.pin.toolbar
 
-import com.pyamsoft.padlock.pin.PinConfirmDialogPresenter.Callback
+import com.pyamsoft.padlock.pin.toolbar.PinToolbarPresenter.Callback
 import com.pyamsoft.pydroid.arch.Presenter
 
-interface PinConfirmDialogPresenter : Presenter<Callback> {
+interface PinToolbarPresenter : Presenter<Callback> {
 
   interface Callback {
 
-    fun onAttemptSubmit(attempt: String)
+    fun onDialogClosed()
+
+    fun onAttemptSubmit()
 
   }
 }
-

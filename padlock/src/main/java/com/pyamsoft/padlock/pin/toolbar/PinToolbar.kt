@@ -15,7 +15,7 @@
  *
  */
 
-package com.pyamsoft.padlock.pin
+package com.pyamsoft.padlock.pin.toolbar
 
 import android.os.Bundle
 import android.view.MenuItem
@@ -26,7 +26,7 @@ import androidx.annotation.IdRes
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.pin.PinToolbar.Callback
+import com.pyamsoft.padlock.pin.toolbar.PinToolbar.Callback
 import com.pyamsoft.pydroid.arch.BaseUiView
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener

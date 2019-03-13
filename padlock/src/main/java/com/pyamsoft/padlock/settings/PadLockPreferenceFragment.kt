@@ -24,7 +24,7 @@ import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.pin.PinConfirmDialog
+import com.pyamsoft.padlock.pin.confirm.PinConfirmDialog
 import com.pyamsoft.pydroid.ui.app.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.settings.AppSettingsPreferenceFragment
 import com.pyamsoft.pydroid.ui.util.show

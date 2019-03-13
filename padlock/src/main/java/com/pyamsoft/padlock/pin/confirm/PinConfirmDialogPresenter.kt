@@ -15,27 +15,17 @@
  *
  */
 
-package com.pyamsoft.padlock.pin
+package com.pyamsoft.padlock.pin.confirm
 
-import androidx.annotation.CheckResult
-import androidx.annotation.IdRes
-import androidx.constraintlayout.widget.ConstraintLayout
-import com.pyamsoft.pydroid.arch.UiComponent
+import com.pyamsoft.padlock.pin.confirm.PinConfirmDialogPresenter.Callback
+import com.pyamsoft.pydroid.arch.Presenter
 
-internal interface PinToolbarUiComponent : UiComponent<PinToolbarUiComponent.Callback> {
-
-  @IdRes
-  @CheckResult
-  fun id(): Int
-
-  fun layout(constraintLayout: ConstraintLayout)
+interface PinConfirmDialogPresenter : Presenter<Callback> {
 
   interface Callback {
 
-    fun onClose()
-
-    fun onAttemptSubmit()
+    fun onAttemptSubmit(attempt: String)
 
   }
-
 }
+

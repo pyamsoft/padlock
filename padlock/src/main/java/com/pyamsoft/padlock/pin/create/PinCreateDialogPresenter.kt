@@ -15,9 +15,9 @@
  *
  */
 
-package com.pyamsoft.padlock.pin
+package com.pyamsoft.padlock.pin.create
 
-import com.pyamsoft.padlock.pin.PinCreateDialogPresenter.Callback
+import com.pyamsoft.padlock.pin.create.PinCreateDialogPresenter.Callback
 import com.pyamsoft.pydroid.arch.Presenter
 
 interface PinCreateDialogPresenter : Presenter<Callback> {

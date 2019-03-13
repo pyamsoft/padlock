@@ -20,15 +20,15 @@ package com.pyamsoft.padlock.lock
 import android.view.ViewGroup
 import androidx.annotation.CheckResult
 import androidx.lifecycle.LifecycleOwner
-import com.pyamsoft.padlock.R
+import com.pyamsoft.padlock.R.color
 import com.pyamsoft.padlock.api.preferences.LockScreenPreferences
 import com.pyamsoft.padlock.lock.LockComponent.LockModule
 import com.pyamsoft.padlock.lock.LockComponent.LockProvider
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_PATTERN
 import com.pyamsoft.padlock.model.LockScreenType.TYPE_TEXT
 import com.pyamsoft.padlock.pin.ConfirmPinView
-import com.pyamsoft.padlock.pin.PatternConfirmPinView
-import com.pyamsoft.padlock.pin.TextConfirmPinView
+import com.pyamsoft.padlock.pin.pattern.PatternConfirmPinView
+import com.pyamsoft.padlock.pin.text.TextConfirmPinView
 import com.pyamsoft.padlock.scopes.FragmentScope
 import com.pyamsoft.pydroid.loader.ImageLoader
 import com.pyamsoft.pydroid.ui.app.ToolbarActivityProvider
@@ -94,8 +94,12 @@ interface LockComponent {
       callback: ConfirmPinView.Callback
     ): ConfirmPinView {
       return when (preferences.getCurrentLockType()) {
-        TYPE_PATTERN -> PatternConfirmPinView(owner, parent, callback, R.color.white)
-        TYPE_TEXT -> TextConfirmPinView(imageLoader, owner, parent, callback)
+        TYPE_PATTERN -> PatternConfirmPinView(
+            owner, parent, callback, color.white
+        )
+        TYPE_TEXT -> TextConfirmPinView(
+            imageLoader, owner, parent, callback
+        )
       }
     }
   }

@@ -25,7 +25,7 @@ import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.pin.ConfirmPinPresenter
-import com.pyamsoft.padlock.pin.PinConfirmDialog
+import com.pyamsoft.padlock.pin.confirm.PinConfirmDialog
 import com.pyamsoft.padlock.service.ServiceActionPresenter
 import com.pyamsoft.pydroid.ui.app.ActivityBase
 import com.pyamsoft.pydroid.ui.theme.ThemeInjector

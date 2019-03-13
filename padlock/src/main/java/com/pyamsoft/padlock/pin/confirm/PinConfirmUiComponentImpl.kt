@@ -15,25 +15,30 @@
  *
  */
 
-package com.pyamsoft.padlock.pin
+package com.pyamsoft.padlock.pin.confirm
 
 import android.os.Bundle
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.LifecycleOwner
-import com.pyamsoft.padlock.pin.PinCreateUiComponent.Callback
+import com.pyamsoft.padlock.pin.ConfirmPinPresenter
+import com.pyamsoft.padlock.pin.ConfirmPinView
+import com.pyamsoft.padlock.pin.confirm.PinConfirmUiComponent.Callback
 import com.pyamsoft.pydroid.arch.BaseUiComponent
 import com.pyamsoft.pydroid.arch.doOnDestroy
 import javax.inject.Inject
+import javax.inject.Named
 
-internal class PinCreateUiComponentImpl @Inject internal constructor(
-  private val pinView: CreatePinView,
-  private val presenter: PinCreateDialogPresenter,
-  private val createPresenter: CreatePinPresenter
-) : BaseUiComponent<PinCreateUiComponent.Callback>(),
-    PinCreateUiComponent,
-    PinCreateDialogPresenter.Callback,
-    CreatePinPresenter.Callback {
+internal class PinConfirmUiComponentImpl @Inject internal constructor(
+  private val pinView: ConfirmPinView,
+  private val presenter: PinConfirmDialogPresenter,
+  private val confirmPresenter: ConfirmPinPresenter,
+  @Named("finish_on_dismiss") private val finishOnDismiss: Boolean
+) : BaseUiComponent<PinConfirmUiComponent.Callback>(),
+    PinConfirmUiComponent,
+    PinConfirmDialogPresenter.Callback,
+    ConfirmPinPresenter.Callback {
+
   override fun onBind(
     owner: LifecycleOwner,
     savedInstanceState: Bundle?,
@@ -42,12 +47,12 @@ internal class PinCreateUiComponentImpl @Inject internal constructor(
     owner.doOnDestroy {
       pinView.teardown()
       presenter.unbind()
-      createPresenter.unbind()
+      confirmPresenter.unbind()
     }
 
     pinView.inflate(savedInstanceState)
     presenter.bind(this)
-    createPresenter.bind(this)
+    confirmPresenter.bind(this)
   }
 
   override fun saveState(outState: Bundle) {
@@ -78,31 +83,33 @@ internal class PinCreateUiComponentImpl @Inject internal constructor(
     pinView.submit()
   }
 
-  override fun onAttemptSubmit(
-    attempt: String,
-    reEntry: String,
-    hint: String
-  ) {
-    createPresenter.create(attempt, reEntry, hint)
+  override fun onAttemptSubmit(attempt: String) {
+    confirmPresenter.confirm(attempt, checkOnly = finishOnDismiss)
   }
 
-  override fun onCreatePinBegin() {
+  override fun onConfirmPinBegin() {
     pinView.disable()
   }
 
-  override fun onCreatePinSuccess() {
-    onPinCreateCallback()
+  override fun onConfirmPinSuccess(
+    attempt: String,
+    checkOnly: Boolean
+  ) {
+    onPinCallback()
   }
 
-  override fun onCreatePinFailure() {
-    onPinCreateCallback()
+  override fun onConfirmPinFailure(
+    attempt: String,
+    checkOnly: Boolean
+  ) {
+    onPinCallback()
   }
 
-  override fun onCreatePinComplete() {
+  override fun onConfirmPinComplete() {
     pinView.enable()
   }
 
-  private fun onPinCreateCallback() {
+  private fun onPinCallback() {
     pinView.clearDisplay()
     callback.onClose()
   }

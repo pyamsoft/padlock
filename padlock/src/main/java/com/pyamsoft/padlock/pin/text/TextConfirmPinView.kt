@@ -15,28 +15,29 @@
  *
  */
 
-package com.pyamsoft.padlock.pin
+package com.pyamsoft.padlock.pin.text
 
-import com.pyamsoft.padlock.pin.PinConfirmDialogPresenter.Callback
-import com.pyamsoft.padlock.scopes.FragmentScope
-import com.pyamsoft.pydroid.arch.BasePresenter
-import com.pyamsoft.pydroid.core.bus.RxBus
+import android.view.ViewGroup
+import androidx.lifecycle.LifecycleOwner
+import com.pyamsoft.padlock.pin.ConfirmPinView
+import com.pyamsoft.padlock.pin.ConfirmPinView.Callback
+import com.pyamsoft.pydroid.loader.ImageLoader
 import javax.inject.Inject
 
-@FragmentScope
-internal class PinConfirmDialogPresenterImpl @Inject internal constructor(
-) : BasePresenter<Unit, Callback>(RxBus.empty()),
-    ConfirmPinView.Callback,
-    PinConfirmDialogPresenter {
+internal class TextConfirmPinView @Inject internal constructor(
+  imageLoader: ImageLoader,
+  owner: LifecycleOwner,
+  parent: ViewGroup,
+  callback: Callback
+) : ConfirmPinView, TextPinView<Callback>(imageLoader, owner, parent, callback, true) {
 
-  override fun onBind() {
+  override fun showHint(hint: String) {
+    setHintText(hint)
   }
 
-  override fun onSubmit(attempt: String) {
-    callback.onAttemptSubmit(attempt)
+  override fun submit() {
+    callback.onSubmit(getAttempt())
   }
 
-  override fun onUnbind() {
-  }
 }
 

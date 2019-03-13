@@ -15,31 +15,29 @@
  *
  */
 
-package com.pyamsoft.padlock.pin
+package com.pyamsoft.padlock.pin.confirm
 
-import com.pyamsoft.padlock.pin.PinToolbarPresenter.Callback
+import com.pyamsoft.padlock.pin.ConfirmPinView
+import com.pyamsoft.padlock.pin.confirm.PinConfirmDialogPresenter.Callback
 import com.pyamsoft.padlock.scopes.FragmentScope
 import com.pyamsoft.pydroid.arch.BasePresenter
 import com.pyamsoft.pydroid.core.bus.RxBus
 import javax.inject.Inject
 
 @FragmentScope
-internal class PinToolbarPresenterImpl @Inject internal constructor(
+internal class PinConfirmDialogPresenterImpl @Inject internal constructor(
 ) : BasePresenter<Unit, Callback>(RxBus.empty()),
-    PinToolbar.Callback,
-    PinToolbarPresenter {
+    ConfirmPinView.Callback,
+    PinConfirmDialogPresenter {
 
   override fun onBind() {
   }
 
-  override fun onNavClicked() {
-    callback.onDialogClosed()
-  }
-
-  override fun onSubmitClicked() {
-    callback.onAttemptSubmit()
+  override fun onSubmit(attempt: String) {
+    callback.onAttemptSubmit(attempt)
   }
 
   override fun onUnbind() {
   }
 }
+

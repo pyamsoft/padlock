@@ -15,12 +15,13 @@
  *
  */
 
-package com.pyamsoft.padlock.pin
+package com.pyamsoft.padlock.pin.confirm
 
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.pyamsoft.padlock.pin.confirm.PinConfirmUiComponent.Callback
 import com.pyamsoft.pydroid.arch.UiComponent
 
-internal interface PinCreateUiComponent : UiComponent<PinCreateUiComponent.Callback> {
+internal interface PinConfirmUiComponent : UiComponent<Callback> {
 
   fun layout(
     constraintLayout: ConstraintLayout,
