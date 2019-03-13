@@ -60,7 +60,7 @@ class PauseConfirmActivity : ActivityBase(), ConfirmPinPresenter.Callback {
 
     confirmPinPresenter.bind(this)
 
-    PinConfirmDialog.newInstance(true)
+    PinConfirmDialog.newInstance(finishOnDismiss = true)
         .show(this, PinConfirmDialog.TAG)
   }
 
