@@ -26,7 +26,6 @@ import android.view.ViewGroup
 import android.view.WindowManager.LayoutParams
 import androidx.annotation.CheckResult
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.DialogFragment
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
@@ -36,16 +35,11 @@ import com.pyamsoft.pydroid.ui.app.noTitle
 import javax.inject.Inject
 
 class PinCreateDialog : DialogFragment(),
-    PinCreateDialogPresenter.Callback,
-    PinToolbarPresenter.Callback,
-    CreatePinPresenter.Callback {
+    PinToolbarUiComponent.Callback,
+    PinCreateUiComponent.Callback {
 
-  @field:Inject internal lateinit var toolbar: PinToolbar
-  @field:Inject internal lateinit var pinView: CreatePinView
-
-  @field:Inject internal lateinit var presenter: PinCreateDialogPresenter
-  @field:Inject internal lateinit var toolbarPresenter: PinToolbarPresenter
-  @field:Inject internal lateinit var createPresenter: CreatePinPresenter
+  @field:Inject internal lateinit var toolbarComponent: PinToolbarUiComponent
+  @field:Inject internal lateinit var component: PinCreateUiComponent
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -90,90 +84,24 @@ class PinCreateDialog : DialogFragment(),
         .build()
         .inject(this)
 
-    createComponents(savedInstanceState)
-    layoutComponents(layoutRoot)
+    component.bind(viewLifecycleOwner, savedInstanceState, this)
+    toolbarComponent.bind(viewLifecycleOwner, savedInstanceState, this)
 
-    presenter.bind(this)
-    createPresenter.bind(this)
-    toolbarPresenter.bind(this)
-  }
-
-  private fun createComponents(savedInstanceState: Bundle?) {
-    toolbar.inflate(savedInstanceState)
-    pinView.inflate(savedInstanceState)
-  }
-
-  private fun layoutComponents(layoutRoot: ConstraintLayout) {
-    ConstraintSet().apply {
-      clone(layoutRoot)
-
-      toolbar.also {
-        connect(it.id(), ConstraintSet.TOP, layoutRoot.id, ConstraintSet.TOP)
-        connect(it.id(), ConstraintSet.START, layoutRoot.id, ConstraintSet.START)
-        connect(it.id(), ConstraintSet.END, layoutRoot.id, ConstraintSet.END)
-      }
-
-      pinView.also {
-        connect(it.id(), ConstraintSet.TOP, toolbar.id(), ConstraintSet.BOTTOM)
-        connect(it.id(), ConstraintSet.BOTTOM, layoutRoot.id, ConstraintSet.BOTTOM)
-        connect(it.id(), ConstraintSet.START, layoutRoot.id, ConstraintSet.START)
-        connect(it.id(), ConstraintSet.END, layoutRoot.id, ConstraintSet.END)
-      }
-
-      applyTo(layoutRoot)
-    }
+    toolbarComponent.layout(layoutRoot)
+    component.layout(layoutRoot, toolbarComponent.id())
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
-    toolbar.saveState(outState)
-    pinView.saveState(outState)
-  }
-
-  override fun onDestroyView() {
-    super.onDestroyView()
-    toolbar.teardown()
-    pinView.teardown()
-
-    presenter.unbind()
-    createPresenter.unbind()
-    toolbarPresenter.unbind()
-  }
-
-  override fun onAttemptSubmit(
-    attempt: String,
-    reEntry: String,
-    hint: String
-  ) {
-    createPresenter.create(attempt, reEntry, hint)
+    toolbarComponent.saveState(outState)
+    component.saveState(outState)
   }
 
   override fun onAttemptSubmit() {
-    pinView.submit()
+    component.submit()
   }
 
-  override fun onDialogClosed() {
-    dismiss()
-  }
-
-  override fun onCreatePinBegin() {
-    pinView.disable()
-  }
-
-  override fun onCreatePinSuccess() {
-    onPinCreateCallback()
-  }
-
-  override fun onCreatePinFailure() {
-    onPinCreateCallback()
-  }
-
-  override fun onCreatePinComplete() {
-    pinView.enable()
-  }
-
-  private fun onPinCreateCallback() {
-    pinView.clearDisplay()
+  override fun onClose() {
     dismiss()
   }
 
