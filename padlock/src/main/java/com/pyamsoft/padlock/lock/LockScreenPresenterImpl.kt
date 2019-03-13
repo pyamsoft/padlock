@@ -28,7 +28,6 @@ import com.pyamsoft.pydroid.core.singleDisposable
 import com.pyamsoft.pydroid.core.tryDispose
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import timber.log.Timber
 import javax.inject.Inject
@@ -51,7 +50,6 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
 
   override fun onBind() {
     attemptCloseOld()
-    loadDisplayName()
   }
 
   private fun attemptCloseOld() {
@@ -67,14 +65,6 @@ internal class LockScreenPresenterImpl @Inject internal constructor(
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe { callback.onCloseOld() }
-        .destroy()
-  }
-
-  private fun loadDisplayName() {
-    interactor.getDisplayName(packageName)
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(Consumer { callback.onDisplayNameLoaded(it) })
         .destroy()
   }
 

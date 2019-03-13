@@ -17,18 +17,27 @@
 
 package com.pyamsoft.padlock.lock
 
-import com.pyamsoft.padlock.lock.LockScreenToolbarPresenter.Callback
-import com.pyamsoft.pydroid.arch.Presenter
+import androidx.annotation.CheckResult
+import androidx.annotation.IdRes
+import androidx.constraintlayout.widget.ConstraintLayout
+import com.pyamsoft.pydroid.arch.UiComponent
 
-internal interface LockScreenToolbarPresenter : Presenter<Callback> {
+internal interface LockScreenToolbarUiComponent : UiComponent<Unit> {
 
-  interface Callback {
+  @IdRes
+  @CheckResult
+  fun id(): Int
 
-    fun onDisplayNameLoaded(name: String)
+  fun layout(constraintLayout: ConstraintLayout)
 
-    fun onDefaultIgnoreTimeLoaded(time: Long)
+  fun close()
 
-  }
+  // TODO(fix arch)
+  @CheckResult
+  fun isExcludeChecked(): Boolean
+
+  // TODO(fix arch)
+  @CheckResult
+  fun getSelectedIgnoreTime(): Long
 
 }
-

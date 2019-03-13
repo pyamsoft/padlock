@@ -21,31 +21,21 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import androidx.annotation.CallSuper
-import androidx.annotation.CheckResult
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
 import com.pyamsoft.padlock.model.db.PadLockEntryModel
-import com.pyamsoft.padlock.pin.ConfirmPinView
-import com.pyamsoft.padlock.service.ForegroundEventPresenter
 import com.pyamsoft.pydroid.ui.app.ActivityBase
 import com.pyamsoft.pydroid.ui.theme.ThemeInjector
 import timber.log.Timber
 import javax.inject.Inject
 
 class LockScreenActivity : ActivityBase(),
-    LockScreenPresenter.Callback,
-    LockScreenToolbarPresenter.Callback {
+    LockScreenUiComponent.Callback {
 
-  @field:Inject internal lateinit var toolbar: LockToolbarView
-  @field:Inject internal lateinit var iconView: LockImageView
-  @field:Inject internal lateinit var pinScreen: ConfirmPinView
-
-  @field:Inject internal lateinit var toolbarPresenter: LockScreenToolbarPresenter
-  @field:Inject internal lateinit var presenter: LockScreenPresenter
-  @field:Inject internal lateinit var foregroundPresenter: ForegroundEventPresenter
+  @field:Inject internal lateinit var component: LockScreenUiComponent
+  @field:Inject internal lateinit var toolbarComponent: LockScreenToolbarUiComponent
 
   override val fragmentContainerId: Int = 0
 
@@ -60,176 +50,61 @@ class LockScreenActivity : ActivityBase(),
     super.onCreate(savedInstanceState)
     setContentView(R.layout.layout_constraint)
 
+    val extras = requireNotNull(intent.extras)
+    val lockedPackageName = extras.getString(ENTRY_PACKAGE_NAME, "")
+    val lockedActivityName = extras.getString(ENTRY_ACTIVITY_NAME, "")
+    val lockedRealName = extras.getString(ENTRY_REAL_NAME, "")
+    val lockedCode = extras.getString(ENTRY_LOCK_CODE, null)
+    val lockedIsSystem = extras.getBoolean(ENTRY_IS_SYSTEM, false)
+    val lockedIcon = extras.getInt(ENTRY_ICON, 0)
+
+    require(lockedPackageName.isNotBlank())
+    require(lockedActivityName.isNotBlank())
+    require(lockedRealName.isNotBlank())
+
     val layoutRoot = findViewById<ConstraintLayout>(R.id.layout_constraint)
     Injector.obtain<PadLockComponent>(applicationContext)
         .plusLockComponent()
         .parent(layoutRoot)
         .owner(this)
         .toolbarActivityProvider(this)
-        .packageName(getLockedPackageName())
-        .activityName(getLockedActivityName())
-        .realName(getLockedRealName())
-        .appIcon(getLockedIcon())
+        .packageName(lockedPackageName)
+        .activityName(lockedActivityName)
+        .realName(lockedRealName)
+        .lockedCode(lockedCode)
+        .lockedSystem(lockedIsSystem)
+        .appIcon(lockedIcon)
         .build()
         .inject(this)
 
-    createComponents(savedInstanceState)
-    layoutComponents(layoutRoot)
+    component.bind(this, savedInstanceState, this)
+    toolbarComponent.bind(this, savedInstanceState, Unit)
 
-    presenter.bind(this)
-    toolbarPresenter.bind(this)
-  }
-
-  private fun createComponents(savedInstanceState: Bundle?) {
-    toolbar.inflate(savedInstanceState)
-    iconView.inflate(savedInstanceState)
-    pinScreen.inflate(savedInstanceState)
-  }
-
-  private fun layoutComponents(layoutRoot: ConstraintLayout) {
-    ConstraintSet().apply {
-      clone(layoutRoot)
-
-      toolbar.also {
-        connect(it.id(), ConstraintSet.TOP, layoutRoot.id, ConstraintSet.TOP)
-        connect(it.id(), ConstraintSet.START, layoutRoot.id, ConstraintSet.START)
-        connect(it.id(), ConstraintSet.END, layoutRoot.id, ConstraintSet.END)
-        constrainWidth(it.id(), ConstraintSet.MATCH_CONSTRAINT)
-      }
-
-      iconView.also {
-        connect(it.id(), ConstraintSet.TOP, toolbar.id(), ConstraintSet.BOTTOM)
-        connect(it.id(), ConstraintSet.START, layoutRoot.id, ConstraintSet.START)
-        connect(it.id(), ConstraintSet.END, layoutRoot.id, ConstraintSet.END)
-        constrainWidth(it.id(), ConstraintSet.MATCH_CONSTRAINT)
-      }
-
-      pinScreen.also {
-        connect(it.id(), ConstraintSet.TOP, iconView.id(), ConstraintSet.BOTTOM)
-        connect(it.id(), ConstraintSet.START, layoutRoot.id, ConstraintSet.START)
-        connect(it.id(), ConstraintSet.END, layoutRoot.id, ConstraintSet.END)
-        connect(it.id(), ConstraintSet.BOTTOM, layoutRoot.id, ConstraintSet.BOTTOM)
-        constrainWidth(it.id(), ConstraintSet.MATCH_CONSTRAINT)
-        constrainHeight(it.id(), ConstraintSet.MATCH_CONSTRAINT)
-      }
-
-      applyTo(layoutRoot)
-    }
-
-  }
-
-  override fun onCloseOld() {
-    Timber.w("Close event received for this old lock screen: $this")
-    finish()
-  }
-
-  override fun onDisplayNameLoaded(name: String) {
-    toolbar.setName(name)
-  }
-
-  override fun onDefaultIgnoreTimeLoaded(time: Long) {
-    toolbar.initIgnoreTime(time)
+    toolbarComponent.layout(layoutRoot)
+    component.layout(layoutRoot, toolbarComponent.id())
   }
 
   override fun onResume() {
     super.onResume()
-    presenter.checkUnlocked()
+    component.checkUnlocked()
   }
 
-  override fun onShowLockHint(hint: String) {
-    pinScreen.showHint(hint)
-  }
-
-  override fun onSubmitUnlockAttempt(attempt: String) {
-    val excluded = toolbar.isExcludeChecked()
-    val ignoreTime = toolbar.getSelectedIgnoreTime()
-    Timber.d("Submitting unlock attempt")
-    presenter.submit(getLockedCode(), attempt, getLockedIsSystem(), excluded, ignoreTime)
-  }
-
-  @CheckResult
-  private fun getLockedPackageName(): String {
-    return requireNotNull(intent.extras).getString(ENTRY_PACKAGE_NAME, "")
-        .also { require(it.isNotBlank()) }
-  }
-
-  @CheckResult
-  private fun getLockedActivityName(): String {
-    return requireNotNull(intent.extras).getString(ENTRY_ACTIVITY_NAME, "")
-        .also { require(it.isNotBlank()) }
-  }
-
-  @CheckResult
-  private fun getLockedRealName(): String {
-    return requireNotNull(intent.extras).getString(ENTRY_REAL_NAME, "")
-        .also { require(it.isNotBlank()) }
-  }
-
-  @CheckResult
-  private fun getLockedCode(): String? {
-    return requireNotNull(intent.extras).getString(ENTRY_LOCK_CODE)
-  }
-
-  @CheckResult
-  private fun getLockedIcon(): Int {
-    return requireNotNull(intent.extras).getInt(ENTRY_ICON, 0)
-  }
-
-  @CheckResult
-  private fun getLockedIsSystem(): Boolean {
-    return requireNotNull(intent.extras).getBoolean(ENTRY_IS_SYSTEM, false)
-  }
-
-  override fun onAlreadyUnlocked() {
-    Timber.d("${getLockedPackageName()} ${getLockedActivityName()} unlocked, close lock screen")
+  override fun onClose() {
     finish()
   }
 
-  override fun onSubmitBegin() {
-    Timber.d("Submit begin")
-    pinScreen.disable()
-  }
-
-  override fun onSubmitUnlocked() {
-    Timber.d(
-        "Unlocked! ${getLockedPackageName()} ${getLockedActivityName()} ${getLockedRealName()}"
-    )
-    pinScreen.clearDisplay()
-    finish()
-  }
-
-  override fun onSubmitLocked() {
-    Timber.e(
-        "Temp Locked ${getLockedPackageName()} ${getLockedActivityName()} ${getLockedRealName()}"
-    )
-    pinScreen.clearDisplay()
-    pinScreen.enable()
-    pinScreen.showErrorMessage("Error: This App is temporarily locked.")
-  }
-
-  override fun onSubmitFailed() {
-    Timber.w(
-        "Failed unlock ${getLockedPackageName()} ${getLockedActivityName()} ${getLockedRealName()}"
-    )
-    pinScreen.clearDisplay()
-    pinScreen.enable()
-    pinScreen.showErrorMessage("Error: Invalid PIN")
-  }
-
-  override fun onSubmitError(throwable: Throwable) {
-    pinScreen.clearDisplay()
-    pinScreen.enable()
-    pinScreen.showErrorMessage("Something went wrong during PIN submission, please try again")
+  override fun onSubmitAttempt(attempt: String) {
+    val isExcluded = toolbarComponent.isExcludeChecked()
+    val ignoreTime = toolbarComponent.getSelectedIgnoreTime()
+    component.submit(attempt, isExcluded, ignoreTime)
   }
 
   override fun onPause() {
     super.onPause()
     if (isFinishing || isChangingConfigurations) {
-      toolbar.close()
+      toolbarComponent.close()
     }
-
-    // Clear the current foreground
-    foregroundPresenter.foreground(getLockedPackageName(), getLockedRealName())
+    component.clearForeground()
   }
 
   override fun onBackPressed() {
@@ -239,11 +114,6 @@ class LockScreenActivity : ActivityBase(),
   @CallSuper
   override fun onDestroy() {
     super.onDestroy()
-    pinScreen.teardown()
-    iconView.teardown()
-    toolbar.teardown()
-
-    presenter.unbind()
     overridePendingTransition(0, 0)
   }
 
@@ -254,9 +124,8 @@ class LockScreenActivity : ActivityBase(),
 
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
-    pinScreen.saveState(outState)
-    iconView.saveState(outState)
-    toolbar.saveState(outState)
+    component.saveState(outState)
+    toolbarComponent.saveState(outState)
   }
 
   companion object {

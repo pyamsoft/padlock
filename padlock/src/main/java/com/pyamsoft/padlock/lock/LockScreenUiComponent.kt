@@ -17,18 +17,33 @@
 
 package com.pyamsoft.padlock.lock
 
-import com.pyamsoft.padlock.lock.LockScreenToolbarPresenter.Callback
-import com.pyamsoft.pydroid.arch.Presenter
+import androidx.constraintlayout.widget.ConstraintLayout
+import com.pyamsoft.pydroid.arch.UiComponent
 
-internal interface LockScreenToolbarPresenter : Presenter<Callback> {
+internal interface LockScreenUiComponent : UiComponent<LockScreenUiComponent.Callback> {
+
+  fun layout(
+    constraintLayout: ConstraintLayout,
+    aboveId: Int
+  )
+
+  fun clearForeground()
+
+  fun checkUnlocked()
+
+  // TODO(model should not be in view/component
+  fun submit(
+    attempt: String,
+    isExcluded: Boolean,
+    ignoreTime: Long
+  )
 
   interface Callback {
 
-    fun onDisplayNameLoaded(name: String)
+    fun onClose()
 
-    fun onDefaultIgnoreTimeLoaded(time: Long)
+    fun onSubmitAttempt(attempt: String)
 
   }
 
 }
-

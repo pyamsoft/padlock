@@ -38,8 +38,6 @@ internal interface LockScreenPresenter : Presenter<Callback> {
 
     fun onCloseOld()
 
-    fun onDisplayNameLoaded(name: String)
-
     fun onAlreadyUnlocked()
 
     fun onSubmitUnlockAttempt(attempt: String)

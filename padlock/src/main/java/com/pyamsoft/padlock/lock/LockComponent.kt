@@ -62,6 +62,14 @@ interface LockComponent {
 
     @BindsInstance
     @CheckResult
+    fun lockedCode(@Named("locked_code") lockedCode: String?): Builder
+
+    @BindsInstance
+    @CheckResult
+    fun lockedSystem(@Named("locked_system") isSystem: Boolean): Builder
+
+    @BindsInstance
+    @CheckResult
     fun packageName(@Named("locked_package_name") packageName: String): Builder
 
     @BindsInstance
@@ -115,6 +123,12 @@ interface LockComponent {
 
     @Binds
     internal abstract fun bindCallback(impl: LockScreenPresenterImpl): ConfirmPinView.Callback
+
+    @Binds
+    internal abstract fun bindToolbarComponent(impl: LockScreenToolbarUiComponentImpl): LockScreenToolbarUiComponent
+
+    @Binds
+    internal abstract fun bindComponent(impl: LockScreenUiComponentImpl): LockScreenUiComponent
 
   }
 }

@@ -24,17 +24,32 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.functions.Consumer
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
+import javax.inject.Named
 
 internal class LockScreenToolbarPresenterImpl @Inject internal constructor(
-  private val interactor: LockScreenInteractor
+  private val interactor: LockScreenInteractor,
+  @Named("locked_package_name") private val packageName: String
 ) : BasePresenter<Unit, LockScreenToolbarPresenter.Callback>(RxBus.empty()),
     LockScreenToolbarPresenter {
 
   override fun onBind() {
+    loadIgnoreTime()
+    loadDisplayName()
+  }
+
+  private fun loadIgnoreTime() {
     interactor.getDefaultIgnoreTime()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(Consumer { callback.onDefaultIgnoreTimeLoaded(it) })
+        .destroy()
+  }
+
+  private fun loadDisplayName() {
+    interactor.getDisplayName(packageName)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(Consumer { callback.onDisplayNameLoaded(it) })
         .destroy()
   }
 
