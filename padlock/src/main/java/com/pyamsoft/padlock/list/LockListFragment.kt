@@ -267,14 +267,24 @@ class LockListFragment : Fragment(),
   override fun onConfirmPinBegin() {
   }
 
-  override fun onConfirmPinSuccess(attempt: String) {
-    Timber.d("Pin confirm success")
-    clearPinPresenter.clear(attempt)
+  override fun onConfirmPinSuccess(
+    attempt: String,
+    checkOnly: Boolean
+  ) {
+    if (!checkOnly) {
+      Timber.d("Pin confirm success")
+      clearPinPresenter.clear(attempt)
+    }
   }
 
-  override fun onConfirmPinFailure(attempt: String) {
-    Timber.d("Pin confirm failed")
-    lockView.onMasterPinClearFailure()
+  override fun onConfirmPinFailure(
+    attempt: String,
+    checkOnly: Boolean
+  ) {
+    if (!checkOnly) {
+      Timber.d("Pin confirm failed")
+      lockView.onMasterPinClearFailure()
+    }
   }
 
   override fun onConfirmPinComplete() {

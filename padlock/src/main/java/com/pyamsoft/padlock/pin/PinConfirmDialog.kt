@@ -159,7 +159,7 @@ class PinConfirmDialog : DialogFragment(),
   }
 
   override fun onAttemptSubmit(attempt: String) {
-    confirmPresenter.confirm(attempt)
+    confirmPresenter.confirm(attempt, checkOnly = finishOnDismiss)
   }
 
   override fun onAttemptSubmit() {
@@ -170,11 +170,17 @@ class PinConfirmDialog : DialogFragment(),
     pinView.disable()
   }
 
-  override fun onConfirmPinSuccess(attempt: String) {
+  override fun onConfirmPinSuccess(
+    attempt: String,
+    checkOnly: Boolean
+  ) {
     onPinCallback()
   }
 
-  override fun onConfirmPinFailure(attempt: String) {
+  override fun onConfirmPinFailure(
+    attempt: String,
+    checkOnly: Boolean
+  ) {
     onPinCallback()
   }
 

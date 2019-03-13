@@ -41,11 +41,11 @@ internal class ConfirmPinPresenterImpl @Inject internal constructor(
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe { event ->
-          val (attempt, success) = event
+          val (attempt, success, checkOnly) = event
           if (success) {
-            callback.onConfirmPinSuccess(attempt)
+            callback.onConfirmPinSuccess(attempt, checkOnly)
           } else {
-            callback.onConfirmPinFailure(attempt)
+            callback.onConfirmPinFailure(attempt, checkOnly)
           }
         }
         .destroy()
@@ -55,20 +55,24 @@ internal class ConfirmPinPresenterImpl @Inject internal constructor(
     confirmDisposable.tryDispose()
   }
 
-  override fun confirm(pin: String) {
+  override fun confirm(
+    pin: String,
+    checkOnly: Boolean
+  ) {
     confirmDisposable = interactor.comparePin(pin)
         .map { pin to it }
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe({ publish(CheckPinEvent(it.first, it.second)) }, {
+        .subscribe({ publish(CheckPinEvent(it.first, it.second, checkOnly)) }, {
           Timber.e(it, "Error confirming pin")
-          callback.onConfirmPinFailure(pin)
+          publish(CheckPinEvent(pin, false, checkOnly))
         })
   }
 
   internal data class CheckPinEvent(
     val attempt: String,
-    val success: Boolean
+    val success: Boolean,
+    val checkOnly: Boolean
   )
 }
 

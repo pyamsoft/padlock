@@ -112,13 +112,23 @@ internal class SettingsUiComponentImpl @Inject internal constructor(
   override fun onConfirmPinBegin() {
   }
 
-  override fun onConfirmPinFailure(attempt: String) {
-    settingsView.showMessage("Failed to clear master pin")
+  override fun onConfirmPinFailure(
+    attempt: String,
+    checkOnly: Boolean
+  ) {
+    if (!checkOnly) {
+      settingsView.showMessage("Failed to clear master pin")
+    }
   }
 
-  override fun onConfirmPinSuccess(attempt: String) {
-    Timber.d("Clear old master pin")
-    clearPinPresenter.clear(attempt)
+  override fun onConfirmPinSuccess(
+    attempt: String,
+    checkOnly: Boolean
+  ) {
+    if (!checkOnly) {
+      Timber.d("Clear old master pin")
+      clearPinPresenter.clear(attempt)
+    }
   }
 
   override fun onConfirmPinComplete() {

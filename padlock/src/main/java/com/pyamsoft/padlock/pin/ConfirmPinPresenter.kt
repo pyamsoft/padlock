@@ -21,16 +21,16 @@ import com.pyamsoft.pydroid.arch.Presenter
 
 interface ConfirmPinPresenter : Presenter<ConfirmPinPresenter.Callback> {
 
-  fun confirm(pin: String)
+  fun confirm(pin: String, checkOnly: Boolean)
 
 
   interface Callback {
 
     fun onConfirmPinBegin()
 
-    fun onConfirmPinSuccess(attempt: String)
+    fun onConfirmPinSuccess(attempt: String, checkOnly: Boolean)
 
-    fun onConfirmPinFailure(attempt: String)
+    fun onConfirmPinFailure(attempt: String, checkOnly: Boolean)
 
     fun onConfirmPinComplete()
 
