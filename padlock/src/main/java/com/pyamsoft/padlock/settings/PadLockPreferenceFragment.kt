@@ -24,32 +24,17 @@ import androidx.core.content.getSystemService
 import com.pyamsoft.padlock.Injector
 import com.pyamsoft.padlock.PadLockComponent
 import com.pyamsoft.padlock.R
-import com.pyamsoft.padlock.pin.ClearPinPresenter
-import com.pyamsoft.padlock.pin.ConfirmPinPresenter
 import com.pyamsoft.padlock.pin.PinConfirmDialog
 import com.pyamsoft.pydroid.ui.app.requireToolbarActivity
 import com.pyamsoft.pydroid.ui.settings.AppSettingsPreferenceFragment
 import com.pyamsoft.pydroid.ui.util.show
-import timber.log.Timber
 import javax.inject.Inject
 
 class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
-    SettingsPresenter.Callback,
-    SwitchLockTypePresenter.Callback,
-    ClearAllPresenter.Callback,
-    ClearDatabasePresenter.Callback,
-    ConfirmPinPresenter.Callback,
-    ClearPinPresenter.Callback {
+    SettingsUiComponent.Callback {
 
-  @field:Inject internal lateinit var clearDatabasePresenter: ClearDatabasePresenter
-  @field:Inject internal lateinit var clearAllPresenter: ClearAllPresenter
-  @field:Inject internal lateinit var clearPinPresenter: ClearPinPresenter
-  @field:Inject internal lateinit var confirmPinPresenter: ConfirmPinPresenter
-  @field:Inject internal lateinit var switchLockTypePresenter: SwitchLockTypePresenter
-  @field:Inject internal lateinit var presenter: SettingsPresenter
-
+  @field:Inject internal lateinit var component: SettingsUiComponent
   @field:Inject internal lateinit var toolbarView: SettingsToolbarView
-  @field:Inject internal lateinit var settingsView: SettingsView
 
   override val preferenceXmlResId: Int = R.xml.preferences
 
@@ -68,42 +53,18 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
         .inject(this)
 
     toolbarView.inflate(savedInstanceState)
-    settingsView.inflate(savedInstanceState)
-
-    confirmPinPresenter.bind(this)
-    switchLockTypePresenter.bind(this)
-    clearPinPresenter.bind(this)
-    clearDatabasePresenter.bind(this)
-    clearAllPresenter.bind(this)
-    presenter.bind(this)
-  }
-
-  override fun onClearDatabaseRequest() {
-    ConfirmDeleteDatabaseDialog()
-        .show(requireActivity(), "confirm_dialog")
-  }
-
-  override fun onSwitchLockTypeRequest(newType: String) {
-    switchLockTypePresenter.switchLockType(newType)
+    component.bind(viewLifecycleOwner, savedInstanceState, this)
   }
 
   override fun onDestroyView() {
     super.onDestroyView()
     toolbarView.teardown()
-    settingsView.teardown()
-
-    confirmPinPresenter.unbind()
-    switchLockTypePresenter.unbind()
-    clearPinPresenter.unbind()
-    clearDatabasePresenter.unbind()
-    clearAllPresenter.unbind()
-    presenter.unbind()
   }
 
   override fun onSaveInstanceState(outState: Bundle) {
     super.onSaveInstanceState(outState)
     toolbarView.saveState(outState)
-    settingsView.saveState(outState)
+    component.saveState(outState)
   }
 
   override fun onClearAllClicked() {
@@ -112,61 +73,18 @@ class PadLockPreferenceFragment : AppSettingsPreferenceFragment(),
         .show(requireActivity(), "confirm_dialog")
   }
 
-  override fun onLockTypeSwitchBlocked() {
-    settingsView.promptChangeLockType {
-      PinConfirmDialog.newInstance(finishOnDismiss = false)
-          .show(requireActivity(), PinConfirmDialog.TAG)
-    }
+  override fun showClearDatabaseConfirmationDialog() {
+    ConfirmDeleteDatabaseDialog().show(requireActivity(), "confirm_dialog")
   }
 
-  override fun onLockTypeSwitchSuccess(newType: String) {
-    Timber.d("Change accepted, set value: $newType")
-    settingsView.changeLockType(newType)
-  }
-
-  override fun onLockTypeSwitchError(throwable: Throwable) {
-    settingsView.showMessage(throwable.message ?: "Failed to switch lock type")
-  }
-
-  override fun onAllSettingsCleared() {
-    Timber.d("Everything is cleared, kill self")
+  override fun onKillApplication() {
     val activityManager = requireNotNull(requireActivity().getSystemService<ActivityManager>())
     activityManager.clearApplicationUserData()
   }
 
-  override fun onDatabaseCleared() {
-    settingsView.showMessage("Locked application database cleared")
-  }
-
-  override fun onPinClearSuccess() {
-    settingsView.showMessage("You may now change lock type")
-  }
-
-  override fun onPinClearFailed() {
-    settingsView.showMessage("Failed to clear master pin")
-  }
-
-  override fun onConfirmPinBegin() {
-  }
-
-  override fun onConfirmPinFailure(attempt: String) {
-    settingsView.showMessage("Failed to clear master pin")
-  }
-
-  override fun onConfirmPinSuccess(attempt: String) {
-    Timber.d("Clear old master pin")
-    clearPinPresenter.clear(attempt)
-  }
-
-  override fun onConfirmPinComplete() {
-  }
-
-  override fun onClearAllSettingsError(throwable: Throwable) {
-    settingsView.showMessage("Unable to reset application settings, please try again later.")
-  }
-
-  override fun onClearDatabaseError(throwable: Throwable) {
-    settingsView.showMessage("Unable to reset database, please try again later.")
+  override fun onRequestPinChange() {
+    PinConfirmDialog.newInstance(finishOnDismiss = false)
+        .show(requireActivity(), PinConfirmDialog.TAG)
   }
 
   companion object {
