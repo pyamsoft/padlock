@@ -31,6 +31,7 @@ import com.pyamsoft.pydroid.arch.BaseUiView
 import com.pyamsoft.pydroid.ui.theme.Theming
 import com.pyamsoft.pydroid.ui.util.DebouncedOnClickListener
 import com.pyamsoft.pydroid.ui.util.setUpEnabled
+import com.pyamsoft.pydroid.util.tintWith
 import javax.inject.Inject
 import kotlin.LazyThreadSafetyMode.NONE
 
@@ -75,6 +76,13 @@ internal class PinToolbar @Inject internal constructor(
 
   private fun inflateMenu() {
     layoutRoot.inflateMenu(R.menu.pin_menu)
+    val color: Int
+    if (theming.isDarkTheme()) {
+      color = R.color.white
+    } else {
+      color = R.color.black
+    }
+    submitItem.icon = submitItem.icon.tintWith(layoutRoot.context, color)
 
     submitItem.setOnMenuItemClickListener {
       callback.onSubmitClicked()
