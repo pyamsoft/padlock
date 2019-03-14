@@ -122,7 +122,7 @@ class PadLock : Application(), PYDroid.Instance {
     }
   }
 
-  override fun getSystemService(name: String): Any {
+  override fun getSystemService(name: String): Any? {
     when (name) {
       Injector.name -> return component
       ThemeInjector.name -> return theming
