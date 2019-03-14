@@ -1,4 +1,21 @@
 # padlock
+
+# DEPRECATED
+
+With the coming changes in Android Q which affect how Activities can launch  
+from the background, PadLock is effectively dead.
+
+I will not be able to continue development as it feels like applications which  
+try to do what PadLock did are not welcome anymore in the Android ecosystem.
+
+There will be no more bugfixes or features in this codebase. The store page will  
+stay live until Android Q releases, or I am forced to take it down - whichever  
+comes first.
+
+Thank you.
+
+
+
 Padlock pyamsoft Android application
 
 [![Get it on Google Play](https://raw.githubusercontent.com/pyamsoft/padlock/master/art/google-play-badge.png)][1]
