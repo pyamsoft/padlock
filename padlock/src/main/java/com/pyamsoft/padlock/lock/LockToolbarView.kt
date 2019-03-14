@@ -27,7 +27,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.ViewCompat
 import com.pyamsoft.padlock.R
 import com.pyamsoft.pydroid.arch.BaseUiView
-import com.pyamsoft.pydroid.ui.app.ToolbarActivityProvider
 import com.pyamsoft.pydroid.ui.theme.Theming
 import timber.log.Timber
 import javax.inject.Inject
@@ -35,7 +34,6 @@ import kotlin.LazyThreadSafetyMode.NONE
 
 internal class LockToolbarView @Inject internal constructor(
   private val theming: Theming,
-  private val toolbarActivityProvider: ToolbarActivityProvider,
   parent: ViewGroup
 ) : BaseUiView<Unit>(parent, Unit) {
 
@@ -118,7 +116,6 @@ internal class LockToolbarView @Inject internal constructor(
     }
     layoutRoot.popupTheme = theme
     ViewCompat.setElevation(layoutRoot, 0f)
-    toolbarActivityProvider.setToolbar(layoutRoot)
   }
 
   private fun inflateMenu(savedInstanceState: Bundle?) {

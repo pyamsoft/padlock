@@ -67,7 +67,6 @@ class LockScreenActivity : ActivityBase(),
         .plusLockComponent()
         .parent(layoutRoot)
         .owner(this)
-        .toolbarActivityProvider(this)
         .packageName(lockedPackageName)
         .activityName(lockedActivityName)
         .realName(lockedRealName)

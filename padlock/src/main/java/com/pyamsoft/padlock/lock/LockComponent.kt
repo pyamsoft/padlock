@@ -58,10 +58,6 @@ interface LockComponent {
 
     @BindsInstance
     @CheckResult
-    fun toolbarActivityProvider(provider: ToolbarActivityProvider): Builder
-
-    @BindsInstance
-    @CheckResult
     fun lockedCode(@Named("locked_code") lockedCode: String?): Builder
 
     @BindsInstance
